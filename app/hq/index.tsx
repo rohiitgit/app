@@ -9,6 +9,7 @@ import Camera from './camera'
 import { useEffect } from 'react'
 import Settings from './settings'
 import Query from './query'
+import React from 'react'
 
 export default function HQIndex() {
   let isDarkMode = useColorScheme() === 'dark'

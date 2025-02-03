@@ -38,6 +38,7 @@ export default function Settings() {
     <SafeAreaView
       style={{
         flex: 1,
+        backgroundColor: isDarkMode ? '#030303' : '#fff',
         justifyContent: 'center',
         alignItems: 'center',
       }}
@@ -58,7 +59,7 @@ export default function Settings() {
             color: isDarkMode ? 'white' : 'black',
           }}
         >
-          JIPMER <Text style={{ color: '#7469B6' }}>Blood Center</Text>
+          <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
         </Text>
       </View>
       <ScrollView
@@ -83,7 +84,7 @@ export default function Settings() {
             router.push('tel:+914132296666')
           }}
         >
-          <Octicons name="device-mobile" size={20} /> Call JIPMER Blood Center
+          <Octicons name="device-mobile" size={20} /> Call Blood Center
         </Button>
         <Button
           onPress={() => {
@@ -117,7 +118,7 @@ export default function Settings() {
               
             }}
           >
-            JIPMER Blood Bank {Application.nativeApplicationVersion}{' '}
+            Open Blood Internal Dist. {Application.nativeApplicationVersion}{' '}
             [{Application.nativeBuildVersion}]
           </Text>
         </View>

@@ -103,8 +103,15 @@ export default function Index() {
             color: isDarkMode ? '#fff' : '#000',
           }}
         >
-          JIPMER <Text style={{ color: '#7469B6' }}>Blood Center</Text>
+          <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
         </Text>
+        <Text style={{
+            fontSize: 24,
+            textAlign: 'center',
+            color: isDarkMode ? '#fff' : '#000',
+          }}>
+            localhost @ 54SRN/5GHz
+          </Text>
         <View style={{ marginTop: 20 }}>
           <TextInput
             placeholder="phone number"

@@ -75,6 +75,7 @@ export default function Five({
       medications: route.params.medications,
       distance: route.params.distance,
       birthdayhero: birthdayHero,
+      scope: route.params.baseBank.uuid,
       coords: route.params.location
         ? route.params.location.hasOwnProperty('latitude') ?
         `${route.params.location.latitude},${route.params.location.longitude}`
@@ -147,7 +148,7 @@ export default function Five({
                 color: responsiveDark,
               }}
             >
-              JIPMER <Text style={{ color: '#7469B6' }}>Blood Center</Text>
+              <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
             </Text>
           </View>
           <Progress.Bar

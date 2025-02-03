@@ -94,8 +94,8 @@ export default function Four({
   function calcCrow(region: { latitude: number; longitude: number }) {
     let lat = region.latitude
     let lon = region.longitude
-    let bbLat = 11.953852
-    let bbLon = 79.797765
+    let bbLat = route.params.baseBank.coords.split(',')[0]
+    let bbLon = route.params.baseBank.coords.split(',')[1]
     var R = 6371 // km
     var dLat = toRad(bbLat - lat)
     var dLon = toRad(bbLon - lon)
@@ -203,7 +203,7 @@ export default function Four({
                 color: responsiveDark,
               }}
             >
-              JIPMER <Text style={{ color: '#7469B6' }}>Blood Center</Text>
+              <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
             </Text>
           </View>
           <Progress.Bar
@@ -358,8 +358,8 @@ export default function Four({
                   />
                   <Marker
                     coordinate={{
-                      latitude: 11.953852,
-                      longitude: 79.797765,
+                      latitude: route.params.baseBank.coords.split(',')[0],
+                      longitude: route.params.baseBank.coords.split(',')[1],
                     }}
                     title="Blood Bank"
                     pinColor="blue"
@@ -384,6 +384,7 @@ export default function Four({
                   textAlign: 'center',
                   marginTop: 10,
                   marginBottom: 10,
+                  color: responsiveDark
                 }}
               >
                 Please ensure you are at your permanent location. If not, enter
@@ -405,6 +406,7 @@ export default function Four({
                     textAlign: 'center',
                     marginBottom: 10,
                     alignSelf: 'center',
+                    color: responsiveDark,
                   }}
                 >
                   Use custom address (limited)

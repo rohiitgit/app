@@ -32,6 +32,8 @@ export default function QR() {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+
+        backgroundColor: isDarkMode ? '#030303' : '#fff',
       }}
     >
       <View
@@ -50,7 +52,7 @@ export default function QR() {
             color: isDarkMode ? 'white' : 'black',
           }}
         >
-          JIPMER <Text style={{ color: '#7469B6' }}>Blood Center</Text>
+          <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
         </Text>
       </View>
       <ScrollView

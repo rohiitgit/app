@@ -78,7 +78,7 @@ export default function One({
                 color: isDarkMode ? 'white' : 'black',
               }}
             >
-              JIPMER <Text style={{ color: '#7469B6' }}>Blood Center</Text>
+              <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
             </Text>
           </View>
           <Progress.Bar

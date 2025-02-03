@@ -157,7 +157,7 @@ export default function Modal() {
               }}
             >
               Even if you haven't been verified, you can donate at the{' '}
-              <Text style={{ color: '#7469B6' }}>JIPMER Blood Center</Text>.
+              <Text style={{ color: '#7469B6' }}>Blood Center</Text>.
               Make sure to show an employee your QR code before you donate so
               they can verify your data.
             </Text>

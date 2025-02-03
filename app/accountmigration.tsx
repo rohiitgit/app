@@ -140,11 +140,9 @@ export default function Modal() {
       return
     }
     try {
-      let location = await Location.getCurrentPositionAsync() || {
-        coords: {
-          latitude: 11.953852,
-          longitude: 79.797765,
-        },
+      let location = await Location.getLastKnownPositionAsync({})
+      if (!location) {
+        location = await Location.getCurrentPositionAsync({})
       }
       setUserDefinedLocation({
         latitude: location.coords.latitude,
@@ -285,8 +283,8 @@ export default function Modal() {
             marginBottom: 25,
           }}
         >
-          Your JIPMER Blood Center account has been created, and all your data
-          has been migrated.{'\n'}
+          Your Open Blood account has been created, and all your data has been
+          migrated.{'\n'}
         </Text>
         <View
           style={{

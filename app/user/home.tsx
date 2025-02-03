@@ -14,8 +14,8 @@ import Button from '@/components/Button'
 import { Link, router, useLocalSearchParams } from 'expo-router'
 import Card from '@/components/Card'
 import Octicons from '@expo/vector-icons/Octicons'
-import * as SplashScreen from 'expo-splash-screen';
-SplashScreen.preventAutoHideAsync();
+import * as SplashScreen from 'expo-splash-screen'
+SplashScreen.preventAutoHideAsync()
 
 export default function Home() {
   let [refreshing, setRefreshing] = useState<boolean>(false)
@@ -26,7 +26,7 @@ export default function Home() {
   let [totalDonators, setTotalDonators] = useState<number | null>(null)
   let [log, setLog] = useState<{ x: string; y: number }[]>([])
   let [donatingSince, setDonatingSince] = useState<string>('')
-  let [appReady, setAppReady] = useState<boolean>(false)  
+  let [appReady, setAppReady] = useState<boolean>(false)
 
   function humanizeDate(date: string) {
     let d = new Date(date)
@@ -131,12 +131,12 @@ export default function Home() {
 
   const onLayoutRootView = useCallback(async () => {
     if (appReady) {
-      await SplashScreen.hideAsync();
+      await SplashScreen.hideAsync()
     }
-  }, [appReady]);
+  }, [appReady])
 
   if (!appReady) {
-    return null;
+    return null
   }
 
   return (
@@ -145,6 +145,7 @@ export default function Home() {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: isDarkMode ? '#030303' : '#fff',
       }}
     >
       <View
@@ -163,7 +164,7 @@ export default function Home() {
             color: isDarkMode ? 'white' : 'black',
           }}
         >
-          JIPMER <Text style={{ color: '#7469B6' }}>Blood Center</Text>
+          <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
         </Text>
         <Pressable
           onPress={() => load(true)}
@@ -197,7 +198,7 @@ export default function Home() {
           style={{
             alignContent: 'flex-start',
             width: '80%',
-            justifyContent: 'center'
+            justifyContent: 'center',
           }}
         >
           <Text
@@ -212,11 +213,11 @@ export default function Home() {
               {name}
             </Text>{' '}
             <Pressable
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
               onPress={() => {
                 if (verified === true) {
                   Alert.alert(

@@ -121,7 +121,7 @@ export default function HQHome() {
             color: responsiveColor
           }}
         >
-          JIPMER <Text style={{ color: '#7469B6' }}>Blood Center HQ</Text>
+          <Text style={{ color: '#7469B6' }}>Open Blood HQ</Text> Internal
         </Text>
         <Pressable
           onPress={() => load(true)}

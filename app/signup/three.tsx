@@ -23,6 +23,7 @@ import * as Progress from 'react-native-progress'
 import { Octicons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import FreeButton from '@/components/FreeButton'
+import React from 'react'
 export default function Three({
   navigation,
   route,
@@ -95,7 +96,7 @@ export default function Three({
                 color: responsiveDark,
               }}
             >
-              JIPMER <Text style={{ color: '#7469B6' }}>Blood Center</Text>
+              <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
             </Text>
           </View>
           <Progress.Bar
@@ -270,7 +271,7 @@ export default function Three({
           </FreeButton>
           <FreeButton
             onPress={() => {
-              navigation.navigate(`four`, {
+              navigation.navigate(`threealpha`, {
                 ...route.params,
                 conditions: showConditions ? conditions : '',
                 medications: showMedications ? medications : '',

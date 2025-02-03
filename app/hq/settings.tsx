@@ -58,7 +58,7 @@ export default function Settings() {
             color: isDarkMode ? 'white' : 'black',
           }}
         >
-          JIPMER <Text style={{ color: '#7469B6' }}>Blood Center HQ</Text>
+          <Text style={{ color: '#7469B6' }}>Open Blood HQ</Text> Internal
         </Text>
       </View>
       <ScrollView
@@ -110,7 +110,7 @@ export default function Settings() {
               
             }}
           >
-            JIPMER Blood Bank HQ {Application.nativeApplicationVersion}{' '}
+            Open Blood HQ Internal Dist. {Application.nativeApplicationVersion}{' '}
             [{Application.nativeBuildVersion}]
           </Text>
         </View>

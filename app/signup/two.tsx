@@ -92,7 +92,7 @@ export default function Two({
                 color: responsiveDark,
               }}
             >
-              JIPMER <Text style={{ color: '#7469B6' }}>Blood Center</Text>
+              <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
             </Text>
           </View>
           <Progress.Bar

@@ -74,7 +74,7 @@ export default function Onboarding() {
             color: isDarkMode ? 'white' : 'black',
           }}
         >
-          JIPMER <Text style={{ color: '#7469B6' }}>Blood Center</Text>
+          <Text style={{ color: '#7469B6' }}>Open Blood HQ</Text> Internal
         </Text>
         <View style={{ marginTop: 20 }}>
           <Text
