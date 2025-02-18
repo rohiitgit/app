@@ -16,10 +16,7 @@ export default function HQIndex() {
   return (
     <>
       <Tab.Navigator
-        sceneContainerStyle={{
-          backgroundColor: isDarkMode ? '#030303' : '#efeef7',
-        }}
-        screenOptions={{
+       /* screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
           tabBarStyle: {
@@ -28,7 +25,7 @@ export default function HQIndex() {
             left: '0%',
             width: '100%',
             alignSelf: 'center',
-            height: 80,
+            height: '10%',
             paddingTop: 15,
             shadowColor: '#7469B6',
             shadowOpacity: 0.3,
@@ -39,13 +36,37 @@ export default function HQIndex() {
             backgroundColor: isDarkMode ? '#3a3b3c' : '#fff',
             backfaceVisibility: 'hidden',
           },
+          sceneStyle: {
+            backgroundColor: isDarkMode ? '#030303' : '#efeef7',
+          },
           tabBarActiveTintColor: '#7469B6',
           tabBarIconStyle: {
             justifyContent: 'center',
             alignItems: 'center',
             flex: 1,
           },
-        }}
+        }}*/
+          screenOptions={{
+            headerShown: false,
+            tabBarShowLabel: false,
+            tabBarStyle: {
+              width: '100%',
+              height: 80,
+              justifyContent: 'center',
+              alignSelf: 'center',
+              elevation: 10,
+              backgroundColor: isDarkMode ? '#3a3b3c' : '#fff',
+              borderTopWidth: 0,
+            },
+            sceneStyle: {
+              backgroundColor: isDarkMode ? '#030303' : '#efeef7',
+            },
+            tabBarActiveTintColor: '#7469B6',
+            tabBarIconStyle: {
+              verticalAlign: 'middle',
+              marginTop: 20,
+            },
+          }}
         initialRouteName="home"
       >
         <Tab.Screen

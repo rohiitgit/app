@@ -1,13 +1,9 @@
 import {
   Alert,
-  Dimensions,
   FlatList,
   Modal,
-  Platform,
   Pressable,
-  RefreshControl,
   ScrollView,
-  Switch,
   Text,
   TouchableOpacity,
   useColorScheme,
@@ -17,21 +13,16 @@ import * as SecureStore from 'expo-secure-store'
 import { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Button from '@/components/Button'
-import { Link, router } from 'expo-router'
-import Card from '@/components/Card'
+import { router } from 'expo-router'
 import Octicons from '@expo/vector-icons/Octicons'
 import FreeButton from '@/components/FreeButton'
 import { TextInput } from 'react-native'
 import styles from '@/assets/styles/styles'
-import TwoRowInput from '@/components/TwoRowInput'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { Picker } from '@react-native-picker/picker'
 
 export default function Query() {
   let nameInputTemp = ''
-  let [refreshing, setRefreshing] = useState<boolean>(false)
-  let [totalDonators, setTotalDonators] = useState<number | null>(null)
-  let [totalDonations, setTotalDonations] = useState<number | null>(null)
   let [expandCriteria, setExpandCriteria] = useState<boolean>(false)
   let [expandSearchBox, setExpandSearchBox] = useState<boolean>(true)
   let [activeHotswap, setActiveHotswap] = useState<boolean>(true)
@@ -41,6 +32,7 @@ export default function Query() {
   let [modifyValue, setModifyValue] = useState<'distance' | 'months'>('months')
   let inputRef = useRef<TextInput>(null)
   let [showModal, setShowModal] = useState<boolean>(false)
+  let [bbName, setBBName] = useState<string | null>('')
 
   let [showBloodTypeModal, setShowBloodTypeModal] = useState<boolean>(false)
   let [openUnverified, setOpenUnverified] = useState<boolean>(false)
@@ -49,6 +41,7 @@ export default function Query() {
     useState<boolean>(false)
   let [radius, setRadius] = useState<string>('')
   let [token, setToken] = useState<string | null>('')
+  let [bankCode, setBankCode] = useState<string | null>('')
   let [resultData, setResultData] = useState<any>([])
   let [loading, setLoading] = useState<boolean>(false)
   let [timeTaken, setTimeTaken] = useState<number>(0)
@@ -75,16 +68,21 @@ export default function Query() {
 
   useEffect(() => {
     async function getToken() {
+      let id = await SecureStore.getItemAsync('id')
       let t = await SecureStore.getItemAsync('token')
+      let name = await SecureStore.getItemAsync('bbName')
+      setBBName(name)
+      setBankCode(id)
       setToken(t)
     }
     getToken()
   }, [])
   async function queryDonors(refresh = false, unverified = false) {
-    if (refresh) setRefreshing(true)
+    if (refresh) setLoading(true)
     if (unverified) setOpenUnverified(true)
     setResultData([])
     setLoading(true)
+    let bankCode = await SecureStore.getItemAsync('id')
     let token = await SecureStore.getItemAsync('token')
     fetch(`http://localhost:3000/hq/query-donor`, {
       method: 'POST',
@@ -94,10 +92,12 @@ export default function Query() {
       body: JSON.stringify(
         unverified
           ? {
+              bankCode: bankCode,
               token: token,
               unverified: true,
             }
           : {
+              bankCode: bankCode,
               token: token,
               months: minimumMonths == '' ? null : minimumMonths,
               verified: requireUsersVerified,
@@ -111,7 +111,7 @@ export default function Query() {
     })
       .then((response) => response.json())
       .then((response) => {
-        if (refresh) setRefreshing(false)
+        if (refresh) setLoading(false)
         if (!unverified) setExpandSearchBox(false)
         if (response.error) {
           Alert.alert('Error', 'Unauthorized Access', [
@@ -130,7 +130,7 @@ export default function Query() {
         }
       })
       .catch((error) => {
-        if (refresh) setRefreshing(false)
+        if (refresh) setLoading(false)
         setLoading(false)
         Alert.alert('Error', 'Failed to fetch data')
       })
@@ -296,73 +296,33 @@ export default function Query() {
             >
               Set the required blood type of the donors.
             </Text>
-            <Picker selectedValue={bloodtype} onValueChange={setBloodtype}>
-              <Picker.Item
-                label="Not required"
-                value=""
-                color={isDarkMode ? 'white' : 'black'}
-              />
-              <Picker.Item
-                label="A+"
-                value="A+"
-                color={isDarkMode ? 'white' : 'black'}
-              />
-              <Picker.Item
-                label="A-"
-                value="A-"
-                color={isDarkMode ? 'white' : 'black'}
-              />
-              <Picker.Item
-                label="B+"
-                value="B+"
-                color={isDarkMode ? 'white' : 'black'}
-              />
-              <Picker.Item
-                label="B-"
-                value="B-"
-                color={isDarkMode ? 'white' : 'black'}
-              />
-              <Picker.Item
-                label="AB+"
-                value="AB+"
-                color={isDarkMode ? 'white' : 'black'}
-              />
-              <Picker.Item
-                label="AB-"
-                value="AB-"
-                color={isDarkMode ? 'white' : 'black'}
-              />
-              <Picker.Item
-                label="O+"
-                value="O+"
-                color={isDarkMode ? 'white' : 'black'}
-              />
-              <Picker.Item
-                label="O-"
-                value="O-"
-                color={isDarkMode ? 'white' : 'black'}
-              />
+            <Picker
+              selectedValue={bloodtype}
+              onValueChange={setBloodtype}
+              style={{
+                color: 'black',
+                padding: 20,
+                backgroundColor: '#fefefe',
+                borderRadius: 16,
+              }}
+            >
+              <Picker.Item label="Not required" value="" />
+              <Picker.Item label="A+" value="A+" />
+              <Picker.Item label="A-" value="A-" />
+              <Picker.Item label="B+" value="B+" />
+              <Picker.Item label="B-" value="B-" />
+              <Picker.Item label="AB+" value="AB+" />
+              <Picker.Item label="AB-" value="AB-" />
+              <Picker.Item label="O+" value="O+" />
+              <Picker.Item label="O-" value="O-" />
               <Picker.Item
                 label="Bombay blood group"
                 value="Bombay blood group"
-                color={isDarkMode ? 'white' : 'black'}
               />
             </Picker>
           </KeyboardAwareScrollView>
         </View>
       </Modal>
-      {/*{loading ? (
-                <Text
-                    style={{
-                        fontSize: 20,
-                        textAlign: 'center',
-                        marginTop: 20,
-                        color: isDarkMode ? 'white' : 'black',
-                    }}
-                >
-                    Querying...
-                </Text>
-            ) : (*/}
       <View
         style={{
           justifyContent: 'center',
@@ -405,6 +365,7 @@ export default function Query() {
               </Text>
             ) : null
           }
+          ListFooterComponent={() => <View style={{ height: 200 }}></View>}
           ListHeaderComponent={() => (
             <View>
               <View
@@ -416,15 +377,33 @@ export default function Query() {
                   marginTop: 20,
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 24,
-                    textAlign: 'center',
-                    color: isDarkMode ? 'white' : 'black',
-                  }}
+                <View
+                  style={{ flexDirection: 'column', justifyContent: 'center' }}
                 >
-                  <Text style={{ color: '#7469B6' }}>Open Blood HQ</Text> Internal
-                </Text>
+                  <Text
+                    style={{
+                      fontSize: 26,
+                      textAlign: 'center',
+                      color: isDarkMode ? 'white' : 'black',
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: '#7469B6',
+                        fontFamily: 'PlayfairDisplay_600SemiBold',
+                      }}
+                    >
+                      {bbName ? bbName : 'Open Blood HQ'}
+                    </Text>
+                  </Text>
+                  <Text
+                    style={{
+                      color: isDarkMode ? 'white' : 'black',
+                    }}
+                  >
+                    {bbName ? 'Open Blood HQ' : ''}
+                  </Text>
+                </View>
               </View>
               <View
                 style={{
@@ -447,6 +426,7 @@ export default function Query() {
                       textAlign: 'left',
                       color: '#7469B6',
                       fontWeight: 'bold',
+                      fontFamily: 'PlayfairDisplay_600SemiBold',
                       marginTop: 20,
                       marginBottom: 10,
                     }}
@@ -527,6 +507,7 @@ export default function Query() {
                         alignSelf: 'flex-start',
                         fontWeight: 'bold',
                         color: '#7469B6',
+                        fontFamily: 'PlayfairDisplay_600SemiBold',
                       }}
                     >
                       Search
@@ -535,7 +516,6 @@ export default function Query() {
                       name={expandSearchBox ? 'chevron-up' : 'chevron-down'}
                       size={28}
                       color="#7469B6"
-
                     />
                   </Pressable>
                 ) : null}
@@ -781,7 +761,6 @@ export default function Query() {
                               fontWeight: 'bold',
                               color: isDarkMode ? 'white' : 'black',
                             }}
-                    
                           >
                             Name/Phone
                           </Text>
@@ -810,7 +789,7 @@ export default function Query() {
                           onChangeText={(val) => (nameInputTemp = val)}
                           onEndEditing={() => setName(nameInputTemp)}
                           defaultValue={name}
-                          autoComplete='off'
+                          autoComplete="off"
                           autoCorrect={false}
                         />
                       </View>
@@ -1009,6 +988,7 @@ export default function Query() {
                       pathname: '/verifydonor',
                       params: {
                         uuid: item.uuid,
+                        bankCode: bankCode,
                         token: token,
                       },
                     })

@@ -28,9 +28,7 @@ export default function Settings() {
     load(false)
   }, [])
   function reportBug() {
-    router.push(
-      'mailto:mihir@pidgon.com?subject=JIPMER%20Blood%20Center%20Bug%20Report'
-    )
+    router.push('mailto:openblood@pidgon.com?subject=Open%20Blood%20Bug%20Report')
   }
   let isDarkMode = useColorScheme() === 'dark'
   let responsiveColor = useColorScheme() === 'dark' ? '#fff' : '#000'
@@ -51,15 +49,29 @@ export default function Settings() {
           marginTop: 20,
         }}
       >
-        <Text
-          style={{
-            fontSize: 24,
-            textAlign: 'center',
-            color: isDarkMode ? 'white' : 'black',
-          }}
-        >
-          <Text style={{ color: '#7469B6' }}>Open Blood HQ</Text> Internal
-        </Text>
+        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+          <Text
+            style={{
+              fontSize: 26,
+              textAlign: 'center',
+              color: isDarkMode ? 'white' : 'black',
+            }}
+          >
+            <Text
+              style={{
+                color: '#7469B6',
+                fontFamily: 'PlayfairDisplay_600SemiBold',
+              }}
+            >
+              Open Blood HQ
+            </Text>
+          </Text>
+          <Text
+            style={{
+              color: isDarkMode ? 'white' : 'black',
+            }}
+          ></Text>
+        </View>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -80,7 +92,7 @@ export default function Settings() {
       >
         <Button
           onPress={() => {
-            router.push('mailto:mihir@pidgon.com')
+            router.push('mailto:openblood@pidgon.com')
           }}
         >
           <Octicons name="mail" size={20} /> Get Support
@@ -91,6 +103,7 @@ export default function Settings() {
         <Button
           onPress={() => {
             SecureStore.deleteItemAsync('token')
+            SecureStore.deleteItemAsync('id')
             router.replace('/')
           }}
           style={{
@@ -107,7 +120,6 @@ export default function Settings() {
               color: 'gray',
               marginTop: 20,
               fontSize: 16,
-              
             }}
           >
             Open Blood HQ Internal Dist. {Application.nativeApplicationVersion}{' '}

@@ -4,8 +4,20 @@ import * as Notifications from 'expo-notifications'
 import * as SecureStore from 'expo-secure-store'
 import * as SplashScreen from 'expo-splash-screen'
 import { useColorScheme } from 'react-native'
+//import {useFonts, PlayfairDisplay_400Regular} from '@expo-google-fonts/playfair-display'
+import {
+  useFonts,
+  DMSerifText_400Regular,
+} from '@expo-google-fonts/dm-serif-text'
+import {
+  PlayfairDisplay_600SemiBold,
+} from '@expo-google-fonts/playfair-display'
 export default function RootLayout() {
   let isDarkMode = useColorScheme() === 'dark'
+  let [fontsLoaded] = useFonts({
+    PlayfairDisplay_600SemiBold,
+    DMSerifText_400Regular,
+  })
   function useNotificationObserver() {
     useEffect(() => {
       let isMounted = true
@@ -42,22 +54,21 @@ export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false)
   useEffect(() => {
     async function prepare() {
-      
       try {
         SecureStore.getItemAsync('token').then((token) => {
+          setAppIsReady(true)
           if (token) {
             if (token.startsWith('hq-')) {
-              router.push('/hq')
+              console.log('hq', token)
+              router.replace('/hq')
             } else {
-              console.log(token)
-              router.push('/user')
+              console.log('user', token)
+              router.replace('/user')
             }
           }
         })
       } catch (e) {
         console.warn(e)
-      } finally {
-        setAppIsReady(true)
       }
     }
 
@@ -65,16 +76,16 @@ export default function RootLayout() {
   }, [])
 
   const onLayoutRootView = useCallback(async () => {
-    if (appIsReady) {
+    if (appIsReady && !fontsLoaded) {
       await SplashScreen.hideAsync()
     }
   }, [appIsReady])
 
   useEffect(() => {
-    onLayoutRootView();
-  }, [appIsReady]);
+    onLayoutRootView()
+  }, [appIsReady])
 
-  if (!appIsReady) {
+  if (!appIsReady || !fontsLoaded) {
     return null
   }
 
@@ -110,6 +121,13 @@ export default function RootLayout() {
       />
       <Stack.Screen
         name="requestblood"
+        options={{
+          // Set the presentation mode to modal for our modal route.
+          presentation: 'modal',
+        }}
+      />
+      <Stack.Screen
+        name="processalert"
         options={{
           // Set the presentation mode to modal for our modal route.
           presentation: 'modal',

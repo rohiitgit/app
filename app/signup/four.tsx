@@ -46,13 +46,11 @@ export default function Four({
   let [addressText, setAddressText] = useState<string>('')
   let [useCustomLocation, setUseCustomLocation] = useState<boolean>(false)
   let [customAddressLookupID, setCustomAddressLookupID] = useState<string>('')
-
   let [isLocatingCustomAddress, setIsLocatingCustomAddress] =
     useState<boolean>(false)
   let [customLocationFormattedAddress, setCustomLocationFormattedAddress] =
     useState<string>('')
   let text = ''
-
   useEffect(() => {
     SecureStore.getItemAsync('lookup').then((res) => {
       if (res) {
@@ -61,7 +59,6 @@ export default function Four({
       }
     })
   }, [])
-
   async function getLocation() {
     setErrorMsg('')
     text = 'Getting location...'
@@ -358,8 +355,8 @@ export default function Four({
                   />
                   <Marker
                     coordinate={{
-                      latitude: route.params.baseBank.coords.split(',')[0],
-                      longitude: route.params.baseBank.coords.split(',')[1],
+                      latitude: parseFloat(route.params.baseBank.coords.split(',')[0] || 0),
+                      longitude: parseFloat(route.params.baseBank.coords.split(',')[1] || 0),
                     }}
                     title="Blood Bank"
                     pinColor="blue"

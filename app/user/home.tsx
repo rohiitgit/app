@@ -27,7 +27,8 @@ export default function Home() {
   let [log, setLog] = useState<{ x: string; y: number }[]>([])
   let [donatingSince, setDonatingSince] = useState<string>('')
   let [appReady, setAppReady] = useState<boolean>(false)
-
+  let [bbName, setBBName] = useState<string>('')
+  let [bbPhone, setBBPhone] = useState<string>('')
   function humanizeDate(date: string) {
     let d = new Date(date)
     //return DDth MMM, YYYY at HH:MM AM/PM
@@ -104,6 +105,9 @@ export default function Home() {
           setDonatingSince(response.data.donatingSince)
           setLog(response.data.log.reverse())
           setVerified(response.data.verified)
+          setBBName(response.data.bank.name)
+          await SecureStore.setItemAsync('bbName', response.data.bank.name)
+          setBBPhone(response.data.bank.phone)
           console.log(response.data.installed)
           if (response.data.installed === false) {
             router.push({
@@ -145,7 +149,6 @@ export default function Home() {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: isDarkMode ? '#030303' : '#fff',
       }}
     >
       <View
@@ -153,19 +156,35 @@ export default function Home() {
           flexDirection: 'row',
           justifyContent: 'space-between',
           width: '80%',
-          marginBottom: 40,
-          marginTop: 20,
+          marginBottom: 20,
+          marginTop: 10,
         }}
       >
-        <Text
-          style={{
-            fontSize: 24,
-            textAlign: 'center',
-            color: isDarkMode ? 'white' : 'black',
-          }}
-        >
-          <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
-        </Text>
+        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+          <Text
+            style={{
+              fontSize: 26,
+              textAlign: 'center',
+              color: isDarkMode ? 'white' : 'black',
+            }}
+          >
+            <Text
+              style={{
+                color: '#7469B6',
+                fontFamily: 'PlayfairDisplay_600SemiBold',
+              }}
+            >
+              {bbName}
+            </Text>
+          </Text>
+          <Text
+            style={{
+              color: isDarkMode ? 'white' : 'black',
+            }}
+          >
+            Open Blood
+          </Text>
+        </View>
         <Pressable
           onPress={() => load(true)}
           style={{
@@ -203,21 +222,18 @@ export default function Home() {
         >
           <Text
             style={{
-              fontSize: 28,
+              fontSize: 22,
               textAlign: 'left',
               color: isDarkMode ? 'white' : 'black',
+              flexDirection: 'row',
+              justifyContent: 'flex-start',
             }}
           >
-            Hello{name.trim() === '' ? '!' : ', '}
+            <Text>Hello{name.trim() === '' ? '!' : ', '}</Text>
             <Text style={{ color: '#7469B6', fontWeight: 'bold' }}>
               {name}
             </Text>{' '}
             <Pressable
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
               onPress={() => {
                 if (verified === true) {
                   Alert.alert(
@@ -342,6 +358,13 @@ export default function Home() {
               </Text>
             </View>
           ) : null}
+
+          <Button
+            onPress={() => {
+              router.push(`tel:${bbPhone}`)
+            }}
+          >📞 Call Blood Center
+          </Button>
         </View>
         <Text
           style={{
@@ -361,7 +384,7 @@ export default function Home() {
             alignItems: 'center',
             width: '100%',
             gap: 20,
-            marginBottom: 50,
+            marginBottom: 100,
           }}
         >
           {log.map((item, index) => {

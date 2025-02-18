@@ -37,7 +37,6 @@ export default function Index() {
     let uuid = await SecureStore.getItemAsync('token')
     const perms = await Notifications.getPermissionsAsync()
     let existingStatus = perms.status
-    console.log(`Existing status: ${existingStatus}`)
     if (existingStatus !== 'granted') {
       console.log('Requesting permissions')
       registerForPushNotificationsAsync().then(async (token) => {
@@ -112,7 +111,7 @@ export default function Index() {
         const perms = await Notifications.getPermissionsAsync()
         let existingStatus = perms.status
         console.log(`Existing status: ${existingStatus}`)
-        if (existingStatus !== 'granted') {
+        if (existingStatus !== 'granted' && Device.isDevice) {
           console.log('Requesting permissions')
           Alert.alert(
             `Notifications`,
@@ -139,74 +138,66 @@ export default function Index() {
   }, [])
   let isDarkMode = useColorScheme() === 'dark'
   return (
-    <>
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarShowLabel: false,
-          tabBarStyle: {
-            /*position: "absolute",
-            bottom: 25,
-            left: 33.5,
-            width: 325,*/
-            position: 'absolute',
-            bottom: '0%',
-            left: '0%',
-            width: '100%',
-            alignSelf: 'center',
-            height: 80,
-            paddingTop: 15,
-            shadowColor: '#7469B6',
-            shadowOpacity: 0.3,
-            shadowRadius: 20,
-            borderRadius: 64,
-            elevation: 10,
-            backgroundColor: isDarkMode ? '#3a3b3c' : '#fff',
-            borderTopWidth: 0,
-          },
-          tabBarActiveTintColor: '#7469B6',
-          tabBarIconStyle: {
-            justifyContent: 'center',
-            alignItems: 'center',
-            flex: 1,
-          },
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          width: '100%',
+          height: 80,
+          justifyContent: 'center',
+          alignSelf: 'center',
+          shadowColor: '#7469B6',
+          shadowOpacity: 0.3,
+          shadowRadius: 20,
+          elevation: 10,
+          backgroundColor: isDarkMode ? '#3a3b3c' : '#fff',
+          borderTopWidth: 0,
+        },
+        sceneStyle: {
+          backgroundColor: isDarkMode ? '#030303' : '#efeef7',
+        },
+        tabBarActiveTintColor: '#7469B6',
+        tabBarIconStyle: {
+          verticalAlign: 'middle',
+          marginTop: 20,
+        },
+      }}
+      initialRouteName="home"
+    >
+      <Tab.Screen
+        name="qr"
+        component={QR}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="heart" color={color} size={size} />
+          ),
         }}
-        initialRouteName="home"
-      >
-        <Tab.Screen
-          name="qr"
-          component={QR}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Octicons name="heart" color={color} size={size} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="home"
-          component={Home}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Octicons name="home" color={color} size={size} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="settings"
-          component={Settings}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Octicons name="gear" color={color} size={size} />
-            ),
-          }}
-        />
-      </Tab.Navigator>
-    </>
+      />
+      <Tab.Screen
+        name="home"
+        component={Home}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="home" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="settings"
+        component={Settings}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="gear" color={color} size={size} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
   )
 }
 
 async function registerForPushNotificationsAsync() {
-  let token;
+  let token
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
       name: 'default',

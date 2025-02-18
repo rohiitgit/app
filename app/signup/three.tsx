@@ -255,7 +255,7 @@ export default function Three({
           <FreeButton
             onPress={() => {
               navigation.navigate(
-                `two${route.params?.affiliated == 'yes' ? 'beta' : ''}`,
+                `two`,
                 {
                   ...route.params,
                   conditions,
@@ -271,7 +271,7 @@ export default function Three({
           </FreeButton>
           <FreeButton
             onPress={() => {
-              navigation.navigate(`threealpha`, {
+              navigation.navigate(`four`, {
                 ...route.params,
                 conditions: showConditions ? conditions : '',
                 medications: showMedications ? medications : '',

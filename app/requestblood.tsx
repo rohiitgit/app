@@ -22,6 +22,7 @@ export default function Modal() {
   let [bloodtype, setBloodtype] = useState<string>('A+')
   let [phoneNumber, setPhoneNumber] = useState<string>('')
   const token = local.token
+  const bankCode = local.bankCode
   let [unitsRequired, setUnitsRequired] = useState<string>('0')
   let [minimumMonths, setMinimumMonths] = useState<string>('0')
   let [loading, setLoading] = useState<boolean>(false)
@@ -35,34 +36,17 @@ export default function Modal() {
       Alert.alert('Error', 'Please enter valid numbers')
       return
     }
-    console.log(unitsRequired, minimumMonths)
-    fetch(`http://localhost:3000/hq/request-blood`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    router.push({
+      pathname: '/processalert',
+      params: {
+        bankCode: bankCode,
         token: token,
-        type: bloodtype,
+        bloodtype: bloodtype,
         units: parseInt(unitsRequired),
         months: parseInt(minimumMonths),
         contact: phoneNumber,
-      }),
+      },
     })
-      .then((response) => response.json())
-      .then((response) => {
-        if (response.error) {
-          setLoading(false)
-          Alert.alert('Error', response.message)
-        } else {
-          Alert.alert(response.message)
-          router.dismiss()
-        }
-      })
-      .catch((error) => {
-        setLoading(false)
-        Alert.alert('Error')
-      })
   }
 
   return (
@@ -82,7 +66,7 @@ export default function Modal() {
         <Pressable
           onPress={() => router.dismiss()}
           style={{
-            width: '90%',
+            width: '100%',
             alignSelf: 'center',
             flexDirection: 'row',
             justifyContent: 'space-between',
@@ -91,15 +75,16 @@ export default function Modal() {
         >
           <Text
             style={{
-              fontSize: 36,
+              fontSize: 38,
               fontWeight: 'bold',
               textAlign: 'left',
               color: responsiveColor,
+              fontFamily: 'PlayfairDisplay_600SemiBold',
             }}
           >
-            Request Blood
+            Blood Alert
           </Text>
-          <Octicons name="x" size={36} color={responsiveColor} />
+          <Octicons name="x" size={38} color={responsiveColor} />
         </Pressable>
 
         <Text
@@ -114,20 +99,22 @@ export default function Modal() {
         <Picker
           selectedValue={bloodtype}
           onValueChange={(itemValue) => setBloodtype(itemValue)}
+          style={{
+            color: 'black',
+            padding: 20,
+            backgroundColor: '#fefefe',
+            borderRadius: 16,
+          }}
         >
-          <Picker.Item label="A+" value="A+" color={responsiveColor} />
-          <Picker.Item label="A-" value="A-" color={responsiveColor} />
-          <Picker.Item label="B+" value="B+" color={responsiveColor} />
-          <Picker.Item label="B-" value="B-" color={responsiveColor} />
-          <Picker.Item label="AB+" value="AB+" color={responsiveColor} />
-          <Picker.Item label="AB-" value="AB-" color={responsiveColor} />
-          <Picker.Item label="O+" value="O+" color={responsiveColor} />
-          <Picker.Item label="O-" value="O-" color={responsiveColor} />
-          <Picker.Item
-            label="Bombay blood group"
-            value="Bombay blood group"
-            color={responsiveColor}
-          />
+          <Picker.Item label="A+" value="A+" />
+          <Picker.Item label="A-" value="A-" />
+          <Picker.Item label="B+" value="B+" />
+          <Picker.Item label="B-" value="B-" />
+          <Picker.Item label="AB+" value="AB+" />
+          <Picker.Item label="AB-" value="AB-" />
+          <Picker.Item label="O+" value="O+" />
+          <Picker.Item label="O-" value="O-" />
+          <Picker.Item label="Bombay blood group" value="Bombay blood group" />
         </Picker>
         <Text
           style={{
@@ -180,8 +167,8 @@ export default function Modal() {
           value={phoneNumber}
           onChangeText={setPhoneNumber}
         />
-        <Button onPress={requestBlood} disabled={loading}>
-          {loading ? 'Processing request...' : 'Request Blood'}
+        <Button onPress={requestBlood}>
+          {loading ? 'Initiating...' : 'Send Alert'}
         </Button>
         <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
       </View>

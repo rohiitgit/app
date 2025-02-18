@@ -83,7 +83,7 @@ export default function Two({
             }}
           >
             <Pressable onPress={() => router.push('/')}>
-              <Octicons name="arrow-left" size={24} color={responsiveDark} />
+              <Octicons name="arrow-left" size={24} />
             </Pressable>
             <Text
               style={{
@@ -92,7 +92,15 @@ export default function Two({
                 color: responsiveDark,
               }}
             >
-              <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
+              <Text
+                style={{
+                  color: '#7469B6',
+                  fontFamily: 'PlayfairDisplay_600SemiBold',
+                }}
+              >
+                Open Blood
+              </Text>{' '}
+              Sign Up
             </Text>
           </View>
           <Progress.Bar
@@ -106,13 +114,12 @@ export default function Two({
         <Text
           style={{
             fontSize: 28,
-            textAlign: 'center',
-            margin: 'auto',
+            textAlign: 'left',
             marginBottom: 20,
             color: responsiveDark,
           }}
         >
-          Sign up | <Text style={{ color: '#7469B6' }}>Biodata</Text>
+          <Text style={{ color: '#7469B6' }}>Biodata</Text>
         </Text>
         <Text
           style={{
@@ -140,11 +147,54 @@ export default function Two({
         >
           Enter your sex
         </Text>
-        <Picker selectedValue={sex} onValueChange={setSex}>
-          <Picker.Item label="Male" value={'male'} color={responsiveDark} />
-          <Picker.Item label="Female" value={'female'} color={responsiveDark} />
-          <Picker.Item label="Other" value={'other'} color={responsiveDark} />
+        <Picker
+          selectedValue={sex}
+          onValueChange={setSex}
+          style={{
+            color: 'black',
+            padding: 20,
+            backgroundColor: '#fefefe',
+            borderRadius: 16,
+          }}
+        >
+          <Picker.Item label="Male" value={'male'} />
+          <Picker.Item label="Female" value={'female'} />
+          <Picker.Item label="Other" value={'other'} />
         </Picker>
+        <Text
+          style={{
+            fontSize: 18,
+            marginBottom: 20,
+            color: responsiveDark,
+          }}
+        >
+          Enter your blood group
+        </Text>
+        <View>
+          <Picker
+            selectedValue={bloodtype}
+            onValueChange={setBloodtype}
+            style={{
+              color: 'black',
+              padding: 20,
+              backgroundColor: '#fefefe',
+              borderRadius: 16,
+            }}
+          >
+            <Picker.Item label="A+" value="A+" />
+            <Picker.Item label="A-" value="A-" />
+            <Picker.Item label="B+" value="B+" />
+            <Picker.Item label="B-" value="B-" />
+            <Picker.Item label="AB+" value="AB+" />
+            <Picker.Item label="AB-" value="AB-" />
+            <Picker.Item label="O+" value="O+" />
+            <Picker.Item label="O-" value="O-" />
+            <Picker.Item
+              label="Bombay blood group"
+              value="Bombay blood group"
+            />
+          </Picker>
+        </View>
         <Text
           style={{
             fontSize: 18,
@@ -217,32 +267,6 @@ export default function Two({
         >
           cm
         </TwoRowInput>
-        <Text
-          style={{
-            fontSize: 18,
-            marginBottom: 20,
-            color: responsiveDark,
-          }}
-        >
-          Enter your blood group
-        </Text>
-        <View>
-          <Picker selectedValue={bloodtype} onValueChange={setBloodtype}>
-            <Picker.Item label="A+" value="A+" color={responsiveDark} />
-            <Picker.Item label="A-" value="A-" color={responsiveDark} />
-            <Picker.Item label="B+" value="B+" color={responsiveDark} />
-            <Picker.Item label="B-" value="B-" color={responsiveDark} />
-            <Picker.Item label="AB+" value="AB+" color={responsiveDark} />
-            <Picker.Item label="AB-" value="AB-" color={responsiveDark} />
-            <Picker.Item label="O+" value="O+" color={responsiveDark} />
-            <Picker.Item label="O-" value="O-" color={responsiveDark} />
-            <Picker.Item
-              label="Bombay blood group"
-              value="Bombay blood group"
-              color={responsiveDark}
-            />
-          </Picker>
-        </View>
         <View
           style={{
             flexDirection: 'row',

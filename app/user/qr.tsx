@@ -11,18 +11,22 @@ import { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import QRCode from 'react-native-qrcode-svg'
 import Octicons from '@expo/vector-icons/Octicons'
+import Button from '@/components/Button'
 export default function QR() {
   let [uuid, setUUID] = useState<string | null>('notfound')
   let [refreshing, setRefreshing] = useState<boolean>(false)
+  let [showQR, setShowQR] = useState<boolean>(false)
+  const [bbName, setBbName] = useState<string>('')
   async function load(refresh = false) {
     if (refresh) setRefreshing(true)
     let token = await SecureStore.getItemAsync('token')
+    const name = await SecureStore.getItemAsync('bbName')
+    setBbName(name || '')
     setUUID(token)
     setRefreshing(false)
   }
 
   useEffect(() => {
-    console.log('loading')
     load(false)
   }, [])
   let isDarkMode = useColorScheme() === 'dark'
@@ -32,8 +36,6 @@ export default function QR() {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-
-        backgroundColor: isDarkMode ? '#030303' : '#fff',
       }}
     >
       <View
@@ -41,19 +43,35 @@ export default function QR() {
           flexDirection: 'row',
           justifyContent: 'space-between',
           width: '80%',
-          marginBottom: 40,
-          marginTop: 20,
+          marginBottom: 20,
+          marginTop: 10,
         }}
       >
-        <Text
-          style={{
-            fontSize: 24,
-            textAlign: 'center',
-            color: isDarkMode ? 'white' : 'black',
-          }}
-        >
-          <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
-        </Text>
+        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+          <Text
+            style={{
+              fontSize: 26,
+              textAlign: 'center',
+              color: isDarkMode ? 'white' : 'black',
+            }}
+          >
+            <Text
+              style={{
+                color: '#7469B6',
+                fontFamily: 'PlayfairDisplay_600SemiBold',
+              }}
+            >
+              {bbName ? bbName : 'Open Blood'}
+            </Text>
+          </Text>
+          <Text
+            style={{
+              color: isDarkMode ? 'white' : 'black',
+            }}
+          >
+            {bbName ? 'Open Blood' : ''}
+          </Text>
+        </View>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -72,26 +90,42 @@ export default function QR() {
       >
         <View
           style={{
-            marginTop: 20,
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
-          <QRCode
-            value={'bloodbank-' + (uuid ?? 'notfound')}
-            backgroundColor="transparent"
-            color={isDarkMode ? 'white' : 'black'}
-            size={325}
-          />
+          {showQR ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <QRCode
+                value={'bloodbank-' + (uuid ?? 'notfound')}
+                backgroundColor="transparent"
+                color={isDarkMode ? 'white' : 'black'}
+                size={325}
+              />
+              <Button onPress={() => setShowQR(false)}>Hide QR</Button>
+            </View>
+          ) : (
+            <Button onPress={() => setShowQR(true)}>Show QR</Button>
+          )}
         </View>
         <Text
           style={{
-            fontSize: 14,
+            fontSize: 16,
             textAlign: 'center',
             margin: 20,
             color: isDarkMode ? 'white' : 'black',
           }}
         >
-          This QR code is unique to you and is used to identify you when you
-          donate.
+          This QR code verifies your identity when you donate. Scanning it
+          allows blood banks to update your records and optionally add you to
+          their donor list.
         </Text>
       </ScrollView>
     </SafeAreaView>

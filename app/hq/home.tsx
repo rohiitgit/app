@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Button from '@/components/Button'
 import { Link, router } from 'expo-router'
-import * as SplashScreen from 'expo-splash-screen';
+import * as SplashScreen from 'expo-splash-screen'
 import Card from '@/components/Card'
 import Octicons from '@expo/vector-icons/Octicons'
 
@@ -23,12 +23,17 @@ export default function HQHome() {
   let [unverifiedDonors, setUnverifiedDonors] = useState<number>(0)
   let [totalDonations, setTotalDonations] = useState<number | null>(null)
   let [token, setToken] = useState<string | null>('')
+  let [bankCode, setBankCode] = useState<string | null>('')
+  let [bbName, setBbName] = useState<string>('')
   let [appReady, setAppReady] = useState(false)
   useEffect(() => {
     async function getToken() {
       let t = await SecureStore.getItemAsync('token')
       console.log(t)
       setToken(t)
+      let id = await SecureStore.getItemAsync('id')
+      setBankCode(id)
+      console.log(id)
     }
     getToken()
   }, [])
@@ -36,17 +41,19 @@ export default function HQHome() {
     if (refresh) setRefreshing(true)
 
     let token = await SecureStore.getItemAsync('token')
+    let id = await SecureStore.getItemAsync('id')
     fetch(`http://localhost:3000/hq/get-stats`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        bankCode: id,
         loginCode: token,
       }),
     })
       .then((response) => response.json())
-      .then((response) => {
+      .then(async (response) => {
         if (refresh) setRefreshing(false)
         if (response.error) {
           Alert.alert('Error', 'Unauthorized Access', [
@@ -60,7 +67,8 @@ export default function HQHome() {
           ])
         } else {
           setTotalDonations(response.data.totalDonated)
-
+          await SecureStore.setItemAsync('bbName', response.data.name)
+          setBbName(response.data.name)
           let totalDonors = response.data.totalDonors
           let verified = 0,
             unverified = 0,
@@ -84,17 +92,17 @@ export default function HQHome() {
     load(false)
     setAppReady(true)
   }, [])
-  
+
   let responsiveColor = useColorScheme() === 'dark' ? 'white' : 'black'
 
   const onLayoutRootView = useCallback(async () => {
     if (appReady) {
-      await SplashScreen.hideAsync();
+      await SplashScreen.hideAsync()
     }
-  }, [appReady]);
+  }, [appReady])
 
   if (!appReady) {
-    return null;
+    return null
   }
 
   return (
@@ -114,15 +122,31 @@ export default function HQHome() {
           marginTop: 20,
         }}
       >
-        <Text
-          style={{
-            fontSize: 24,
-            textAlign: 'center',
-            color: responsiveColor
-          }}
-        >
-          <Text style={{ color: '#7469B6' }}>Open Blood HQ</Text> Internal
-        </Text>
+        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+          <Text
+            style={{
+              fontSize: 26,
+              textAlign: 'center',
+              color: responsiveColor,
+            }}
+          >
+            <Text
+              style={{
+                color: '#7469B6',
+                fontFamily: 'PlayfairDisplay_600SemiBold',
+              }}
+            >
+              {bbName ? bbName : 'Open Blood HQ'}
+            </Text>
+          </Text>
+          <Text
+            style={{
+              color: responsiveColor,
+            }}
+          >
+            {bbName ? 'Open Blood HQ' : ''}
+          </Text>
+        </View>
         <Pressable
           onPress={() => load(true)}
           style={{
@@ -130,7 +154,7 @@ export default function HQHome() {
             alignItems: 'center',
           }}
         >
-          <Octicons name="sync" size={24} color="#7469B6" />
+          <Octicons name="sync" size={32} color="#7469B6" />
         </Pressable>
       </View>
       <ScrollView
@@ -161,6 +185,7 @@ export default function HQHome() {
               textAlign: 'left',
               color: '#7469B6',
               fontWeight: 'bold',
+              fontFamily: 'PlayfairDisplay_600SemiBold',
             }}
           >
             Stats
@@ -192,10 +217,10 @@ export default function HQHome() {
               subtitle="total donors"
             />
             <Card
-              icon="heart-fill"
+              icon="verified"
               iconColor="#AD88C6"
-              title={totalDonations?.toString() || ''}
-              subtitle="total donated"
+              title={verifiedDonors?.toString() || ''}
+              subtitle="verified"
             />
           </View>
           <View
@@ -215,10 +240,10 @@ export default function HQHome() {
               subtitle="unverified"
             />
             <Card
-              icon="verified"
+              icon="heart-fill"
               iconColor="#AD88C6"
-              title={verifiedDonors?.toString() || ''}
-              subtitle="verified"
+              title={totalDonations?.toString() || ''}
+              subtitle="total donated"
             />
           </View>
           <Button
@@ -227,13 +252,12 @@ export default function HQHome() {
                 pathname: '/requestblood',
                 params: {
                   token: token,
+                  bankCode: bankCode,
                 },
               })
             }
-          
           >
-            <Octicons name="heart" size={22} color="white" />{' '}
-            Request Blood
+            🚨 Send Blood Alert
           </Button>
         </View>
       </ScrollView>

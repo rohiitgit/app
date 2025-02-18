@@ -64,6 +64,7 @@ export default function Modal() {
             fontWeight: 'bold',
             color: '#7469B6',
             marginBottom: 25,
+            fontFamily: 'PlayfairDisplay_600SemiBold',
           }}
         >
           Next Steps

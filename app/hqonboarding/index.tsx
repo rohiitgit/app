@@ -16,6 +16,7 @@ import Button from '@/components/Button'
 import { Link, router } from 'expo-router'
 export default function Onboarding() {
   let [loginCode, setLoginCode] = useState<string>('')
+  let [bankCode, setBankCode] = useState<string>('')
   let [loginProcess, setLoginProcess] = useState<boolean>(false)
   useEffect(() => {
     SecureStore.getItemAsync('token').then((token) => {
@@ -34,16 +35,19 @@ export default function Onboarding() {
       },
       body: JSON.stringify({
         loginCode: loginCode,
+        bankCode: bankCode,
       }),
     })
       .then((response) => response.json())
       .then(async (response) => {
         setLoginProcess(false)
-        if (response.error) {
+        console.log('RES: ', response)
+        if (response.error == true) {
           alert(response.message)
         } else {
-          //alert(response.message)
-          await SecureStore.setItemAsync('token', 'hq-' + response.token)
+          await SecureStore.setItemAsync('id', response.id)
+          await SecureStore.setItemAsync('token', `hq-${loginCode}`)
+          router.push('/hq')
         }
       })
       .catch((error) => {
@@ -61,11 +65,6 @@ export default function Onboarding() {
         backgroundColor: isDarkMode ? '#030303' : '#efeef7',
       }}
     >
-      {/* <TouchableWithoutFeedback
-                onPress={() => {
-                    Keyboard.dismiss()
-                }}
-            > */}
       <SafeAreaView>
         <Text
           style={{
@@ -80,8 +79,30 @@ export default function Onboarding() {
           <Text
             style={{
               fontSize: 16,
-              color: '#7469B6',
-              textAlign: 'center',
+              color: isDarkMode ? 'white' : 'black',
+              textAlign: 'left',
+              marginLeft: 20,
+            }}
+          >
+            Bank Code
+          </Text>
+          <TextInput
+            placeholder="bank code"
+            autoComplete="off"
+            placeholderTextColor={'grey'}
+            secureTextEntry={false}
+            value={bankCode}
+            onChangeText={setBankCode}
+            style={styles.input}
+            textContentType='username'
+          />
+
+          <Text
+            style={{
+              fontSize: 16,
+              color: isDarkMode ? 'white' : 'black',
+              textAlign: 'left',
+              marginLeft: 20,
             }}
           >
             Login Code
@@ -94,6 +115,7 @@ export default function Onboarding() {
             value={loginCode}
             onChangeText={setLoginCode}
             style={styles.input}
+            textContentType='password'
           />
         </View>
         <Button onPress={login} disabled={loginProcess}>
@@ -116,7 +138,6 @@ export default function Onboarding() {
           </Text>
         </Pressable>
       </SafeAreaView>
-      {/* </TouchableWithoutFeedback> */}
     </ScrollView>
   )
 }

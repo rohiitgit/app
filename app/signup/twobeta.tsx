@@ -112,30 +112,23 @@ export default function TwoBeta({
         <Picker
           selectedValue={designation}
           onValueChange={(itemValue, itemIndex) => setDesignation(itemValue)}
+          style={{
+            color: 'black',
+            padding: 20,
+            backgroundColor: '#fefefe',
+            borderRadius: 16,
+          }}
         >
-          <Picker.Item label="Faculty" value="Faculty" color={responsiveDark} />
-          <Picker.Item
-            label="Resident"
-            value="Resident"
-            color={responsiveDark}
-          />
-          <Picker.Item label="MBBS" value="MBBS" color={responsiveDark} />
-          <Picker.Item
-            label="B.Sc. Nursing"
-            value="B Sc. Nursing"
-            color={responsiveDark}
-          />
+          <Picker.Item label="Faculty" value="Faculty" />
+          <Picker.Item label="Resident" value="Resident" />
+          <Picker.Item label="MBBS" value="MBBS" />
+          <Picker.Item label="B.Sc. Nursing" value="B Sc. Nursing" />
           <Picker.Item
             label="B.Sc. Allied Medical Sciences"
             value="B.Sc. Allied Medical Sciences"
-            color={responsiveDark}
           />
-          <Picker.Item
-            label="Nursing staff"
-            value="Nursing staff"
-            color={responsiveDark}
-          />
-          <Picker.Item label="Other" value="Other" color={responsiveDark} />
+          <Picker.Item label="Nursing staff" value="Nursing staff" />
+          <Picker.Item label="Other" value="Other" />
         </Picker>
         <Text
           style={{

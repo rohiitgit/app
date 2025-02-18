@@ -40,11 +40,12 @@ export default function Modal() {
     return diffMonths < 3
   }
   const local = useLocalSearchParams()
-  let uuid = local.uuid
+  const uuid = local.uuid
+  const token = local.token
+  const bankCode = local.bankCode
   let [bloodtype, setBloodtype] = useState<string>('')
   let [conditions, setConditions] = useState<string>('')
   let [medications, setMedications] = useState<string>('')
-  const token = local.token
 
   let [name, setName] = useState<string>('')
   let [phone, setPhone] = useState<string>('')
@@ -68,6 +69,7 @@ export default function Modal() {
   let [loading, setLoading] = useState<boolean>(true)
   let isDarkMode = useColorScheme() === 'dark'
   let responsiveColor = isDarkMode ? 'white' : 'black'
+
   useEffect(() => {
     fetch(`http://localhost:3000/hq/request-user-data`, {
       method: 'POST',
@@ -75,6 +77,7 @@ export default function Modal() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        bankCode: bankCode,
         token: token,
         uuid: uuid,
       }),
@@ -91,8 +94,8 @@ export default function Modal() {
           setBloodtype(response.data.bloodtype)
           setPhone(response.data.phone)
           setDob(response.data.dob)
-          setAffiliated(response.data.affiliated)
-          setAffiliatedData(response.data.affiliatedata)
+          /* setAffiliated(response.data.affiliated) //
+          setAffiliatedData(response.data.affiliatedata)*/
           setHeight(response.data.height)
           setWeight(response.data.weight)
           setDistance(response.data.distance)
@@ -118,6 +121,7 @@ export default function Modal() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        bankCode: bankCode,
         token: token,
         uuid: uuid,
         bloodtype: bloodtype,
@@ -131,7 +135,7 @@ export default function Modal() {
           setVerifying(false)
           alert(response.message)
         } else {
-          setVerifying(false) 
+          setVerifying(false)
           alert(response.message)
           setVerified(true)
         }
@@ -150,6 +154,7 @@ export default function Modal() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        bankCode: bankCode,
         token: token,
         uuid: uuid,
       }),
@@ -186,7 +191,7 @@ export default function Modal() {
             {
               text: 'Get support',
               onPress: () => {
-                Linking.openURL(`mailto:mihir@pidgon.com`)
+                Linking.openURL(`mailto:openblood@pidgon.com`)
               },
             },
           ])
@@ -209,16 +214,23 @@ export default function Modal() {
       }}
     >
       {loading ? (
-        <Text
+        <View
           style={{
-            fontSize: 36,
-            fontWeight: 'bold',
-            textAlign: 'center',
-            color: responsiveColor,
+            flex: 1,
           }}
         >
-          Loading donor...
-        </Text>
+          <Text
+            style={{
+              fontSize: 36,
+              fontWeight: 'bold',
+              textAlign: 'center',
+              color: responsiveColor,
+              fontFamily: 'PlayfairDisplay_600SemiBold',
+            }}
+          >
+            Loading donor...
+          </Text>
+        </View>
       ) : (
         <View
           style={{
@@ -242,6 +254,7 @@ export default function Modal() {
                 fontWeight: 'bold',
                 textAlign: 'left',
                 color: responsiveColor,
+                fontFamily: 'PlayfairDisplay_600SemiBold',
               }}
             >
               {name}
@@ -280,20 +293,21 @@ export default function Modal() {
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  width: '80%',
                   gap: 20,
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 20,
-                    textAlign: 'left',
-                    color: isDarkMode ? '#fff' : '#000',
-                  }}
-                >
-                  {address.slice(0, 50)}
-                  {address.length > 50 ? '...' : ''}
-                </Text>
+                {!/^-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?$/.test(address) ? (
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      textAlign: 'left',
+                      color: isDarkMode ? '#fff' : '#000',
+                    }}
+                  >
+                    {address.slice(0, 50)}
+                    {address.length > 50 ? '...' : ''}
+                  </Text>
+                ) : null}
               </View>
               <FreeButton
                 onPress={() => {
@@ -352,12 +366,19 @@ export default function Modal() {
                 border={true}
               />
               <Card
+                title={`${parseFloat(distance).toFixed(2)} km`}
+                icon="location"
+                iconColor={responsiveColor}
+                subtitle={'away'}
+                border={true}
+              />
+              {/*<Card
                 title={affiliated ? 'Affiliated' : 'Unaffiliated'}
                 icon={affiliated ? 'pulse' : 'x'}
                 iconColor={affiliated ? '#35C759' : '#F34573'}
                 subtitle={`with JIPMER`}
                 border={true}
-              />
+              />*/}
             </View>
             <View
               style={{
@@ -396,70 +417,13 @@ export default function Modal() {
                 border={true}
               />
               <Card
-                title={totalDonations}
+                title={totalDonations.toString()}
                 icon="sort-asc"
                 iconColor={responsiveColor}
                 subtitle={'total donations'}
                 border={true}
               />
             </View>
-            {affiliated ? (
-              <>
-                <Text
-                  style={{
-                    fontSize: 24,
-                    textAlign: 'center',
-                    color: responsiveColor,
-                  }}
-                >
-                  Affiliation Data
-                </Text>
-                <View
-                  style={{
-                    flexDirection: 'column',
-                    gap: 10,
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      gap: 10,
-                    }}
-                  >
-                    <Card
-                      title={affiliatedData?.department || ''}
-                      icon="id-badge"
-                      iconColor={responsiveColor}
-                      subtitle={'Department'}
-                      border={true}
-                    />
-                    <Card
-                      title={affiliatedData?.designation || ''}
-                      icon="people"
-                      iconColor={responsiveColor}
-                      subtitle={'Designation'}
-                      border={true}
-                    />
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      gap: 10,
-                    }}
-                  >
-                    <Card
-                      title={affiliatedData?.yearOfJoining?.toString() || ''}
-                      icon="hourglass"
-                      iconColor={responsiveColor}
-                      subtitle={'Joining year'}
-                      border={true}
-                    />
-                  </View>
-                </View>
-              </>
-            ) : null}
           </View>
           <View
             style={{

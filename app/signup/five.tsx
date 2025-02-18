@@ -56,15 +56,6 @@ export default function Five({
     console.log(route.params.location.latitude, route.params.location.longitude)
     var payload = {
       phonenumber: route.params.phoneNumber,
-      affiliated: route.params.affiliated === 'yes',
-      affiliatedata:
-        route.params.affiliated === 'yes'
-          ? {
-              designation: route.params.designation,
-              yearOfJoining: route.params.yearOfJoining,
-              department: route.params.department,
-            }
-          : null,
       name: route.params.name,
       sex: route.params.sex,
       dob: route.params.dob,

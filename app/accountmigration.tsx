@@ -39,7 +39,6 @@ export default function Modal() {
   useEffect(() => {
     SecureStore.getItemAsync('lookup').then((res) => {
       if (res) {
-        console.log('Found lookup', res)
         setGeocodeLookupId(res)
       }
     })
@@ -71,7 +70,7 @@ export default function Modal() {
         {
           text: 'Contact Support',
           onPress: () => {
-            router.push('tel:+914132296666')
+            router.push('mailto:openblood@pidgon.com')
           },
         },
         {
@@ -112,7 +111,7 @@ export default function Modal() {
               {
                 text: 'Get help',
                 onPress: () => {
-                  router.push('mailto:mihir@pidgon.com')
+                  router.push('mailto:openblood@pidgon.com')
                 },
               },
             ])
@@ -169,6 +168,10 @@ export default function Modal() {
     let lon = region.longitude
     let bbLat = 11.953852
     let bbLon = 79.797765
+    /**
+     * Why are these values hardcoded? 
+     * This page is only for certain donors of that blood bank and this page will be removed in the future.
+     */
     var R = 6371 // km
     var dLat = toRad(bbLat - lat)
     var dLon = toRad(bbLon - lon)

@@ -5,14 +5,14 @@ import {
 } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
-import One from './one'
+import One from './ta'
 import Two from './two'
 import TwoBeta from './twobeta'
 import { useLocalSearchParams } from 'expo-router'
 import Three from './three'
 import Four from './four'
 import Five from './five'
-import ThreeAlpha from './threealpha'
+import ThreeAlpha from './one'
 const Stack = createNativeStackNavigator()
 
 export default function Signup() {
@@ -30,17 +30,19 @@ export default function Signup() {
             animation: 'fade',
           }}
         >
-          <Stack.Screen
-            name="one"
-            component={One}
-            initialParams={{ phoneNumber: local.phoneNumber }}
-          />
+
+          <Stack.Screen name="one" component={ThreeAlpha} initialParams={{ phoneNumber: local.phoneNumber }}/>
           <Stack.Screen name="two" component={Two} />
           <Stack.Screen name="twobeta" component={TwoBeta} />
           <Stack.Screen name="three" component={Three} />
-          <Stack.Screen name="threealpha" component={ThreeAlpha} />
           <Stack.Screen name="four" component={Four} />
           <Stack.Screen name="five" component={Five} />
+
+          <Stack.Screen
+            name="ta"
+            component={One}
+            initialParams={{ phoneNumber: local.phoneNumber }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </NavigationIndependentTree>

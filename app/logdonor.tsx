@@ -3,7 +3,6 @@ import { Link, router, useLocalSearchParams } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
 import Octicons from '@expo/vector-icons/Octicons'
-import { Picker } from '@react-native-picker/picker'
 import Button from '@/components/Button'
 export default function Modal() {
   function convertTimestampToShortString(timestamp: string) {
@@ -30,10 +29,13 @@ export default function Modal() {
   let uuid = local.uuid
   let [bloodtype, setBloodtype] = useState<string>('A+')
   const token = local.token
+  const bankCode = local.id
   let [donorData, setDonorData] = useState<any>({})
   let [verifying, setVerifying] = useState<boolean>(false)
   let [marking, setMarking] = useState<boolean>(false)
+  let [extending, setExtending] = useState<boolean>(false)
   let [loading, setLoading] = useState<boolean>(true)
+  let [oos, setOos] = useState<boolean>(false)
   useEffect(() => {
     fetch(`http://localhost:3000/hq/get-donor`, {
       method: 'POST',
@@ -41,6 +43,7 @@ export default function Modal() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        bankCode: bankCode,
         token: token,
         uuid: uuid,
       }),
@@ -51,12 +54,14 @@ export default function Modal() {
           alert(response.message)
           router.dismiss()
         } else {
+          console.log(response.data)
           setLoading(false)
           let localDonor = response.data
           localDonor.age =
             new Date().getFullYear() - new Date(localDonor.dob).getFullYear()
           setDonorData(localDonor)
           setBloodtype(response.data.bloodtype)
+          setOos(response.data.oos)
         }
       })
   }, [])
@@ -69,6 +74,7 @@ export default function Modal() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        bankCode: bankCode,
         token: token,
         uuid: uuid,
       }),
@@ -82,6 +88,36 @@ export default function Modal() {
           setMarking(false)
           alert(response.message)
           router.dismiss()
+        }
+      })
+      .catch((error) => {
+        setMarking(false)
+        alert('An error occurred while marking the donor as donated')
+      })
+  }
+
+  function extendDonorScope() {
+    setExtending(true)
+    fetch(`http://localhost:3000/hq/extend-donor-scope`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        bankCode: bankCode,
+        token: token,
+        uuid: uuid,
+      }),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (response.error) {
+          setExtending(false)
+          alert(response.message)
+        } else {
+          setExtending(false)
+          alert(response.message)
+          setOos(false)
         }
       })
       .catch((error) => {
@@ -129,6 +165,7 @@ export default function Modal() {
                 fontSize: 36,
                 fontWeight: 'bold',
                 textAlign: 'center',
+                fontFamily: 'PlayfairDisplay_600SemiBold',
               }}
             >
               {donorData.name}
@@ -188,6 +225,7 @@ export default function Modal() {
                   router.push({
                     pathname: '/verifydonor',
                     params: {
+                      bankCode: bankCode,
                       uuid: uuid,
                       token: token,
                     },
@@ -198,27 +236,86 @@ export default function Modal() {
               </Button>
             </View>
           ) : (
-            <Button
-              onPress={() => {
-                router.push({
-                  pathname: '/verifydonor',
-                  params: {
-                    uuid: uuid,
-                    token: token,
-                  },
-                })
+            <View style={{ margin: 'auto' }}>
+              <Pressable
+                onPress={() => {
+                  router.push({
+                    pathname: '/verifydonor',
+                    params: {
+                      uuid: uuid,
+                      bankCode: bankCode,
+                      token: token,
+                    },
+                  })
+                }}
+                disabled={oos}
+              >
+                <Text
+                  style={{
+                    fontSize: 22,
+                    color: oos ? '#FF3B2F' : '#7469B6',
+                    textAlign: 'center',
+                  }}
+                >
+                  {oos
+                    ? 'This donor is out of your scope. You can still mark them as donated.'
+                    : '📋 View more donor data'}
+                </Text>
+              </Pressable>
+            </View>
+          )}
+          <View style={{ margin: 'auto' }}>
+            <Pressable
+              onPress={markAsDonated}
+              disabled={!donorData.verified || marking}
+              style={{
+                backgroundColor: '#7469B6',
+                paddingVertical: 12,
+                paddingHorizontal: 24,
+                borderRadius: 8,
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 300,
+                margin: 'auto',
               }}
             >
-              View donor data
-            </Button>
-          )}
-          <Button
-            onPress={markAsDonated}
-            disabled={!donorData.verified || marking}
-          >
-            Mark{marking ? 'ing' : ''} as donated
-            {marking ? '...' : ''}
-          </Button>
+              <Text style={{ fontSize: 24, color: 'white' }}>
+                Mark{marking ? 'ing' : ''} as donated
+                {marking ? '...' : ''}
+              </Text>
+            </Pressable>
+            {oos ? (
+              <View
+                style={{
+                  margin: 'auto',
+                  padding: 10,
+                }}
+              >
+                <Text
+                  style={{ fontSize: 17, margin: 'auto', textAlign: 'center' }}
+                >
+                  {'\n\n'}
+                  This donor is out of your scope. You cannot view their donor
+                  data unless you add them into your list.
+                </Text>
+                <Button
+                  style={{
+                    margin: 'auto',
+                  }}
+                  onPress={extendDonorScope}
+                  disabled={extending}
+                >
+                  Includ{extending ? 'ing' : 'e'} donor{extending ? '...' : ''}
+                </Button>
+                <Text
+                  style={{ fontSize: 17, margin: 'auto', textAlign: 'center' }}
+                >
+                  If this donor does not live in your region and/or does not
+                  donate frequently to this blood bank, please reconsider.
+                </Text>
+              </View>
+            ) : null}
+          </View>
         </View>
       )}
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />

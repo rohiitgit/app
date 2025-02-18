@@ -14,8 +14,9 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import styles from '@/assets/styles/styles'
 import Button from '@/components/Button'
 import { Link, router } from 'expo-router'
-import { fetch } from 'expo/fetch';
+import { fetch } from 'expo/fetch'
 import React from 'react'
+import * as Application from 'expo-application'
 export default function Index() {
   let [phoneNumber, setPhoneNumber] = useState<string>('')
   let [password, setPassword] = useState<string>('')
@@ -46,8 +47,6 @@ export default function Index() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        /*phonenumber: phoneNumber,
-                password: password,*/
         phone: phoneNumber,
         allowSignup: true,
         intentVerifyOTPlogin: allowOTP,
@@ -77,9 +76,28 @@ export default function Index() {
       })
       .catch((error) => {
         setLoginProcess(false)
+        console.log(error)
         alert(error)
       })
   }
+
+  useEffect(() => {
+    try {
+      SecureStore.getItemAsync('token').then((token) => {
+        if (token) {
+          if (token.startsWith('hq-')) {
+            console.log('hq', token)
+            router.replace('/hq')
+          } else {
+            console.log('user', token)
+            router.replace('/user')
+          }
+        }
+      })
+    } catch (e) {
+      console.warn(e)
+    }
+  }, [])
   let isDarkMode = useColorScheme() === 'dark'
   return (
     <ScrollView
@@ -89,35 +107,26 @@ export default function Index() {
         alignItems: 'center',
         backgroundColor: isDarkMode ? '#030303' : '#fff',
       }}
+      keyboardDismissMode="on-drag"
     >
-      {/* <TouchableWithoutFeedback
-                onPress={() => {
-                    Keyboard.dismiss()
-                }}
-            > */}
       <SafeAreaView>
         <Text
           style={{
-            fontSize: 24,
+            fontSize: 32,
             textAlign: 'center',
-            color: isDarkMode ? '#fff' : '#000',
+            color: '#7469B6',
+            fontFamily: 'PlayfairDisplay_600SemiBold'//'PlayfairDisplay_600SemiBold',
           }}
         >
-          <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
+          Open Blood
         </Text>
-        <Text style={{
-            fontSize: 24,
-            textAlign: 'center',
-            color: isDarkMode ? '#fff' : '#000',
-          }}>
-            localhost @ 54SRN/5GHz
-          </Text>
         <View style={{ marginTop: 20 }}>
           <TextInput
             placeholder="phone number"
             autoComplete="tel"
             keyboardType="phone-pad"
             value={phoneNumber}
+            onSubmitEditing={login}
             onChangeText={setPhoneNumber}
             placeholderTextColor={'grey'}
             style={{
@@ -167,22 +176,6 @@ export default function Index() {
             ? 'Sign up!'
             : 'Continue'}
         </Button>
-        {/*<Pressable
-                    onPress={() => {
-                        router.push('/signup')
-                    }}
-                    style={{ marginTop: 20 }}
-                >
-                    <Text
-                        style={{
-                            textAlign: 'center',
-                            fontSize: 16,
-                            color: '#7469B6',
-                        }}
-                    >
-                        Sign up
-                    </Text>
-                </Pressable>*/}
         <Pressable
           onPress={() => {
             router.push('/hqonboarding')
@@ -196,11 +189,26 @@ export default function Index() {
               color: '#7469B6',
             }}
           >
-            Blood Center login
+            Blood Center
           </Text>
         </Pressable>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 50,
+          }}>
+            <Text
+              style={{
+                fontSize: 16,
+                color: 'grey'
+              }}
+            >
+              Open Blood Internal Distribution {Application.nativeApplicationVersion} [
+                          {Application.nativeBuildVersion}]
+            </Text>
+          </View>
       </SafeAreaView>
-      {/* </TouchableWithoutFeedback> */}
     </ScrollView>
   )
 }

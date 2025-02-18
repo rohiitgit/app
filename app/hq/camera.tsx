@@ -1,10 +1,10 @@
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'
+import { CameraView, useCameraPermissions } from 'expo-camera'
 import { useEffect, useState } from 'react'
 import {
+  Alert,
   Pressable,
   StyleSheet,
   Text,
-  TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native'
@@ -12,17 +12,25 @@ import Button from '@/components/Button'
 import Octicons from '@expo/vector-icons/Octicons'
 import * as SecureStore from 'expo-secure-store'
 import { router } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { StatusBar } from 'expo-status-bar'
 export default function Camera() {
   const [permission, requestPermission] = useCameraPermissions()
   const [flash, setFlash] = useState(false)
   const [side, setSide] = useState<'front' | 'back'>('back')
   const [currentData, setCurrentData] = useState<any>('')
   const [token, setToken] = useState<string | null>('')
-
+  const [bankCode, setBankCode] = useState<string | null>('')
+  const [bbName, setBbName] = useState<string>('')
+  let isDarkMode = useColorScheme() === 'dark'
   useEffect(() => {
     async function getToken() {
       let t = await SecureStore.getItemAsync('token')
+      let id = await SecureStore.getItemAsync('id')
+      let name = await SecureStore.getItemAsync('bbName')
+      setBbName(name || '')
       setToken(t)
+      setBankCode(id)
     }
     getToken()
   }, [])
@@ -61,7 +69,42 @@ export default function Camera() {
     )
   }
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View
+        style={{
+          gap: 0,
+          borderBottomLeftRadius: 64,
+          borderBottomRightRadius: 64,
+          padding: 20,
+          width: '100%',
+          flexDirection: 'column',
+          //backgroundColor: '#efeef7',
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 26,
+            textAlign: 'left',
+            color: isDarkMode ? 'white' : 'black',
+          }}
+        >
+          <Text
+            style={{
+              color: '#7469B6',
+              fontFamily: 'PlayfairDisplay_600SemiBold',
+            }}
+          >
+            {bbName ? bbName : 'Open Blood HQ'}
+          </Text>
+        </Text>
+        <Text
+          style={{
+            color: isDarkMode ? 'white' : 'black',
+          }}
+        >
+          {bbName ? 'Open Blood HQ' : ''}
+        </Text>
+      </View>
       <CameraView
         style={styles.camera}
         facing={side}
@@ -69,7 +112,12 @@ export default function Camera() {
           barcodeTypes: ['qr'],
         }}
         onBarcodeScanned={(result) => {
-          if (result.data.startsWith('bloodbank-') !== true) {
+          if (result.data == 'bloodbank-notfound') {
+            Alert.alert(
+              'Error',
+              "The donor's identity could not be confirmed. Please reload the donor app and try again."
+            )
+          } else if (result.data.startsWith('bloodbank-') !== true) {
             setCurrentData('')
           } else {
             setCurrentData(result.data)
@@ -77,7 +125,55 @@ export default function Camera() {
         }}
         enableTorch={flash}
       ></CameraView>
-
+      {/* <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          gap: 30,
+          alignItems: 'center',
+          width: '100%',
+          position: 'absolute',
+          top: '5%',
+          borderRadius: 64,
+          padding: 20,
+          paddingTop: 10,
+          paddingBottom: 10,
+          elevation: 10,
+          backdropFilter: 'blur(20px)',
+          backgroundColor: "#efeef7"
+        }}
+      >
+        <View
+          style={{
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 26,
+              textAlign: 'center',
+              color: isDarkMode ? 'white' : 'black',
+            }}
+          >
+            <Text
+              style={{
+                color: '#7469B6',
+                fontFamily: 'PlayfairDisplay_600SemiBold',
+              }}
+            >
+              {bbName ? bbName : 'Open Blood HQ'}
+            </Text>
+          </Text>
+          <Text
+            style={{
+              color: isDarkMode ? 'white' : 'black',
+            }}
+          >
+            {bbName ? 'Open Blood HQ' : ''}
+          </Text>
+        </View>
+      </View> */}
       <View
         style={{
           flexDirection: 'row',
@@ -108,13 +204,14 @@ export default function Camera() {
             style={{
               borderRadius: 64,
               backgroundColor: '#fff',
-              padding: 10,
+              padding: 15,
             }}
             onPress={() => {
               router.push({
                 pathname: '/logdonor',
                 params: {
                   uuid: currentData,
+                  id: bankCode,
                   token: token,
                 },
               })
@@ -122,7 +219,7 @@ export default function Camera() {
           >
             <Text
               style={{
-                fontSize: 20,
+                fontSize: 24,
                 color: '#7469B6',
               }}
             >
@@ -142,7 +239,8 @@ export default function Camera() {
           <Octicons name="sun" size={28} color="#7469B6" />
         </Pressable>
       </View>
-    </View>
+      <StatusBar style="auto" />
+    </SafeAreaView>
   )
 }
 
@@ -157,6 +255,7 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+    elevation: 1,
   },
   buttonContainer: {
     flex: 1,

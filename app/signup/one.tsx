@@ -3,6 +3,7 @@ import {
   Keyboard,
   Pressable,
   ScrollView,
+  Switch,
   Text,
   TextInput,
   TouchableWithoutFeedback,
@@ -20,23 +21,60 @@ import TwoRowInput from '@/components/TwoRowInput'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import * as Progress from 'react-native-progress'
 import { Octicons } from '@expo/vector-icons'
-export default function One({
+import DateTimePicker from '@react-native-community/datetimepicker'
+import FreeButton from '@/components/FreeButton'
+import React from 'react'
+export default function ThreeAlpha({
   navigation,
   route,
 }: {
   navigation: any
   route: any
 }) {
-  console.log(route.params)
   let [phoneNumber, setPhoneNumber] = useState<string>(
     route.params?.phoneNumber || ''
   )
-  let [affiliated, setAffiliated] = useState<string | null>(
-    route.params?.affiliated || 'no'
+  let [baseBank, setBaseBank] = useState<{
+    name: string
+    uuid: string
+    coords: string
+    region: string
+  }>(
+    route.params?.baseBank || {
+      name: '',
+      uuid: '',
+      coords: '',
+      region: '',
+    }
   )
-  delete route.params?.affiliated
-  console.log(route.params)
+  let [banks, setBanks] = useState<
+    {
+      name: string
+      uuid: string
+      coords: string
+      region: string
+    }[]
+  >([])
+  delete route.params?.basebank
+
   let isDarkMode = useColorScheme() === 'dark'
+  let responsiveDark = useColorScheme() === 'dark' ? 'white' : 'black'
+
+  function retrieveBanks() {
+    fetch('http://localhost:3000/donor/banks', {
+      method: 'GET',
+    })
+      .then((response) => response.json())
+      .then(async (response) => setBanks(response.banks))
+      .catch((error) => {
+        console.error(error)
+        Alert.alert('Error', 'Could not fetch blood banks')
+      })
+  }
+
+  useEffect(() => {
+    retrieveBanks()
+  }, [])
   return (
     <KeyboardAwareScrollView
       contentContainerStyle={{
@@ -65,20 +103,24 @@ export default function One({
             }}
           >
             <Pressable onPress={() => router.push('/')}>
-              <Octicons
-                name="arrow-left"
-                size={24}
-                color={isDarkMode ? 'white' : 'black'}
-              />
+              <Octicons name="arrow-left" size={24} color={responsiveDark} />
             </Pressable>
             <Text
               style={{
                 fontSize: 24,
                 textAlign: 'center',
-                color: isDarkMode ? 'white' : 'black',
+                color: responsiveDark,
               }}
             >
-              <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
+              <Text
+                style={{
+                  color: '#7469B6',
+                  fontFamily: 'PlayfairDisplay_600SemiBold',
+                }}
+              >
+                Open Blood
+              </Text>{' '}
+              Sign Up
             </Text>
           </View>
           <Progress.Bar
@@ -92,54 +134,137 @@ export default function One({
         <Text
           style={{
             fontSize: 28,
-            textAlign: 'center',
-            margin: 'auto',
+            textAlign: 'left',
             marginBottom: 20,
-            color: isDarkMode ? 'white' : 'black',
+            color: '#7469B6',
           }}
         >
-          Sign up | <Text style={{ color: '#7469B6' }}>General</Text>
+          Base Blood Bank
         </Text>
-        <Text
+
+        <View
           style={{
-            fontSize: 20,
-            marginBottom: 20,
-            color: isDarkMode ? 'white' : 'black',
+            width: '80%',
           }}
         >
-          Are you affiliated with JIPMER?
-        </Text>
-        <View>
-          <Picker
-            selectedValue={affiliated}
-            onValueChange={(itemValue) => setAffiliated(itemValue)}
+          <Text
             style={{
-              color: isDarkMode ? 'white' : 'black',
+              fontSize: 18,
+              marginBottom: 30,
+              color: responsiveDark,
+              fontFamily: 'S',
             }}
           >
-            <Picker.Item
-              label="No"
-              value="no"
-              color={isDarkMode ? 'white' : 'black'}
-            />
-            <Picker.Item
-              label="Yes"
-              value="yes"
-              color={isDarkMode ? 'white' : 'black'}
-            />
-          </Picker>
+            Choose the blood bank you would like to donate to regularly.
+          </Text>
+          <ScrollView
+            contentContainerStyle={{
+              height: 300,
+              flexDirection: 'column',
+              gap: 10,
+            }}
+          >
+            {banks.map((bank) => {
+              return (
+                <Pressable
+                  key={bank.uuid}
+                  onPress={() => {
+                    if (baseBank == bank) {
+                      setBaseBank({
+                        name: '',
+                        uuid: '',
+                        coords: '',
+                        region: '',
+                      })
+                    } else {
+                      setBaseBank(bank)
+                    }
+                  }}
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: 20,
+                    borderRadius: 10,
+                    backgroundColor:
+                      baseBank == bank
+                        ? '#7469B6'
+                        : isDarkMode
+                        ? '#242526'
+                        : '#fff',
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: 'column',
+                      gap: 10,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        color:
+                          baseBank == bank || isDarkMode ? 'white' : 'black',
+                      }}
+                    >
+                      {bank.name}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color:
+                          baseBank == bank || isDarkMode ? 'white' : 'black',
+                      }}
+                    >
+                      {bank.region}
+                    </Text>
+                  </View>
+                  <Octicons
+                    name={`dot${baseBank == bank ? '-fill' : ''}`}
+                    size={24}
+                    color={baseBank == bank ? 'white' : 'black'}
+                  />
+                </Pressable>
+              )
+            })}
+          </ScrollView>
+          <Text
+            style={{
+              fontSize: 18,
+              marginBottom: 30,
+              color: responsiveDark,
+              fontFamily: 'S',
+            }}
+          >
+            {'\n\n'}
+            {baseBank.name == ''
+              ? 'No bank selected.'
+              : `${baseBank.name} will process your application and manage your Open Blood profile.`}
+          </Text>
         </View>
-        <Button
-          onPress={() => {
-            navigation.navigate(`two${affiliated == 'yes' ? 'beta' : ''}`, {
-              ...route.params,
-              phoneNumber,
-              affiliated,
-            })
+
+        <View
+          style={{
+            flexDirection: 'column',
+            justifyContent: 'center',
           }}
         >
-          Next
-        </Button>
+          <FreeButton
+            onPress={() => {
+              navigation.navigate(`two`, {
+                ...route.params,
+                phoneNumber: phoneNumber,
+                baseBank: baseBank,
+              })
+            }}
+            style={{
+              width: '90%',
+            }}
+            disabled={baseBank.uuid === '' ? true : false}
+          >
+            Next
+          </FreeButton>
+        </View>
       </SafeAreaView>
     </KeyboardAwareScrollView>
   )
