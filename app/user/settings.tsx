@@ -14,7 +14,7 @@ import {
   Text,
   TouchableOpacity,
   useColorScheme,
-  View
+  View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 export default function Settings() {
@@ -120,7 +120,8 @@ export default function Settings() {
       .then(async (response) => {
         setAllBanks(
           response.banks.filter((x: any) => {
-            return !scopes.some((y) => y.uuid === x.uuid)
+            //return !scopes.some((y) => y.uuid === x.uuid)
+            return scopes
           })
         )
         setShowModal(true)
@@ -164,7 +165,9 @@ export default function Settings() {
   }, [])
   let isDarkMode = useColorScheme() === 'dark'
   function reportBug() {
-    router.push('mailto:openblood@pidgon.com?subject=Open%20Blood%20Bug%20Report')
+    router.push(
+      'mailto:openblood@pidgon.com?subject=Open%20Blood%20Bug%20Report'
+    )
   }
   return (
     <SafeAreaView
@@ -222,7 +225,6 @@ export default function Settings() {
                 setShowModal(false)
               }}
               style={{
-                backgroundColor: '#7469B6',
                 width: 45,
                 height: 45,
                 borderRadius: 9,
@@ -230,7 +232,9 @@ export default function Settings() {
                 alignItems: 'center',
               }}
             >
-              <Octicons name="x" size={24} color="white" />
+              <Octicons name="x" size={24} color={
+                isDarkMode ? 'white' : 'black'
+              } />
             </Pressable>
           </View>
           <FlatList
@@ -248,6 +252,9 @@ export default function Settings() {
                 No banks found.
               </Text>
             }
+          contentContainerStyle={{
+            marginTop: 10,
+          }}
             renderItem={({ item }) => (
               <View
                 style={{
@@ -255,7 +262,7 @@ export default function Settings() {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   marginBottom: 20,
-                  backgroundColor: isDarkMode ? '#242526' : '#fff',
+                  backgroundColor: isDarkMode ? '#404040' : '#f2f0ef',
                   padding: 16,
                   borderRadius: 9,
                 }}
@@ -281,28 +288,68 @@ export default function Settings() {
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'row', gap: 10 }}>
-                  <Pressable
-                    onPress={() => {
-                      Alert.alert(
-                        `Add ${item.name}?`,
-                        'You will start receiving alerts from this bank and they will be able to view your data.',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          { text: 'Add', onPress: () => addBank(item.uuid) },
-                        ]
-                      )
-                    }}
-                    style={{
-                      backgroundColor: '#7469B6',
-                      width: 45,
-                      height: 45,
-                      borderRadius: 22.5,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Octicons name="plus" size={24} color="white" />
-                  </Pressable>
+                  {
+                    //check if bank is already added
+                    scopes.some((x) => x.uuid === item.uuid) ? (
+                      <Pressable
+                        onPress={() => {
+                          Alert.alert(
+                            `Delete ${item.name}?`,
+                            'This bank will no longer be able to view your data, and you will no longer receive alerts from them.',
+                            [
+                              {
+                                text: 'Cancel',
+                                style: 'cancel',
+                              },
+                              {
+                                text: 'Delete',
+                                style: 'destructive',
+                                onPress: () => {
+                                  delBank(item.uuid)
+                                },
+                              },
+                            ]
+                          )
+                        }}
+                        style={{
+                          backgroundColor: '#ff8787',
+                          width: 45,
+                          height: 45,
+                          borderRadius: 22.5,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Octicons name="trash" size={24} color="white" />
+                      </Pressable>
+                    ) : (
+                      <Pressable
+                        onPress={() => {
+                          Alert.alert(
+                            `Add ${item.name}?`,
+                            'You will start receiving alerts from this bank and they will be able to view your data.',
+                            [
+                              { text: 'Cancel', style: 'cancel' },
+                              {
+                                text: 'Add',
+                                onPress: () => addBank(item.uuid),
+                              },
+                            ]
+                          )
+                        }}
+                        style={{
+                          backgroundColor: '#7469B6',
+                          width: 45,
+                          height: 45,
+                          borderRadius: 22.5,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Octicons name="plus" size={24} color="white" />
+                      </Pressable>
+                    )
+                  }
                 </View>
               </View>
             )}
@@ -423,12 +470,12 @@ export default function Settings() {
                 >
                   <Octicons name="device-mobile" size={24} color="#7469B6" />
                 </Pressable>
-                {scopes.length == 1 && index == 0 ? null : (
+                {/*scopes.length == 1 && index == 0 ? null : (
                   <Pressable
                     onPress={() => {
                       Alert.alert(
                         `Delete ${item.name}?`,
-                        'You cannot undo this action.',
+                        'This bank will no longer be able to view your data, and you will no longer receive alerts from them.',
                         [
                           {
                             text: 'Cancel',
@@ -451,11 +498,12 @@ export default function Settings() {
                       borderRadius: 22.5,
                       justifyContent: 'center',
                       alignItems: 'center',
+                      display: 'none',
                     }}
                   >
                     <Octicons name="trash" size={24} color="#7469B6" />
                   </Pressable>
-                )}
+                )*/}
               </View>
             </View>
           ))}
@@ -473,7 +521,7 @@ export default function Settings() {
           >
             <Octicons name="plus" size={18} color="white" />
             <Text style={{ color: 'white', fontSize: 18, textAlign: 'center' }}>
-              Add a Bank
+              Modify Banks
             </Text>
           </Pressable>
         </View>

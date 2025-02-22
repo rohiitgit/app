@@ -66,7 +66,9 @@ export default function Index() {
             console.log(response.otp)
             console.log('new user')
           } else if (response.uuid) {
+            console.log(response.uuid, response.bank.id)
             await SecureStore.setItemAsync('token', response.uuid)
+            await SecureStore.setItemAsync('bbId', response.bank.id)
             router.push('/user')
           }
         }

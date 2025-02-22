@@ -1,14 +1,14 @@
-import Button from '@/components/Button';
-import Octicons from '@expo/vector-icons/Octicons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
-import { BlurView } from 'expo-blur';
-import Constants from 'expo-constants';
-import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
-import { router, useLocalSearchParams } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
-import React, { useEffect, useRef, useState } from 'react';
+import Button from '@/components/Button'
+import Octicons from '@expo/vector-icons/Octicons'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { createStackNavigator } from '@react-navigation/stack'
+import { BlurView } from 'expo-blur'
+import Constants from 'expo-constants'
+import * as Device from 'expo-device'
+import * as Notifications from 'expo-notifications'
+import { router, useLocalSearchParams } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   Alert,
   Modal,
@@ -16,10 +16,10 @@ import {
   Text,
   useColorScheme,
   View,
-} from 'react-native';
-import Home from './home';
-import QR from './qr';
-import Settings from './settings';
+} from 'react-native'
+import Home from './home'
+import QR from './qr'
+import Settings from './settings'
 const Tab = createBottomTabNavigator()
 const ModalStack = createStackNavigator()
 Notifications.setNotificationHandler({
@@ -52,7 +52,6 @@ export default function Index() {
     registerForPushNotificationsAsync().then(async (token) => {
       if (token) {
         setExpoPushToken(token)
-        console.log('notif token', token)
         fetch('http://192.168.1.16:3000/donor/update-notifications', {
           method: 'POST',
           headers: {
@@ -154,7 +153,7 @@ export default function Index() {
   }, [])
   let isDarkMode = useColorScheme() === 'dark'
   return (
-    <BlurView intensity={100}>
+    <>
       <Modal
         animationType="slide"
         transparent={true}
@@ -163,6 +162,11 @@ export default function Index() {
         }}
         visible={showModal}
       >
+        <BlurView
+          intensity={10}
+          tint="systemMaterial"
+          style={{ position: 'absolute', height: '100%', width: '100%' }}
+        />
         <View
           style={{
             height: '55%',
@@ -176,6 +180,7 @@ export default function Index() {
             style={{
               flexDirection: 'column',
               alignItems: 'flex-start',
+              justifyContent: 'center',
             }}
           >
             <Text
@@ -226,16 +231,17 @@ export default function Index() {
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
-          tabBarShowLabel: false,
+          tabBarShowLabel: true,
           tabBarStyle: {
+            position: 'absolute',
             width: '100%',
-            height: 80,
+            height: 100,
             justifyContent: 'center',
             alignSelf: 'center',
+            elevation: 10,
             shadowColor: '#7469B6',
             shadowOpacity: 0.3,
             shadowRadius: 20,
-            elevation: 10,
             backgroundColor: isDarkMode ? '#3a3b3c' : '#fff',
             borderTopWidth: 0,
           },
@@ -245,13 +251,18 @@ export default function Index() {
           tabBarActiveTintColor: '#7469B6',
           tabBarIconStyle: {
             verticalAlign: 'middle',
-            marginTop: 20,
+            marginTop: 10,
           },
-        }}
-        initialRouteName="home"
+          tabBarLabelStyle: {
+            paddingTop: 5,
+            textTransform: 'uppercase',
+            fontWeight: 'bold',
+          }
+        }} 
+        initialRouteName="Home"
       >
         <Tab.Screen
-          name="qr"
+          name="Code"
           component={QR}
           options={{
             tabBarIcon: ({ color, size }) => (
@@ -260,7 +271,7 @@ export default function Index() {
           }}
         />
         <Tab.Screen
-          name="home"
+          name="Home"
           component={Home}
           options={{
             tabBarIcon: ({ color, size }) => (
@@ -269,7 +280,7 @@ export default function Index() {
           }}
         />
         <Tab.Screen
-          name="settings"
+          name="Settings"
           component={Settings}
           options={{
             tabBarIcon: ({ color, size }) => (
@@ -278,7 +289,7 @@ export default function Index() {
           }}
         />
       </Tab.Navigator>
-    </BlurView>
+    </>
   )
 }
 
@@ -334,10 +345,8 @@ async function registerForPushNotificationsAsync() {
         })
       ).data
     } catch (e) {
-      token = `${e}`
+      console.log(e)
     }
-
-    console.log(token)
   } else {
     throw new Error('physical device required for notifications')
   }

@@ -1,16 +1,20 @@
 import Button from '@/components/Button'
 import Card from '@/components/Card'
 import Octicons from '@expo/vector-icons/Octicons'
+import { BlurView } from 'expo-blur'
 import { router } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
 import * as SplashScreen from 'expo-splash-screen'
 import { useCallback, useEffect, useState } from 'react'
 import {
   Alert,
+  FlatList,
+  Modal,
   Pressable,
   RefreshControl,
   ScrollView,
   Text,
+  TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native'
@@ -28,7 +32,19 @@ export default function Home() {
   let [donatingSince, setDonatingSince] = useState<string>('')
   let [appReady, setAppReady] = useState<boolean>(false)
   let [bbName, setBBName] = useState<string>('')
+  let [bbId, setBBId] = useState<string | null>('')
   let [bbPhone, setBBPhone] = useState<string>('')
+
+  let [showModal, setShowModal] = useState<boolean>(false)
+  let [allBanks, setAllBanks] = useState<
+    {
+      name: string
+      uuid: string
+      phone: string
+      coords: string
+      region: string
+    }[]
+  >([])
   function humanizeDate(date: string) {
     let d = new Date(date)
     //return DDth MMM, YYYY at HH:MM AM/PM
@@ -62,13 +78,15 @@ export default function Home() {
   async function load(refresh = false) {
     if (refresh) setRefreshing(true)
     let token = await SecureStore.getItemAsync('token')
+  let bbId = await SecureStore.getItemAsync('bbId')
     fetch(`http://192.168.1.16:3000/donor/user-stats`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        token,
+        token: token,
+        bank: bbId,
       }),
     })
       .then((response) => response.json())
@@ -84,7 +102,7 @@ export default function Home() {
           setDonatingSince('')
           setLog([])
 
-          Alert.alert(
+          /*Alert.alert(
             'User not found.',
             response.error, //login again redirect
             [
@@ -96,7 +114,7 @@ export default function Home() {
                 },
               },
             ]
-          )
+          )*/
         } else {
           setName(response.data.name)
           setDonated(response.data.donated)
@@ -107,6 +125,7 @@ export default function Home() {
           setVerified(response.data.verified)
           setBBName(response.data.bank.name)
           await SecureStore.setItemAsync('bbName', response.data.bank.name)
+          await SecureStore.setItemAsync('bbid', response.data.bank.id)
           setBBPhone(response.data.bank.phone)
           console.log(response.data.installed)
           if (response.data.installed === false) {
@@ -127,9 +146,15 @@ export default function Home() {
       })
   }
   useEffect(() => {
-    console.log('loading')
-    load(false)
-    setAppReady(true)
+    async function init() {
+      console.log('loading')
+      let id = await SecureStore.getItemAsync('bbId')
+      console.log(id)
+      setBBId(id)
+      load(false)
+      setAppReady(true)
+    }
+    init()
   }, [])
   let isDarkMode = useColorScheme() === 'dark'
 
@@ -143,6 +168,38 @@ export default function Home() {
     return null
   }
 
+  async function initiateSwitchBankModal() {
+    let token = await SecureStore.getItemAsync('token')
+    fetch(`http://192.168.1.16:3000/donor/get-banks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        uuid: token,
+      }),
+    })
+      .then((response) => response.json())
+      .then(async (response) => {
+        if (response.error) {
+          Alert.alert('Error', response.message)
+        } else {
+          let localBanks = response.data
+          let index = localBanks.findIndex(
+            (x: {
+              name: string
+              uuid: string
+              phone: string
+              coords: string
+              region: string
+            }) => x.uuid === bbId
+          )
+          localBanks.splice(index, 1)
+          setAllBanks(localBanks)
+          setShowModal(true)
+        }
+      })
+  }
   return (
     <SafeAreaView
       style={{
@@ -151,6 +208,142 @@ export default function Home() {
         alignItems: 'center',
       }}
     >
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => {
+          setShowModal(false)
+        }}
+        visible={showModal}
+      >
+        <TouchableOpacity
+          onPressOut={() => {
+            setShowModal(false)
+          }}
+          style={{
+            flex: 1,
+          }}
+        />
+        <View
+          style={{
+            height: '55%',
+            borderRadius: 25,
+            padding: 16,
+            marginTop: 'auto',
+            backgroundColor: isDarkMode ? '#121212' : 'white',
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 24,
+                textAlign: 'left',
+                color: isDarkMode ? 'white' : 'black',
+                paddingBottom: 10,
+                fontFamily: 'PlayfairDisplay_600SemiBold',
+              }}
+            >
+              Switch Blood Banks
+            </Text>
+            <Pressable
+              onPress={() => {
+                setShowModal(false)
+              }}
+              style={{
+                backgroundColor: '#7469B6',
+                width: 45,
+                height: 45,
+                borderRadius: 9,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Octicons name="x" size={24} color="white" />
+            </Pressable>
+          </View>
+          <FlatList
+            data={allBanks}
+            keyExtractor={(item) => item.uuid}
+            contentContainerStyle={{
+              paddingTop: 20,
+            }}
+            ListFooterComponent={
+              <Text
+                style={{
+                  fontSize: 18,
+                  paddingTop: 10,
+                  textAlign: 'center',
+                  color: isDarkMode ? 'white' : 'black',
+                }}
+              >
+                You can add more banks in the Settings tab.
+              </Text>
+            }
+            renderItem={({ item }) => (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 20,
+                  backgroundColor: isDarkMode ? '#242526' : '#fff',
+                  padding: 16,
+                  borderRadius: 9,
+                }}
+              >
+                <View style={{ flexDirection: 'column', gap: 5 }}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      textAlign: 'left',
+                      color: isDarkMode ? 'white' : 'black',
+                    }}
+                  >
+                    {item.name}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      textAlign: 'left',
+                      color: isDarkMode ? 'white' : 'black',
+                    }}
+                  >
+                    {item.region}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <Pressable
+                    onPress={async () => {
+                      setBBName(item.name)
+                      await SecureStore.setItemAsync('bbName', item.name)
+                      setBBId(item.uuid)
+                      await SecureStore.setItemAsync('bbId', item.uuid)
+                      load(true)
+                      setShowModal(false)
+                    }}
+                    style={{
+                      backgroundColor: '#7469B6',
+                      width: 45,
+                      height: 45,
+                      borderRadius: 22.5,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Octicons name="chevron-right" size={24} color="white" />
+                  </Pressable>
+                </View>
+              </View>
+            )}
+          />
+        </View>
+      </Modal>
       <View
         style={{
           flexDirection: 'row',
@@ -186,13 +379,13 @@ export default function Home() {
           </Text>
         </View>
         <Pressable
-          onPress={() => load(true)}
+          onPress={initiateSwitchBankModal}
           style={{
             justifyContent: 'center',
             alignItems: 'center',
           }}
         >
-          <Octicons name="sync" size={24} color="#7469B6" />
+          <Octicons name="chevron-down" size={24} color="#7469B6" />
         </Pressable>
       </View>
       <ScrollView
@@ -363,7 +556,8 @@ export default function Home() {
             onPress={() => {
               router.push(`tel:${bbPhone}`)
             }}
-          >📞 Call Blood Center
+          >
+            📞 Call Blood Center
           </Button>
         </View>
         <Text

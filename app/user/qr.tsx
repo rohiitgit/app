@@ -6,7 +6,7 @@ import {
   ScrollView,
   Text,
   useColorScheme,
-  View
+  View,
 } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -93,25 +93,26 @@ export default function QR() {
             alignItems: 'center',
           }}
         >
-          {showQR ? (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <QRCode
-                value={'bloodbank-' + (uuid ?? 'notfound')}
-                backgroundColor="transparent"
-                color={isDarkMode ? 'white' : 'black'}
-                size={325}
-              />
-              <Button onPress={() => setShowQR(false)}>Hide QR</Button>
-            </View>
-          ) : (
-            <Button onPress={() => setShowQR(true)}>Show QR</Button>
-          )}
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <QRCode
+              value={
+                'bloodbank-' +
+                (uuid === null ? 'notfound' : showQR ? uuid : 'hidden')
+              }
+              backgroundColor="transparent"
+              color={isDarkMode ? 'white' : 'black'}
+              size={325}
+            />
+          </View>
+          <Button onPress={() => setShowQR(!showQR)}>
+            {showQR ? 'Hide QR' : 'Show QR'}
+          </Button>
         </View>
         <Text
           style={{
