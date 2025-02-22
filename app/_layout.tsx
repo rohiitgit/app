@@ -1,23 +1,20 @@
-import { router, Stack } from 'expo-router'
-import { useCallback, useEffect, useState } from 'react'
 import * as Notifications from 'expo-notifications'
+import { router, Stack } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
 import * as SplashScreen from 'expo-splash-screen'
-import { useColorScheme } from 'react-native'
+import { useCallback, useEffect, useState } from 'react'
 //import {useFonts, PlayfairDisplay_400Regular} from '@expo-google-fonts/playfair-display'
 import {
-  useFonts,
   DMSerifText_400Regular,
+  useFonts,
 } from '@expo-google-fonts/dm-serif-text'
-import {
-  PlayfairDisplay_600SemiBold,
-} from '@expo-google-fonts/playfair-display'
+import { PlayfairDisplay_600SemiBold } from '@expo-google-fonts/playfair-display'
 export default function RootLayout() {
-  let isDarkMode = useColorScheme() === 'dark'
   let [fontsLoaded] = useFonts({
     PlayfairDisplay_600SemiBold,
     DMSerifText_400Regular,
   })
+
   function useNotificationObserver() {
     useEffect(() => {
       let isMounted = true
@@ -57,7 +54,7 @@ export default function RootLayout() {
       try {
         SecureStore.getItemAsync('token').then((token) => {
           setAppIsReady(true)
-          if (token) {
+          /*if (token) {
             if (token.startsWith('hq-')) {
               console.log('hq', token)
               router.replace('/hq')
@@ -65,7 +62,7 @@ export default function RootLayout() {
               console.log('user', token)
               router.replace('/user')
             }
-          }
+          }*/
         })
       } catch (e) {
         console.warn(e)

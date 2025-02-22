@@ -1,29 +1,24 @@
-import {
-  Alert,
-  Keyboard,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableWithoutFeedback,
-  useColorScheme,
-  View,
-} from 'react-native'
-import * as SecureStore from 'expo-secure-store'
-import { useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import styles from '../../assets/styles/styles'
-import { Picker } from '@react-native-picker/picker'
-import Button from '@/components/Button'
-import { Link, router } from 'expo-router'
 import TwoRowInput from '@/components/TwoRowInput'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import * as Progress from 'react-native-progress'
 import { Octicons } from '@expo/vector-icons'
 import DateTimePicker, {
   DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker'
+import { Picker } from '@react-native-picker/picker'
+import { router } from 'expo-router'
+import { useState } from 'react'
+import {
+  Alert,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  useColorScheme,
+  View
+} from 'react-native'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import * as Progress from 'react-native-progress'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import styles from '../../assets/styles/styles'
 
 import FreeButton from '@/components/FreeButton'
 export default function Two({

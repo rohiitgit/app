@@ -1,23 +1,17 @@
+import Button from '@/components/Button'
+import Card from '@/components/Card'
+import { router, useLocalSearchParams } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
+import React, { useEffect, useState } from 'react'
 import {
-  View,
+  Alert,
   Platform,
   Text,
-  Alert,
-  TextInput,
   useColorScheme,
-  Pressable,
+  View
 } from 'react-native'
-import { Link, router, useLocalSearchParams } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useRef, useState } from 'react'
-import Octicons from '@expo/vector-icons/Octicons'
-import { Picker } from '@react-native-picker/picker'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import Button from '@/components/Button'
-import TwoRowInput from '@/components/TwoRowInput'
-import styles from '@/assets/styles/styles'
 import * as Progress from 'react-native-progress'
-import Card from '@/components/Card'
 export default function Modal() {
   const local = useLocalSearchParams()
   const token = local.token
@@ -46,11 +40,11 @@ export default function Modal() {
   let [progress, setProgress] = useState<number>(0)
   useEffect(() => {
   console.log('connecting to server')
-  const ws = new WebSocket('ws://localhost:3000/request')
+  const ws = new WebSocket('ws://api.pdgn.xyz/request')
     // catch connection errors
     ws.onerror = (error) => {
       console.log('error', error)
-      Alert.alert('Error', 'Could not connect to server')
+      Alert.alert('Error', 'Could not connect to Blood Alert server')
     }
     ws.onopen = () => {
       console.log('connected')

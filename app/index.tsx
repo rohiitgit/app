@@ -1,22 +1,19 @@
+import styles from '@/assets/styles/styles'
+import Button from '@/components/Button'
+import * as Application from 'expo-application'
+import { router } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import { fetch } from 'expo/fetch'
+import React, { useEffect, useState } from 'react'
 import {
-  Keyboard,
   Pressable,
   ScrollView,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
   useColorScheme,
-  View,
+  View
 } from 'react-native'
-import * as SecureStore from 'expo-secure-store'
-import { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import styles from '@/assets/styles/styles'
-import Button from '@/components/Button'
-import { Link, router } from 'expo-router'
-import { fetch } from 'expo/fetch'
-import React from 'react'
-import * as Application from 'expo-application'
 export default function Index() {
   let [phoneNumber, setPhoneNumber] = useState<string>('')
   let [password, setPassword] = useState<string>('')
@@ -41,7 +38,7 @@ export default function Index() {
     }
     console.log(otp)
     setLoginProcess(true)
-    fetch(`http://localhost:3000/donor/send-otp`, {
+    fetch(`http://192.168.1.16:3000/donor/send-otp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

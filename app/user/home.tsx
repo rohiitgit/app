@@ -1,3 +1,10 @@
+import Button from '@/components/Button'
+import Card from '@/components/Card'
+import Octicons from '@expo/vector-icons/Octicons'
+import { router } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import * as SplashScreen from 'expo-splash-screen'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Alert,
   Pressable,
@@ -7,14 +14,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native'
-import * as SecureStore from 'expo-secure-store'
-import { useCallback, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import Button from '@/components/Button'
-import { Link, router, useLocalSearchParams } from 'expo-router'
-import Card from '@/components/Card'
-import Octicons from '@expo/vector-icons/Octicons'
-import * as SplashScreen from 'expo-splash-screen'
 SplashScreen.preventAutoHideAsync()
 
 export default function Home() {
@@ -62,7 +62,7 @@ export default function Home() {
   async function load(refresh = false) {
     if (refresh) setRefreshing(true)
     let token = await SecureStore.getItemAsync('token')
-    fetch(`http://localhost:3000/donor/user-stats`, {
+    fetch(`http://192.168.1.16:3000/donor/user-stats`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

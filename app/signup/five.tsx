@@ -1,26 +1,18 @@
-import {
-  Alert,
-  Keyboard,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableWithoutFeedback,
-  useColorScheme,
-  View,
-} from 'react-native'
-import * as SecureStore from 'expo-secure-store'
-import { useEffect, useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import styles from '../../assets/styles/styles'
+import FreeButton from '@/components/FreeButton'
+import { Octicons } from '@expo/vector-icons'
 import { Picker } from '@react-native-picker/picker'
-import Button from '@/components/Button'
-import { Link, router } from 'expo-router'
-import TwoRowInput from '@/components/TwoRowInput'
+import { router } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import { useState } from 'react'
+import {
+  Pressable,
+  Text,
+  useColorScheme,
+  View
+} from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import * as Progress from 'react-native-progress'
-import { Octicons } from '@expo/vector-icons'
-import FreeButton from '@/components/FreeButton'
+import { SafeAreaView } from 'react-native-safe-area-context'
 export default function Five({
   navigation,
   route,
@@ -74,7 +66,7 @@ export default function Five({
         : '',
       lookupid: route.params.location ? route.params.location.hasOwnProperty('lookup') ? route.params.location.lookup : '' : ''
     }
-    fetch(`http://localhost:3000/donor/signup`, {
+    fetch(`http://192.168.1.16:3000/donor/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

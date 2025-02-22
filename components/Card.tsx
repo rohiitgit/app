@@ -1,5 +1,5 @@
 import Octicons from '@expo/vector-icons/Octicons'
-import { View, Text, useColorScheme } from 'react-native'
+import { Text, useColorScheme, View } from 'react-native'
 
 export default function Card(props: {
   icon: any

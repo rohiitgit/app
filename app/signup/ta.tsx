@@ -1,25 +1,17 @@
-import {
-  Alert,
-  Keyboard,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableWithoutFeedback,
-  useColorScheme,
-  View,
-} from 'react-native'
-import * as SecureStore from 'expo-secure-store'
-import { useEffect, useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import styles from '../../assets/styles/styles'
-import { Picker } from '@react-native-picker/picker'
 import Button from '@/components/Button'
-import { Link, router } from 'expo-router'
-import TwoRowInput from '@/components/TwoRowInput'
+import { Octicons } from '@expo/vector-icons'
+import { Picker } from '@react-native-picker/picker'
+import { router } from 'expo-router'
+import { useState } from 'react'
+import {
+  Pressable,
+  Text,
+  useColorScheme,
+  View
+} from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import * as Progress from 'react-native-progress'
-import { Octicons } from '@expo/vector-icons'
+import { SafeAreaView } from 'react-native-safe-area-context'
 export default function One({
   navigation,
   route,

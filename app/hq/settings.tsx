@@ -1,3 +1,9 @@
+import Button from '@/components/Button'
+import Octicons from '@expo/vector-icons/Octicons'
+import * as Application from 'expo-application'
+import { router } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import { useEffect, useState } from 'react'
 import {
   RefreshControl,
   ScrollView,
@@ -5,14 +11,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native'
-import * as SecureStore from 'expo-secure-store'
-import { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import QRCode from 'react-native-qrcode-svg'
-import { router } from 'expo-router'
-import Button from '@/components/Button'
-import * as Application from 'expo-application'
-import Octicons from '@expo/vector-icons/Octicons'
 export default function Settings() {
   let [uuid, setUUID] = useState<string | null>('notfound')
   let [refreshing, setRefreshing] = useState<boolean>(false)

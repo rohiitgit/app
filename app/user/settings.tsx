@@ -1,25 +1,22 @@
-import {
-  Platform,
-  RefreshControl,
-  ScrollView,
-  Text,
-  useColorScheme,
-  View,
-  FlatList,
-  Pressable,
-  Alert,
-  TouchableOpacity,
-  Modal,
-} from 'react-native'
-import * as SecureStore from 'expo-secure-store'
-import { useEffect, useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import QRCode from 'react-native-qrcode-svg'
-import { router } from 'expo-router'
 import Button from '@/components/Button'
 import { Octicons } from '@expo/vector-icons'
 import * as Application from 'expo-application'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { router } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import { useEffect, useState } from 'react'
+import {
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View
+} from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 export default function Settings() {
   let [uuid, setUUID] = useState<string | null>('notfound')
   let [refreshing, setRefreshing] = useState<boolean>(false)
@@ -43,7 +40,7 @@ export default function Settings() {
   >([])
 
   async function delBank(bankcode: string) {
-    fetch(`http://localhost:3000/donor/remove-bank`, {
+    fetch(`http://192.168.1.16:3000/donor/remove-bank`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -75,7 +72,7 @@ export default function Settings() {
   }
   async function addBank(bankcode: string) {
     console.log(bankcode)
-    fetch(`http://localhost:3000/donor/add-bank`, {
+    fetch(`http://192.168.1.16:3000/donor/add-bank`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -116,7 +113,7 @@ export default function Settings() {
   }
 
   async function getAllBanks() {
-    fetch('http://localhost:3000/donor/banks', {
+    fetch('http://192.168.1.16:3000/donor/banks', {
       method: 'GET',
     })
       .then((response) => response.json())
@@ -138,7 +135,7 @@ export default function Settings() {
 
     let token = await SecureStore.getItemAsync('token')
     setUUID(token)
-    fetch(`http://localhost:3000/donor/get-banks`, {
+    fetch(`http://192.168.1.16:3000/donor/get-banks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

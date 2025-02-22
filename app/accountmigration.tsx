@@ -1,29 +1,25 @@
-import {
-  View,
-  Platform,
-  Text,
-  Alert,
-  Pressable,
-  ScrollView,
-  useColorScheme,
-  Switch,
-  TextInput,
-} from 'react-native'
-import { Link, router, useLocalSearchParams } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useRef, useState } from 'react'
-import Octicons from '@expo/vector-icons/Octicons'
-import { Picker } from '@react-native-picker/picker'
+import styles from '@/assets/styles/styles'
 import Button from '@/components/Button'
-import * as SecureStore from 'expo-secure-store'
-import MapView, { Marker } from 'react-native-maps'
-import * as Location from 'expo-location'
+import FreeButton from '@/components/FreeButton'
 import DateTimePicker, {
   DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker'
-import styles from '@/assets/styles/styles'
-import FreeButton from '@/components/FreeButton'
+import * as Location from 'expo-location'
+import { router, useLocalSearchParams } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import React, { useEffect, useState } from 'react'
+import {
+  Alert,
+  Platform,
+  Pressable,
+  Switch,
+  Text,
+  TextInput,
+  useColorScheme,
+  View
+} from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import MapView, { Marker } from 'react-native-maps'
 export default function Modal() {
   let { name, phone, birthday, coords }: any = useLocalSearchParams()
   let [dob, setDob] = useState<string>(birthday || new Date().toISOString())
@@ -82,7 +78,7 @@ export default function Modal() {
     } else {
       setDisable(true)
       console.log('updating location: conditions met')
-      fetch('http://localhost:3000/donor/update-location', {
+      fetch('http://192.168.1.16:3000/donor/update-location', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +189,7 @@ export default function Modal() {
 
   async function geocodeAddress() {
     setIsLocatingCustomAddress(true)
-    fetch(`http://localhost:3000/donor/geocode-location`, {
+    fetch(`http://192.168.1.16:3000/donor/geocode-location`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

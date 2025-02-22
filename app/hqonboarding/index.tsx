@@ -1,19 +1,17 @@
+import Button from '@/components/Button'
+import { router } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import { useEffect, useState } from 'react'
 import {
-  Keyboard,
   Pressable,
   ScrollView,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
   useColorScheme,
-  View,
+  View
 } from 'react-native'
-import * as SecureStore from 'expo-secure-store'
-import { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import styles from '../../assets/styles/styles'
-import Button from '@/components/Button'
-import { Link, router } from 'expo-router'
 export default function Onboarding() {
   let [loginCode, setLoginCode] = useState<string>('')
   let [bankCode, setBankCode] = useState<string>('')
@@ -28,7 +26,7 @@ export default function Onboarding() {
   })
   function login() {
     setLoginProcess(true)
-    fetch(`http://localhost:3000/hq/login`, {
+    fetch(`http://192.168.1.16:3000/hq/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

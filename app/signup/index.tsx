@@ -1,18 +1,18 @@
-import { ImageBackground, useColorScheme } from 'react-native'
 import {
   NavigationContainer,
   NavigationIndependentTree,
 } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { useColorScheme } from 'react-native'
 
+import { useLocalSearchParams } from 'expo-router'
+import Five from './five'
+import Four from './four'
+import ThreeAlpha from './one'
 import One from './ta'
+import Three from './three'
 import Two from './two'
 import TwoBeta from './twobeta'
-import { useLocalSearchParams } from 'expo-router'
-import Three from './three'
-import Four from './four'
-import Five from './five'
-import ThreeAlpha from './one'
 const Stack = createNativeStackNavigator()
 
 export default function Signup() {

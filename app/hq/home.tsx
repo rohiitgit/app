@@ -1,3 +1,10 @@
+import Button from '@/components/Button'
+import Card from '@/components/Card'
+import Octicons from '@expo/vector-icons/Octicons'
+import { router } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import * as SplashScreen from 'expo-splash-screen'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Alert,
   Pressable,
@@ -7,14 +14,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native'
-import * as SecureStore from 'expo-secure-store'
-import { useCallback, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import Button from '@/components/Button'
-import { Link, router } from 'expo-router'
-import * as SplashScreen from 'expo-splash-screen'
-import Card from '@/components/Card'
-import Octicons from '@expo/vector-icons/Octicons'
 
 export default function HQHome() {
   let [refreshing, setRefreshing] = useState<boolean>(false)
@@ -42,7 +42,7 @@ export default function HQHome() {
 
     let token = await SecureStore.getItemAsync('token')
     let id = await SecureStore.getItemAsync('id')
-    fetch(`http://localhost:3000/hq/get-stats`, {
+    fetch(`http://192.168.1.16:3000/hq/get-stats`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

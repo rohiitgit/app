@@ -1,11 +1,8 @@
-import { View, Platform, Text, Alert, useColorScheme } from 'react-native'
-import { Link, router, useLocalSearchParams } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useState } from 'react'
-import Octicons from '@expo/vector-icons/Octicons'
-import { Picker } from '@react-native-picker/picker'
 import Button from '@/components/Button'
+import { router, useLocalSearchParams } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
+import React, { useEffect } from 'react'
+import { Text, useColorScheme, View } from 'react-native'
 export default function Modal() {
   let {
     name,

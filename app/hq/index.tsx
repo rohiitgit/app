@@ -1,15 +1,14 @@
-import { Text, useColorScheme, View } from 'react-native'
 import Octicons from '@expo/vector-icons/Octicons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createStackNavigator } from '@react-navigation/stack'
+import React from 'react'
+import { useColorScheme } from 'react-native'
+import Camera from './camera'
+import HQHome from './home'
+import Query from './query'
+import Settings from './settings'
 const Tab = createBottomTabNavigator()
 const ModalStack = createStackNavigator()
-import HQHome from './home'
-import Camera from './camera'
-import { useEffect } from 'react'
-import Settings from './settings'
-import Query from './query'
-import React from 'react'
 
 export default function HQIndex() {
   let isDarkMode = useColorScheme() === 'dark'

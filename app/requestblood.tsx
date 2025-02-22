@@ -1,21 +1,21 @@
-import {
-  View,
-  Platform,
-  Text,
-  Alert,
-  TextInput,
-  useColorScheme,
-  Pressable,
-} from 'react-native'
-import { Link, router, useLocalSearchParams } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useState } from 'react'
-import Octicons from '@expo/vector-icons/Octicons'
-import { Picker } from '@react-native-picker/picker'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import styles from '@/assets/styles/styles'
 import Button from '@/components/Button'
 import TwoRowInput from '@/components/TwoRowInput'
-import styles from '@/assets/styles/styles'
+import Octicons from '@expo/vector-icons/Octicons'
+import { Picker } from '@react-native-picker/picker'
+import { router, useLocalSearchParams } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
+import React, { useState } from 'react'
+import {
+  Alert,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  useColorScheme,
+  View,
+} from 'react-native'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 export default function Modal() {
   const local = useLocalSearchParams()
   let uuid = local.uuid

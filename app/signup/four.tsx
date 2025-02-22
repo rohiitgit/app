@@ -1,32 +1,25 @@
-import React from 'react'
+import Button from '@/components/Button'
+import FreeButton from '@/components/FreeButton'
+import { Octicons } from '@expo/vector-icons'
+import * as Location from 'expo-location'
+import { router } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import React, { useEffect, useState } from 'react'
 import {
   Alert,
-  Keyboard,
   Platform,
   Pressable,
-  ScrollView,
   Switch,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
   useColorScheme,
-  View,
+  View
 } from 'react-native'
-import * as SecureStore from 'expo-secure-store'
-import { useEffect, useState } from 'react'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
+import * as Progress from 'react-native-progress'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import styles from '../../assets/styles/styles'
-import { Picker } from '@react-native-picker/picker'
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
-import Button from '@/components/Button'
-import { Link, router } from 'expo-router'
-import TwoRowInput from '@/components/TwoRowInput'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import * as Progress from 'react-native-progress'
-import { Octicons } from '@expo/vector-icons'
-import DateTimePicker from '@react-native-community/datetimepicker'
-import FreeButton from '@/components/FreeButton'
-import * as Location from 'expo-location'
 export default function Four({
   navigation,
   route,
@@ -116,7 +109,7 @@ export default function Four({
 
   async function geocodeAddress() {
     setIsLocatingCustomAddress(true)
-    fetch(`http://localhost:3000/donor/geocode-location`, {
+    fetch(`http://192.168.1.16:3000/donor/geocode-location`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

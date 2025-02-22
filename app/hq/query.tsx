@@ -1,3 +1,11 @@
+import styles from '@/assets/styles/styles'
+import Button from '@/components/Button'
+import FreeButton from '@/components/FreeButton'
+import Octicons from '@expo/vector-icons/Octicons'
+import { Picker } from '@react-native-picker/picker'
+import { router } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import { useEffect, useRef, useState } from 'react'
 import {
   Alert,
   FlatList,
@@ -5,21 +13,13 @@ import {
   Pressable,
   ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native'
-import * as SecureStore from 'expo-secure-store'
-import { useEffect, useRef, useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import Button from '@/components/Button'
-import { router } from 'expo-router'
-import Octicons from '@expo/vector-icons/Octicons'
-import FreeButton from '@/components/FreeButton'
-import { TextInput } from 'react-native'
-import styles from '@/assets/styles/styles'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import { Picker } from '@react-native-picker/picker'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function Query() {
   let nameInputTemp = ''
@@ -84,7 +84,7 @@ export default function Query() {
     setLoading(true)
     let bankCode = await SecureStore.getItemAsync('id')
     let token = await SecureStore.getItemAsync('token')
-    fetch(`http://localhost:3000/hq/query-donor`, {
+    fetch(`http://192.168.1.16:3000/hq/query-donor`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

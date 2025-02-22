@@ -1,4 +1,9 @@
+import Button from '@/components/Button'
+import Octicons from '@expo/vector-icons/Octicons'
 import { CameraView, useCameraPermissions } from 'expo-camera'
+import { router } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
 import {
   Alert,
@@ -8,12 +13,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native'
-import Button from '@/components/Button'
-import Octicons from '@expo/vector-icons/Octicons'
-import * as SecureStore from 'expo-secure-store'
-import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { StatusBar } from 'expo-status-bar'
 export default function Camera() {
   const [permission, requestPermission] = useCameraPermissions()
   const [flash, setFlash] = useState(false)

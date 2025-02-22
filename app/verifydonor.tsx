@@ -1,23 +1,21 @@
-import {
-  View,
-  Platform,
-  Text,
-  Alert,
-  TextInput,
-  KeyboardAvoidingView,
-  Linking,
-  Pressable,
-  useColorScheme,
-} from 'react-native'
-import { Link, router, useLocalSearchParams } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
-import React, { useEffect, useState } from 'react'
+import Card from '@/components/Card'
+import FreeButton from '@/components/FreeButton'
 import Octicons from '@expo/vector-icons/Octicons'
 import { Picker } from '@react-native-picker/picker'
-import Button from '@/components/Button'
-import Card from '@/components/Card'
+import { router, useLocalSearchParams } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
+import React, { useEffect, useState } from 'react'
+import {
+  Alert,
+  Linking,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  useColorScheme,
+  View
+} from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import FreeButton from '@/components/FreeButton'
 export default function Modal() {
   function convertTimestampToShortString(timestamp: string) {
     if (
@@ -71,7 +69,7 @@ export default function Modal() {
   let responsiveColor = isDarkMode ? 'white' : 'black'
 
   useEffect(() => {
-    fetch(`http://localhost:3000/hq/request-user-data`, {
+    fetch(`http://192.168.1.16:3000/hq/request-user-data`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -115,7 +113,7 @@ export default function Modal() {
   function verifyDonor() {
     console.log(token)
     setVerifying(true)
-    fetch(`http://localhost:3000/hq/verify-donor`, {
+    fetch(`http://192.168.1.16:3000/hq/verify-donor`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -148,7 +146,7 @@ export default function Modal() {
 
   function rejectDonor() {
     setRejecting(true)
-    fetch(`http://localhost:3000/hq/reject-donor`, {
+    fetch(`http://192.168.1.16:3000/hq/reject-donor`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

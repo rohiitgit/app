@@ -1,17 +1,15 @@
+import Button from '@/components/Button'
+import * as SecureStore from 'expo-secure-store'
+import { useEffect, useState } from 'react'
 import {
-  Pressable,
   RefreshControl,
   ScrollView,
   Text,
   useColorScheme,
-  View,
+  View
 } from 'react-native'
-import * as SecureStore from 'expo-secure-store'
-import { useEffect, useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import QRCode from 'react-native-qrcode-svg'
-import Octicons from '@expo/vector-icons/Octicons'
-import Button from '@/components/Button'
+import { SafeAreaView } from 'react-native-safe-area-context'
 export default function QR() {
   let [uuid, setUUID] = useState<string | null>('notfound')
   let [refreshing, setRefreshing] = useState<boolean>(false)

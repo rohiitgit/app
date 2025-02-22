@@ -1,9 +1,9 @@
-import { View, Platform, Text, Alert, Pressable } from 'react-native'
-import { Link, router, useLocalSearchParams } from 'expo-router'
+import Button from '@/components/Button'
+import Octicons from '@expo/vector-icons/Octicons'
+import { router, useLocalSearchParams } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
-import Octicons from '@expo/vector-icons/Octicons'
-import Button from '@/components/Button'
+import { Platform, Pressable, Text, View } from 'react-native'
 export default function Modal() {
   function convertTimestampToShortString(timestamp: string) {
     if (
@@ -37,7 +37,7 @@ export default function Modal() {
   let [loading, setLoading] = useState<boolean>(true)
   let [oos, setOos] = useState<boolean>(false)
   useEffect(() => {
-    fetch(`http://localhost:3000/hq/get-donor`, {
+    fetch(`http://192.168.1.16:3000/hq/get-donor`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ export default function Modal() {
 
   function markAsDonated() {
     setMarking(true)
-    fetch(`http://localhost:3000/hq/mark-donated`, {
+    fetch(`http://192.168.1.16:3000/hq/mark-donated`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export default function Modal() {
 
   function extendDonorScope() {
     setExtending(true)
-    fetch(`http://localhost:3000/hq/extend-donor-scope`, {
+    fetch(`http://192.168.1.16:3000/hq/extend-donor-scope`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
