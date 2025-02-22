@@ -66,7 +66,7 @@ export default function Five({
         : '',
       lookupid: route.params.location ? route.params.location.hasOwnProperty('lookup') ? route.params.location.lookup : '' : ''
     }
-    fetch(`http://192.168.1.16:3000/donor/signup`, {
+    fetch(`http://localhost:3000/donor/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

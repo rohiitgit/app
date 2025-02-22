@@ -40,7 +40,7 @@ export default function Settings() {
   >([])
 
   async function delBank(bankcode: string) {
-    fetch(`http://192.168.1.16:3000/donor/remove-bank`, {
+    fetch(`http://localhost:3000/donor/remove-bank`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export default function Settings() {
   }
   async function addBank(bankcode: string) {
     console.log(bankcode)
-    fetch(`http://192.168.1.16:3000/donor/add-bank`, {
+    fetch(`http://localhost:3000/donor/add-bank`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ export default function Settings() {
   }
 
   async function getAllBanks() {
-    fetch('http://192.168.1.16:3000/donor/banks', {
+    fetch('http://localhost:3000/donor/banks', {
       method: 'GET',
     })
       .then((response) => response.json())
@@ -136,7 +136,7 @@ export default function Settings() {
 
     let token = await SecureStore.getItemAsync('token')
     setUUID(token)
-    fetch(`http://192.168.1.16:3000/donor/get-banks`, {
+    fetch(`http://localhost:3000/donor/get-banks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

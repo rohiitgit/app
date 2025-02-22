@@ -50,7 +50,7 @@ export default function ThreeAlpha({
   let responsiveDark = useColorScheme() === 'dark' ? 'white' : 'black'
 
   function retrieveBanks() {
-    fetch('http://192.168.1.16:3000/donor/banks', {
+    fetch('http://localhost:3000/donor/banks', {
       method: 'GET',
     })
       .then((response) => response.json())

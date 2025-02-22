@@ -79,7 +79,7 @@ export default function Home() {
     if (refresh) setRefreshing(true)
     let token = await SecureStore.getItemAsync('token')
   let bbId = await SecureStore.getItemAsync('bbId')
-    fetch(`http://192.168.1.16:3000/donor/user-stats`, {
+    fetch(`http://localhost:3000/donor/user-stats`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ export default function Home() {
 
   async function initiateSwitchBankModal() {
     let token = await SecureStore.getItemAsync('token')
-    fetch(`http://192.168.1.16:3000/donor/get-banks`, {
+    fetch(`http://localhost:3000/donor/get-banks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

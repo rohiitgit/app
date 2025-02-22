@@ -38,7 +38,7 @@ export default function Index() {
     }
     console.log(otp)
     setLoginProcess(true)
-    fetch(`http://192.168.1.16:3000/donor/send-otp`, {
+    fetch(`http://localhost:3000/donor/send-otp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -84,7 +84,7 @@ export default function Query() {
     setLoading(true)
     let bankCode = await SecureStore.getItemAsync('id')
     let token = await SecureStore.getItemAsync('token')
-    fetch(`http://192.168.1.16:3000/hq/query-donor`, {
+    fetch(`http://localhost:3000/hq/query-donor`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

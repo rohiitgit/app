@@ -42,7 +42,7 @@ export default function HQHome() {
 
     let token = await SecureStore.getItemAsync('token')
     let id = await SecureStore.getItemAsync('id')
-    fetch(`http://192.168.1.16:3000/hq/get-stats`, {
+    fetch(`http://localhost:3000/hq/get-stats`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

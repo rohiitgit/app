@@ -78,7 +78,7 @@ export default function Modal() {
     } else {
       setDisable(true)
       console.log('updating location: conditions met')
-      fetch('http://192.168.1.16:3000/donor/update-location', {
+      fetch('http://localhost:3000/donor/update-location', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,7 +189,7 @@ export default function Modal() {
 
   async function geocodeAddress() {
     setIsLocatingCustomAddress(true)
-    fetch(`http://192.168.1.16:3000/donor/geocode-location`, {
+    fetch(`http://localhost:3000/donor/geocode-location`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
