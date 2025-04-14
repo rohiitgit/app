@@ -1,5 +1,6 @@
 import Button from '@/components/Button'
 import Card from '@/components/Card'
+import FreeButton from '@/components/FreeButton'
 import Octicons from '@expo/vector-icons/Octicons'
 import { BlurView } from 'expo-blur'
 import { router } from 'expo-router'
@@ -18,6 +19,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native'
+import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
 SplashScreen.preventAutoHideAsync()
 
@@ -34,7 +36,7 @@ export default function Home() {
   let [bbName, setBBName] = useState<string>('')
   let [bbId, setBBId] = useState<string | null>('')
   let [bbPhone, setBBPhone] = useState<string>('')
-
+  let [switchModalLoading, setSwitchModalLoading] = useState<boolean>(false)
   let [showModal, setShowModal] = useState<boolean>(false)
   let [allBanks, setAllBanks] = useState<
     {
@@ -45,41 +47,80 @@ export default function Home() {
       region: string
     }[]
   >([])
-  function humanizeDate(date: string) {
-    let d = new Date(date)
-    //return DDth MMM, YYYY at HH:MM AM/PM
-    return `${d.getDate()}${
-      [1, 21, 31].includes(d.getDate())
-        ? 'st'
-        : [2, 22].includes(d.getDate())
-        ? 'nd'
-        : [3, 23].includes(d.getDate())
-        ? 'rd'
-        : 'th'
-    } ${
-      [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ][d.getMonth()]
-    } ${d.getFullYear()} at ${d.getHours() % 12 || 12}:${
-      d.getMinutes() < 10 ? '0' : ''
-    }${d.getMinutes()} ${d.getHours() > 12 ? 'PM' : 'AM'}`
+
+  function humanizeDate(isoString: string): string {
+    const WEEKDAYS = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ]
+    const MONTHS = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ]
+
+    const date = new Date(isoString)
+    const now = new Date()
+
+    const dateYMD = [date.getFullYear(), date.getMonth(), date.getDate()]
+    const nowYMD = [now.getFullYear(), now.getMonth(), now.getDate()]
+
+    const msPerDay = 86400000
+    const diffInDays = Math.floor(
+      (new Date(nowYMD[0], nowYMD[1], nowYMD[2]).getTime() -
+        new Date(dateYMD[0], dateYMD[1], dateYMD[2]).getTime()) /
+        msPerDay
+    )
+
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+    const ampm = hours >= 12 ? 'PM' : 'AM'
+    const hour12 = hours % 12 || 12
+    const minuteStr = minutes.toString().padStart(2, '0')
+    const timeStr = `${hour12}:${minuteStr} ${ampm}`
+
+    if (diffInDays === 0) {
+      return `Today at ${timeStr}`
+    } else if (diffInDays === 1) {
+      return `Yesterday at ${timeStr}`
+    } else if (diffInDays <= 6) {
+      return `${WEEKDAYS[date.getDay()]} at ${timeStr}`
+    } else {
+      return `${
+        MONTHS[date.getMonth()]
+      } ${date.getDate()}, ${date.getFullYear()} at ${timeStr}`
+    }
+  }
+
+  function callBank() {
+    if (bbPhone === '') {
+      Alert.alert(
+        'Phone number not found',
+        'The blood bank has not provided a phone number, or something else went wrong. Please try contacting the bank from your settings page.'
+      )
+    } else {
+      router.push(`tel:${bbPhone}`)
+    }
   }
   async function load(refresh = false) {
     if (refresh) setRefreshing(true)
     let token = await SecureStore.getItemAsync('token')
-  let bbId = await SecureStore.getItemAsync('bbId')
-    fetch(`http://localhost:3000/donor/user-stats`, {
+    let bbId = await SecureStore.getItemAsync('bbId')
+    fetch(`https://api.pdgn.xyz/donor/user-stats`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -91,7 +132,7 @@ export default function Home() {
     })
       .then((response) => response.json())
       .then(async (response) => {
-        console.log(response)
+        //console.log(response)
         if (refresh) setRefreshing(false)
         if (response.error) {
           await SecureStore.deleteItemAsync('token')
@@ -127,7 +168,7 @@ export default function Home() {
           await SecureStore.setItemAsync('bbName', response.data.bank.name)
           await SecureStore.setItemAsync('bbid', response.data.bank.id)
           setBBPhone(response.data.bank.phone)
-          console.log(response.data.installed)
+          //console.log(response.data.installed)
           if (response.data.installed === false) {
             router.push({
               pathname: '/accountmigration',
@@ -142,14 +183,14 @@ export default function Home() {
       })
       .catch((error) => {
         if (refresh) setRefreshing(true)
-        console.log(error)
+        //console.log(error)
       })
   }
   useEffect(() => {
     async function init() {
-      console.log('loading')
+      //console.log('loading')
       let id = await SecureStore.getItemAsync('bbId')
-      console.log(id)
+      //console.log(id)
       setBBId(id)
       load(false)
       setAppReady(true)
@@ -169,8 +210,10 @@ export default function Home() {
   }
 
   async function initiateSwitchBankModal() {
+    setShowModal(true)
+    setSwitchModalLoading(true)
     let token = await SecureStore.getItemAsync('token')
-    fetch(`http://localhost:3000/donor/get-banks`, {
+    fetch(`https://api.pdgn.xyz/donor/get-banks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -196,7 +239,7 @@ export default function Home() {
           )
           localBanks.splice(index, 1)
           setAllBanks(localBanks)
-          setShowModal(true)
+          setSwitchModalLoading(false)
         }
       })
   }
@@ -282,17 +325,27 @@ export default function Home() {
                   color: isDarkMode ? 'white' : 'black',
                 }}
               >
-                You can add more banks in the Settings tab.
+                {switchModalLoading
+                  ? 'Loading blood banks...'
+                  : 'You can add more banks in the Settings tab.'}
               </Text>
             }
             renderItem={({ item }) => (
-              <View
+              <Pressable
+                onPress={async () => {
+                  setBBName(item.name)
+                  await SecureStore.setItemAsync('bbName', item.name)
+                  setBBId(item.uuid)
+                  await SecureStore.setItemAsync('bbId', item.uuid)
+                  load(true)
+                  setShowModal(false)
+                }}
                 style={{
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   marginBottom: 20,
-                  backgroundColor: isDarkMode ? '#242526' : '#fff',
+                  backgroundColor: isDarkMode ? '#242526' : '#f3f3f3',
                   padding: 16,
                   borderRadius: 9,
                 }}
@@ -318,15 +371,7 @@ export default function Home() {
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'row', gap: 10 }}>
-                  <Pressable
-                    onPress={async () => {
-                      setBBName(item.name)
-                      await SecureStore.setItemAsync('bbName', item.name)
-                      setBBId(item.uuid)
-                      await SecureStore.setItemAsync('bbId', item.uuid)
-                      load(true)
-                      setShowModal(false)
-                    }}
+                  <View
                     style={{
                       backgroundColor: '#7469B6',
                       width: 45,
@@ -337,57 +382,57 @@ export default function Home() {
                     }}
                   >
                     <Octicons name="chevron-right" size={24} color="white" />
-                  </Pressable>
+                  </View>
                 </View>
-              </View>
+              </Pressable>
             )}
           />
         </View>
       </Modal>
-      <View
+      <Pressable
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
-          width: '80%',
+          width: '85%',
           marginBottom: 20,
           marginTop: 10,
         }}
+        onPress={initiateSwitchBankModal}
       >
-        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <Image
+            source={require('../../assets/images/home.png')}
+            style={{
+              width: 40,
+              height: 40,
+              marginRight: 10,
+            }}
+
+          />
           <Text
             style={{
               fontSize: 26,
-              textAlign: 'center',
-              color: isDarkMode ? 'white' : 'black',
+              color: '#7469B6',
+              fontFamily: 'PlayfairDisplay_600SemiBold',
             }}
           >
-            <Text
-              style={{
-                color: '#7469B6',
-                fontFamily: 'PlayfairDisplay_600SemiBold',
-              }}
-            >
-              {bbName}
-            </Text>
-          </Text>
-          <Text
-            style={{
-              color: isDarkMode ? 'white' : 'black',
-            }}
-          >
-            Open Blood
+            {bbName}
           </Text>
         </View>
-        <Pressable
-          onPress={initiateSwitchBankModal}
+        <View
           style={{
             justifyContent: 'center',
             alignItems: 'center',
           }}
         >
           <Octicons name="chevron-down" size={24} color="#7469B6" />
-        </Pressable>
-      </View>
+        </View>
+      </Pressable>
       <ScrollView
         style={{
           width: '100%',
@@ -471,7 +516,7 @@ export default function Home() {
           <View
             style={{
               width: '100%',
-              gap: 10,
+              gap: '15%',
               flexDirection: 'row',
               justifyContent: 'center',
               alignItems: 'center',
@@ -494,7 +539,7 @@ export default function Home() {
           <View
             style={{
               width: '100%',
-              gap: 10,
+              gap: '15%',
               flexDirection: 'row',
               justifyContent: 'center',
               alignItems: 'center',
@@ -545,20 +590,23 @@ export default function Home() {
               <Text
                 style={{ fontSize: 16, color: isDarkMode ? 'white' : 'black' }}
               >
-                Your details have not been verified yet. Please allow a few days
-                for verification. Alternatively, you can visit or call the blood
-                center to get verified.
+                Your Profile has not been verified yet. Please allow a few days
+                for verification. Alternatively, you can visit the blood center
+                to get verified.
               </Text>
             </View>
           ) : null}
 
-          <Button
-            onPress={() => {
-              router.push(`tel:${bbPhone}`)
+          <FreeButton
+            onPress={callBank}
+            style={{
+              width: '85%',
+              justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
             📞 Call Blood Center
-          </Button>
+          </FreeButton>
         </View>
         <Text
           style={{
@@ -576,7 +624,7 @@ export default function Home() {
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            width: '100%',
+            width: '85%',
             gap: 20,
             marginBottom: 100,
           }}
@@ -594,16 +642,12 @@ export default function Home() {
               <View
                 key={index}
                 style={{
-                  width: '80%',
-                  backgroundColor: isDarkMode ? '#242526' : '#f3f3f3',
+                  width: '100%',
+                  backgroundColor: isDarkMode ? '#242526' : '#fff',
                   borderRadius: 10,
                   justifyContent: 'center',
                   alignItems: 'flex-start',
                   padding: 20,
-                  shadowColor: '#7469B6',
-                  shadowOpacity: 0.3,
-                  shadowRadius: 20,
-                  elevation: 10,
                 }}
               >
                 <Text

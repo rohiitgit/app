@@ -1,4 +1,6 @@
+import styles from '@/assets/styles/styles'
 import Button from '@/components/Button'
+import FreeButton from '@/components/FreeButton'
 import { Octicons } from '@expo/vector-icons'
 import * as Application from 'expo-application'
 import { router } from 'expo-router'
@@ -21,6 +23,7 @@ export default function Settings() {
   let [uuid, setUUID] = useState<string | null>('notfound')
   let [refreshing, setRefreshing] = useState<boolean>(false)
   let [showModal, setShowModal] = useState<boolean>(false)
+  let [isRegenerating, setRegenerating] = useState<boolean>(false)
   let [allBanks, setAllBanks] = useState<
     {
       name: string
@@ -39,8 +42,43 @@ export default function Settings() {
     }[]
   >([])
 
+  async function regenerateUUID() {
+    setRegenerating(true)
+    fetch(`https://api.pdgn.xyz/donor/regenerate-id`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        uuid: uuid,
+      }),
+    })
+      .then((response) => response.json())
+      .then(async (response) => {
+        if (response.error) {
+          alert(response.message)
+        } else {
+          SecureStore.setItemAsync('token', response.uuid)
+          Alert.alert('ID Regenerated!', 'Please restart your app.', [
+            {
+              text: 'OK',
+              onPress: () => {
+                load()
+              },
+            },
+          ])
+        }
+        setRegenerating(false)
+      })
+      .catch((error) => {
+        //console.log(error)
+        alert(error)
+        setRegenerating(false)
+      })
+  }
+
   async function delBank(bankcode: string) {
-    fetch(`http://localhost:3000/donor/remove-bank`, {
+    fetch(`https://api.pdgn.xyz/donor/remove-bank`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -66,13 +104,13 @@ export default function Settings() {
         }
       })
       .catch((error) => {
-        console.log(error)
+        //console.log(error)
         alert(error)
       })
   }
   async function addBank(bankcode: string) {
-    console.log(bankcode)
-    fetch(`http://localhost:3000/donor/add-bank`, {
+    ////console.log(bankcode)
+    fetch(`https://api.pdgn.xyz/donor/add-bank`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -107,13 +145,13 @@ export default function Settings() {
         }
       })
       .catch((error) => {
-        console.log(error)
+        //console.log(error)
         alert(error)
       })
   }
 
   async function getAllBanks() {
-    fetch('http://localhost:3000/donor/banks', {
+    fetch('https://api.pdgn.xyz/donor/banks', {
       method: 'GET',
     })
       .then((response) => response.json())
@@ -136,7 +174,7 @@ export default function Settings() {
 
     let token = await SecureStore.getItemAsync('token')
     setUUID(token)
-    fetch(`http://localhost:3000/donor/get-banks`, {
+    fetch(`https://api.pdgn.xyz/donor/get-banks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -154,7 +192,7 @@ export default function Settings() {
         }
       })
       .catch((error) => {
-        console.log(error)
+        //console.log(error)
         alert(error)
       })
     setRefreshing(false)
@@ -232,9 +270,11 @@ export default function Settings() {
                 alignItems: 'center',
               }}
             >
-              <Octicons name="x" size={24} color={
-                isDarkMode ? 'white' : 'black'
-              } />
+              <Octicons
+                name="x"
+                size={24}
+                color={isDarkMode ? 'white' : 'black'}
+              />
             </Pressable>
           </View>
           <FlatList
@@ -252,9 +292,9 @@ export default function Settings() {
                 No banks found.
               </Text>
             }
-          contentContainerStyle={{
-            marginTop: 10,
-          }}
+            contentContainerStyle={{
+              marginTop: 10,
+            }}
             renderItem={({ item }) => (
               <View
                 style={{
@@ -312,7 +352,7 @@ export default function Settings() {
                           )
                         }}
                         style={{
-                          backgroundColor: '#ff8787',
+                          backgroundColor: '#FF463A',
                           width: 45,
                           height: 45,
                           borderRadius: 22.5,
@@ -358,29 +398,31 @@ export default function Settings() {
       </Modal>
       <View
         style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          width: '80%',
-          marginBottom: 20,
+          width: '85%',
+          marginBottom: 10,
           marginTop: 10,
         }}
       >
         <Text
           style={{
             fontSize: 28,
-            textAlign: 'center',
-            color: '#7469B6',
+            textAlign: 'left',
             fontFamily: 'PlayfairDisplay_600SemiBold',
+            color: '#7469B6',
           }}
         >
-          Open Blood
+          Settings
         </Text>
       </View>
       <ScrollView
+        style={{
+          width: '100%',
+        }}
         contentContainerStyle={{
-          justifyContent: 'flex-start',
-          marginTop: 20,
           gap: 10,
+          paddingBottom: 100,
+          width: '85%',
+          margin: 'auto',
         }}
         //refresh control
         refreshControl={
@@ -394,24 +436,16 @@ export default function Settings() {
       >
         <Text
           style={{
-            fontSize: 28,
-            color: isDarkMode ? 'white' : 'black',
-            fontFamily: 'PlayfairDisplay_600SemiBold',
-          }}
-        >
-          Settings
-        </Text>
-        <Text
-          style={{
             fontSize: 20,
             textAlign: 'left',
             color: isDarkMode ? 'white' : 'black',
+            fontWeight: 'bold',
           }}
         >
           {'\n'}
           Your Banks
         </Text>
-        <View>
+        <View style={{}}>
           {scopes.map((item, index) => (
             <View
               key={item.uuid}
@@ -492,7 +526,7 @@ export default function Settings() {
                       )
                     }}
                     style={{
-                      backgroundColor: '#ff8787',
+                      backgroundColor: '#FF463A',
                       width: 45,
                       height: 45,
                       borderRadius: 22.5,
@@ -507,6 +541,19 @@ export default function Settings() {
               </View>
             </View>
           ))}
+          {scopes.length === 0 ? (
+            <Text
+              style={{
+                fontSize: 18,
+                paddingTop: 10,
+                paddingBottom: 10,
+                textAlign: 'center',
+                color: isDarkMode ? 'white' : 'black',
+              }}
+            >
+              Loading...
+            </Text>
+          ) : null}
           <Pressable
             onPress={getAllBanks}
             style={{
@@ -515,6 +562,7 @@ export default function Settings() {
               padding: 16,
               borderRadius: 9,
               flexDirection: 'row',
+              alignItems: 'center',
               justifyContent: 'center',
               gap: 10,
             }}
@@ -525,29 +573,130 @@ export default function Settings() {
             </Text>
           </Pressable>
         </View>
-        <Button
-          onPress={() => {
-            router.push('mailto:openblood@pidgon.com')
+        <View
+          style={{
+            marginTop: 20,
           }}
         >
-          <Octicons name="mail" size={20} /> Get Support
-        </Button>
-        <Button onPress={reportBug}>
-          <Octicons name="bug" size={20} /> Report a Bug
-        </Button>
-        <Button
+          <Text
+            style={{
+              fontSize: 20,
+              textAlign: 'left',
+              color: isDarkMode ? 'white' : 'black',
+              marginBottom: 5,
+              fontWeight: 'bold',
+            }}
+          >
+            {'\n'}
+            Contact
+          </Text>
+          <FreeButton
+            onPress={() => {
+              router.push('mailto:openblood@pidgon.com')
+            }}
+          >
+            <Octicons name="mail" size={20} /> Get Support
+          </FreeButton>
+          <FreeButton onPress={reportBug}>
+            <Octicons name="bug" size={20} /> Report a Bug
+          </FreeButton>
+        </View>
+        <View
+          style={{
+            marginTop: 20,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 20,
+              textAlign: 'left',
+              color: isDarkMode ? 'white' : 'black',
+              marginBottom: 5,
+              fontWeight: 'bold',
+            }}
+          >
+            {'\n'}
+            Security
+          </Text>
+          <FreeButton
+            onPress={() => {
+              Alert.alert(
+                'Warning',
+                'You should only regenerate your ID if you believe your account has been compromised. This will log you out from all other devices you may have signed into.',
+                [
+                  {
+                    text: 'Cancel',
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'Regenerate',
+                    onPress: () => {
+                      regenerateUUID()
+                    },
+                  },
+                ]
+              )
+            }}
+            disabled={isRegenerating}
+          >
+            Regenerat{isRegenerating ? 'ing' : 'e'} ID
+            {isRegenerating ? '...' : ''}
+          </FreeButton>
+        </View>
+
+        <FreeButton
           onPress={() => {
             SecureStore.deleteItemAsync('token')
             router.replace('/')
+          }}
+        >
+          <Octicons name="sign-out" size={20} /> Log out
+        </FreeButton>
+        <FreeButton
+          onPress={() => {
+            Alert.alert(
+              `Your account is managed by ${scopes.length} blood bank${
+                scopes.length > 1 ? 's' : ''
+              }.`,
+              scopes.length == 1
+                ? 'Contact the blood bank to delete your account. Alternatively, you can email Open Blood support.'
+                : 'You will have to remove all banks but your primary, then contact the blood bank to delete your account. Alternatively, you can email Open Blood support.',
+              [
+                {
+                  text: 'Cancel',
+                  style: 'cancel',
+                },
+                {
+                  text: 'Contact Support',
+                  onPress: () => {
+                    router.push(
+                      'mailto:openblood@pidgon.com?subject=Open%20Blood%20Account%20Deletion'
+                    )
+                  },
+                },
+              ]
+            )
           }}
           style={{
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#FF463A',
           }}
         >
-          <Octicons name="sign-out" size={20} /> Log out
-        </Button>
+          <Octicons name="trash" size={20} color={'white'} />
+          <Text
+            style={{
+              textAlign: 'center',
+              fontSize: 20,
+              color: 'white',
+            }}
+          >
+            {' '}
+            Delete Account
+          </Text>
+        </FreeButton>
         <View style={{ alignItems: 'center' }}>
           <Text
             style={{
@@ -556,7 +705,7 @@ export default function Settings() {
               fontSize: 16,
             }}
           >
-            Open Blood Dist. {Application.nativeApplicationVersion} [
+            Open Blood {Application.nativeApplicationVersion} [
             {Application.nativeBuildVersion}]
           </Text>
         </View>

@@ -29,11 +29,11 @@ export default function HQHome() {
   useEffect(() => {
     async function getToken() {
       let t = await SecureStore.getItemAsync('token')
-      console.log(t)
+      //console.log(t)
       setToken(t)
       let id = await SecureStore.getItemAsync('id')
       setBankCode(id)
-      console.log(id)
+      //console.log(id)
     }
     getToken()
   }, [])
@@ -42,7 +42,7 @@ export default function HQHome() {
 
     let token = await SecureStore.getItemAsync('token')
     let id = await SecureStore.getItemAsync('id')
-    fetch(`http://localhost:3000/hq/get-stats`, {
+    fetch(`https://api.pdgn.xyz/hq/get-stats`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -69,18 +69,12 @@ export default function HQHome() {
           setTotalDonations(response.data.totalDonated)
           await SecureStore.setItemAsync('bbName', response.data.name)
           setBbName(response.data.name)
-          let totalDonors = response.data.totalDonors
-          let verified = 0,
-            unverified = 0,
-            total = totalDonors.length
-
-          totalDonors.forEach((donor: any) => {
-            if (donor.verified) verified++
-            else unverified++
-          })
-          setTotalDonators(total)
-          setVerifiedDonors(verified)
-          setUnverifiedDonors(unverified)
+          setTotalDonators(parseInt(response.data.totalDonors))
+          setVerifiedDonors(parseInt(response.data.verified))
+          setUnverifiedDonors(
+            parseInt(response.data.totalDonors) -
+              parseInt(response.data.verified)
+          )
         }
       })
       .catch((error) => {
@@ -243,7 +237,7 @@ export default function HQHome() {
               icon="heart-fill"
               iconColor="#AD88C6"
               title={totalDonations?.toString() || ''}
-              subtitle="total donated"
+              subtitle="units donated"
             />
           </View>
           <Button

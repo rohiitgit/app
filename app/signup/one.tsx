@@ -1,3 +1,4 @@
+import Button from '@/components/Button'
 import FreeButton from '@/components/FreeButton'
 import { Octicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
@@ -8,12 +9,12 @@ import {
   ScrollView,
   Text,
   useColorScheme,
-  View
+  View,
 } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import * as Progress from 'react-native-progress'
 import { SafeAreaView } from 'react-native-safe-area-context'
-export default function ThreeAlpha({
+export default function One({
   navigation,
   route,
 }: {
@@ -50,7 +51,7 @@ export default function ThreeAlpha({
   let responsiveDark = useColorScheme() === 'dark' ? 'white' : 'black'
 
   function retrieveBanks() {
-    fetch('http://localhost:3000/donor/banks', {
+    fetch('https://api.pdgn.xyz/donor/banks', {
       method: 'GET',
     })
       .then((response) => response.json())
@@ -91,25 +92,38 @@ export default function ThreeAlpha({
               gap: 20,
             }}
           >
-            <Pressable onPress={() => router.push('/')}>
+            <Pressable
+              onPress={() => {
+                Alert.alert(
+                  'Are you sure?',
+                  'Going back will reset your progress.',
+                  [
+                    {
+                      text: 'Cancel',
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'Yes',
+                      style: 'destructive',
+                      onPress: () => {
+                        router.replace('/')
+                      },
+                    },
+                  ]
+                )
+              }}
+            >
               <Octicons name="arrow-left" size={24} color={responsiveDark} />
             </Pressable>
             <Text
               style={{
                 fontSize: 24,
                 textAlign: 'center',
-                color: responsiveDark,
+                color: '#7469B6',
+                fontFamily: 'PlayfairDisplay_600SemiBold',
               }}
             >
-              <Text
-                style={{
-                  color: '#7469B6',
-                  fontFamily: 'PlayfairDisplay_600SemiBold',
-                }}
-              >
-                Open Blood
-              </Text>{' '}
-              Sign Up
+              Open Blood
             </Text>
           </View>
           <Progress.Bar
@@ -126,6 +140,7 @@ export default function ThreeAlpha({
             textAlign: 'left',
             marginBottom: 20,
             color: '#7469B6',
+            fontFamily: 'PlayfairDisplay_600SemiBold',
           }}
         >
           Base Blood Bank
@@ -144,7 +159,8 @@ export default function ThreeAlpha({
               fontFamily: 'S',
             }}
           >
-            Choose the blood bank you would like to donate to regularly.
+            Choose the blood bank you would like to donate to regularly. You can
+            always change this later.
           </Text>
           <ScrollView
             contentContainerStyle={{
@@ -223,22 +239,23 @@ export default function ThreeAlpha({
               marginBottom: 30,
               color: responsiveDark,
               fontFamily: 'S',
+              textAlign: 'center',
             }}
           >
             {'\n\n'}
             {baseBank.name == ''
               ? 'No bank selected.'
-              : `${baseBank.name} will process your application and manage your Open Blood profile.`}
+              : `${baseBank.name} will process your Open Blood profile.`}
           </Text>
         </View>
 
         <View
           style={{
-            flexDirection: 'column',
+            alignSelf: 'center',
             justifyContent: 'center',
           }}
         >
-          <FreeButton
+          <Button
             onPress={() => {
               navigation.navigate(`two`, {
                 ...route.params,
@@ -247,12 +264,12 @@ export default function ThreeAlpha({
               })
             }}
             style={{
-              width: '90%',
+              width: '100%',
             }}
             disabled={baseBank.uuid === '' ? true : false}
           >
             Next
-          </FreeButton>
+          </Button>
         </View>
       </SafeAreaView>
     </KeyboardAwareScrollView>

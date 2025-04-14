@@ -3,12 +3,13 @@ import { Octicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import React, { useState } from 'react'
 import {
+  Alert,
   Pressable,
   Switch,
   Text,
   TextInput,
   useColorScheme,
-  View
+  View,
 } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import * as Progress from 'react-native-progress'
@@ -76,17 +77,38 @@ export default function Three({
               gap: 20,
             }}
           >
-            <Pressable onPress={() => router.push('/')}>
+            <Pressable
+              onPress={() => {
+                Alert.alert(
+                  'Are you sure?',
+                  'Going back will reset your progress.',
+                  [
+                    {
+                      text: 'Cancel',
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'Yes',
+                      style: 'destructive',
+                      onPress: () => {
+                        router.replace('/')
+                      },
+                    },
+                  ]
+                )
+              }}
+            >
               <Octicons name="arrow-left" size={24} color={responsiveDark} />
             </Pressable>
             <Text
               style={{
                 fontSize: 24,
                 textAlign: 'center',
-                color: responsiveDark,
+                color: '#7469B6',
+                fontFamily: 'PlayfairDisplay_600SemiBold',
               }}
             >
-              <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
+              Open Blood
             </Text>
           </View>
           <Progress.Bar
@@ -100,13 +122,13 @@ export default function Three({
         <Text
           style={{
             fontSize: 28,
-            textAlign: 'center',
-            margin: 'auto',
+            textAlign: 'left',
             marginBottom: 20,
-            color: responsiveDark,
+            fontFamily: 'PlayfairDisplay_600SemiBold',
+            color: '#7469B6',
           }}
         >
-          Sign up | <Text style={{ color: '#7469B6' }}>Conditions</Text>
+          Conditions
         </Text>
 
         <View
@@ -123,8 +145,7 @@ export default function Three({
             }}
           >
             If you do not have any medical conditions or take any medications,
-            click <Text style={{ color: '#7469B6', fontSize: 18 }}>Next</Text>{' '}
-            at the bottom of the page.
+            you can skip this step.
           </Text>
           <Text
             style={{
@@ -166,6 +187,7 @@ export default function Three({
                 style={{
                   fontSize: 14,
                   marginBottom: 20,
+                  marginTop: 10,
                   color: 'gray',
                 }}
               >
@@ -244,14 +266,11 @@ export default function Three({
         >
           <FreeButton
             onPress={() => {
-              navigation.navigate(
-                `two`,
-                {
-                  ...route.params,
-                  conditions,
-                  medications,
-                }
-              )
+              navigation.navigate(`two`, {
+                ...route.params,
+                conditions,
+                medications,
+              })
             }}
             style={{
               width: '25%',

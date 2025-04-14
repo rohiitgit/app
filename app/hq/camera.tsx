@@ -115,7 +115,12 @@ export default function Camera() {
           if (result.data == 'bloodbank-notfound') {
             Alert.alert(
               'Error',
-              "The donor's identity could not be confirmed. Please reload the donor app and try again."
+              "The donor's identity could not be confirmed. Please reload the donor app or check the donor's internet connection and try again."
+            )
+          } else if (result.data == 'bloodbank-hidden') {
+            Alert.alert(
+              'Error',
+              "The donor's QR code is hidden. Please ask the donor to click 'Show QR' in the app."
             )
           } else if (result.data.startsWith('bloodbank-') !== true) {
             setCurrentData('')

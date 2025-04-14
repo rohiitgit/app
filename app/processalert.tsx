@@ -3,13 +3,7 @@ import Card from '@/components/Card'
 import { router, useLocalSearchParams } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
-import {
-  Alert,
-  Platform,
-  Text,
-  useColorScheme,
-  View
-} from 'react-native'
+import { Alert, Platform, Text, useColorScheme, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import * as Progress from 'react-native-progress'
 export default function Modal() {
@@ -28,7 +22,7 @@ export default function Modal() {
         months: parseInt(minimumMonths),
         contact: phoneNumber,
    */
-  console.log(token, bankCode)
+  //console.log(token, bankCode)
   let [loading, setLoading] = useState<boolean>(false)
   let isDarkMode = useColorScheme() === 'dark'
   let responsiveColor = isDarkMode ? 'white' : 'black'
@@ -39,15 +33,15 @@ export default function Modal() {
   }>({ x: 0, y: 0, e: 0 })
   let [progress, setProgress] = useState<number>(0)
   useEffect(() => {
-  console.log('connecting to server')
-  const ws = new WebSocket('ws://api.pdgn.xyz/request')
+    //console.log('connecting to server')
+    const ws = new WebSocket('ws://api.pdgn.xyz/request')
     // catch connection errors
     ws.onerror = (error) => {
-      console.log('error', error)
+      //console.log('error', error)
       Alert.alert('Error', 'Could not connect to Blood Alert server')
     }
     ws.onopen = () => {
-      console.log('connected')
+      //console.log('connected')
       ws.send(
         JSON.stringify({
           bankCode: bankCode,
@@ -66,31 +60,29 @@ export default function Modal() {
         let msg = message.data.split('%')
         let event = parseInt(msg[1])
         let data = JSON.parse(msg[2])
-        if(msg[0] === 'err') {
-          Alert.alert('Error', msg[2]);
-          router.dismiss();
+        if (msg[0] === 'err') {
+          Alert.alert('Error', msg[2])
+          router.dismiss()
         }
         if (event === 0) {
           if (data) {
-            console.log('authenticated')
+            //console.log('authenticated')
             setProgress(0.25)
           } else {
-            console.log('unauthenticated')
+            //console.log('unauthenticated')
             Alert.alert('Error', 'Authentication failed')
             router.dismiss()
           }
         } else if (event === 1) {
-          console.log('eligible donors pulled')
+          //console.log('eligible donors pulled')
           setProgress(0.5)
-          console.log(`${data.x} donors are eligible`)
+          //console.log(`${data.x} donors are eligible`)
         } else if (event === 2) {
-          console.log(`distances ${data.x == 1 ? '' : 'not'} calculated`)
+          //console.log(`distances ${data.x == 1 ? '' : 'not'} calculated`)
           setProgress(0.75)
         } else if (event === 3) {
           setProgress(1)
-          console.log(
-            `${data.x} notifications sent, ${data.y} messages sent, ${data.e} errors`
-          )
+          //console.log( `${data.x} notifications sent, ${data.y} messages sent, ${data.e} errors`)
           setNotificationsSent(data)
         }
       }

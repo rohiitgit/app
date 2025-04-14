@@ -37,7 +37,7 @@ export default function Modal() {
   let [loading, setLoading] = useState<boolean>(true)
   let [oos, setOos] = useState<boolean>(false)
   useEffect(() => {
-    fetch(`http://localhost:3000/hq/get-donor`, {
+    fetch(`https://api.pdgn.xyz/hq/get-donor`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ export default function Modal() {
           alert(response.message)
           router.dismiss()
         } else {
-          console.log(response.data)
+          //console.log(response.data)
           setLoading(false)
           let localDonor = response.data
           localDonor.age =
@@ -68,7 +68,7 @@ export default function Modal() {
 
   function markAsDonated() {
     setMarking(true)
-    fetch(`http://localhost:3000/hq/mark-donated`, {
+    fetch(`https://api.pdgn.xyz/hq/mark-donated`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export default function Modal() {
 
   function extendDonorScope() {
     setExtending(true)
-    fetch(`http://localhost:3000/hq/extend-donor-scope`, {
+    fetch(`https://api.pdgn.xyz/hq/extend-donor-scope`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

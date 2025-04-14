@@ -15,36 +15,6 @@ export default function HQIndex() {
   return (
     <>
       <Tab.Navigator
-        /* screenOptions={{
-          headerShown: false,
-          tabBarShowLabel: false,
-          tabBarStyle: {
-            position: 'absolute',
-            bottom: '0%',
-            left: '0%',
-            width: '100%',
-            alignSelf: 'center',
-            height: '10%',
-            paddingTop: 15,
-            shadowColor: '#7469B6',
-            shadowOpacity: 0.3,
-            shadowRadius: 20,
-            borderRadius: 64,
-            borderTopWidth: 0,
-            elevation: 10,
-            backgroundColor: isDarkMode ? '#3a3b3c' : '#fff',
-            backfaceVisibility: 'hidden',
-          },
-          sceneStyle: {
-            backgroundColor: isDarkMode ? '#030303' : '#efeef7',
-          },
-          tabBarActiveTintColor: '#7469B6',
-          tabBarIconStyle: {
-            justifyContent: 'center',
-            alignItems: 'center',
-            flex: 1,
-          },
-        }}*/
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: true,

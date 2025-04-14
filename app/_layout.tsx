@@ -3,6 +3,7 @@ import { router, Stack } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
 import * as SplashScreen from 'expo-splash-screen'
 import { useCallback, useEffect, useState } from 'react'
+
 //import {useFonts, PlayfairDisplay_400Regular} from '@expo-google-fonts/playfair-display'
 import {
   DMSerifText_400Regular,
@@ -10,6 +11,8 @@ import {
 } from '@expo-google-fonts/dm-serif-text'
 import { PlayfairDisplay_600SemiBold } from '@expo-google-fonts/playfair-display'
 export default function RootLayout() {
+  const [initialRoute, setInitialRoute] = useState<string | null>(null)
+
   let [fontsLoaded] = useFonts({
     PlayfairDisplay_600SemiBold,
     DMSerifText_400Regular,
@@ -102,9 +105,14 @@ export default function RootLayout() {
       <Stack.Screen name="hqonboarding/index" />
       <Stack.Screen name="hq/index" />
       <Stack.Screen
+        name="welcome"
+        options={{
+          presentation: 'modal',
+        }}
+      />
+      <Stack.Screen
         name="accountmigration"
         options={{
-          // Set the presentation mode to modal for our modal route.
           presentation: 'modal',
           gestureEnabled: false,
         }}
@@ -112,28 +120,24 @@ export default function RootLayout() {
       <Stack.Screen
         name="logdonor"
         options={{
-          // Set the presentation mode to modal for our modal route.
           presentation: 'modal',
         }}
       />
       <Stack.Screen
         name="requestblood"
         options={{
-          // Set the presentation mode to modal for our modal route.
           presentation: 'modal',
         }}
       />
       <Stack.Screen
         name="processalert"
         options={{
-          // Set the presentation mode to modal for our modal route.
           presentation: 'modal',
         }}
       />
       <Stack.Screen
         name="verifydonor"
         options={{
-          // Set the presentation mode to modal for our modal route.
           presentation: 'modal',
         }}
       />

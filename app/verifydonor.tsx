@@ -13,7 +13,7 @@ import {
   Text,
   TextInput,
   useColorScheme,
-  View
+  View,
 } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 export default function Modal() {
@@ -69,7 +69,7 @@ export default function Modal() {
   let responsiveColor = isDarkMode ? 'white' : 'black'
 
   useEffect(() => {
-    fetch(`http://localhost:3000/hq/request-user-data`, {
+    fetch(`https://api.pdgn.xyz/hq/request-user-data`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ export default function Modal() {
           alert(response.message)
           router.dismiss()
         } else {
-          console.log(response.data)
+          //console.log(response.data)
           setLoading(false)
           setName(response.data.name)
           setBloodtype(response.data.bloodtype)
@@ -111,9 +111,9 @@ export default function Modal() {
   }, [])
 
   function verifyDonor() {
-    console.log(token)
+    //console.log(token)
     setVerifying(true)
-    fetch(`http://localhost:3000/hq/verify-donor`, {
+    fetch(`https://api.pdgn.xyz/hq/verify-donor`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ export default function Modal() {
 
   function rejectDonor() {
     setRejecting(true)
-    fetch(`http://localhost:3000/hq/reject-donor`, {
+    fetch(`https://api.pdgn.xyz/hq/reject-donor`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -161,8 +161,7 @@ export default function Modal() {
       .then((response) => {
         if (!response.error) {
           setRejecting(false)
-          alert(response.message)
-          Alert.alert('Error', response.message, [
+          Alert.alert('Done!', response.message, [
             {
               text: 'OK',
               onPress: () => router.dismiss(),
@@ -534,8 +533,8 @@ export default function Modal() {
               <FreeButton
                 onPress={() => {
                   Alert.alert(
-                    'Warning',
                     'Are you sure you want to reject this donor?',
+                    'If they are not part of any other bank, their profile will be deleted.',
                     [
                       {
                         text: 'Cancel',
@@ -554,10 +553,7 @@ export default function Modal() {
                 disabled={rejecting}
                 style={{ width: '40%', backgroundColor: 'red' }}
               >
-                <Text>
-                  {verified ? 'Remove' : 'Reject'}
-                  {rejecting ? 'ing...' : ''}
-                </Text>
+                <Text>Reject{rejecting ? 'ing...' : ''}</Text>
               </FreeButton>
               <FreeButton
                 onPress={verifyDonor}

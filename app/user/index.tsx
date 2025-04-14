@@ -13,6 +13,7 @@ import {
   Alert,
   Modal,
   Platform,
+  Pressable,
   Text,
   useColorScheme,
   View,
@@ -20,6 +21,7 @@ import {
 import Home from './home'
 import QR from './qr'
 import Settings from './settings'
+import * as Linking from 'expo-linking'
 const Tab = createBottomTabNavigator()
 const ModalStack = createStackNavigator()
 Notifications.setNotificationHandler({
@@ -47,12 +49,19 @@ export default function Index() {
     let uuid = await SecureStore.getItemAsync('token')
     const perms = await Notifications.getPermissionsAsync()
     let existingStatus = perms.status
+    console.log(`Existing status: ${existingStatus}`)
     //if (existingStatus !== 'granted') {
-    console.log('Requesting permissions')
+    //console.log('Requesting permissions')
     registerForPushNotificationsAsync().then(async (token) => {
       if (token) {
+        let os =
+          Device.osName === 'Android'
+            ? 'a'
+            : Device.osName === 'iOS' || Device.osName === 'iPadOS'
+            ? 'i'
+            : ''
         setExpoPushToken(token)
-        fetch('http://localhost:3000/donor/update-notifications', {
+        fetch('https://api.pdgn.xyz/donor/update-notifications', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -60,6 +69,7 @@ export default function Index() {
           body: JSON.stringify({
             uuid: uuid,
             notificationToken: token,
+            os: os,
           }),
         })
           .then((response) => response.json())
@@ -67,11 +77,11 @@ export default function Index() {
             if (response.error) {
               Alert.alert('Error', response.error)
             } else {
-              console.log('Notification token updated')
+              //console.log('Notification token updated')
             }
           })
           .catch((error) => {
-            console.log("Couldn't update notification token", error)
+            //console.log("Couldn't update notification token", error)
           })
       } else {
         Alert.alert('Error', 'Failed to get notification token')
@@ -89,7 +99,7 @@ export default function Index() {
 
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response)
+        //console.log(response)
       })
 
     return () => {
@@ -124,7 +134,7 @@ export default function Index() {
           if (existingStatus === 'denied') {
             setShowModal(true)
           } else {
-            console.log('Requesting permissions')
+            //console.log('Requesting permissions')
             Alert.alert(
               `Notifications`,
               `We need your permission to send you critical notifications when the blood center needs your help. Please allow notifications to continue.`,
@@ -196,36 +206,48 @@ export default function Index() {
             </Text>
             <Text
               style={{
-                fontSize: 22,
-                textAlign: 'left',
+                fontSize: 18,
+                textAlign: 'center',
                 color: isDarkMode ? 'white' : 'black',
+                alignSelf: 'center',
                 paddingBottom: 10,
                 paddingTop: 10,
               }}
             >
-              Open Blood keeps you in the loop when lives depend on it.
-              Notifications are how we alert you when your donation can make a
-              real impact.
-            </Text>
-            <Text
-              style={{
-                fontSize: 22,
-                textAlign: 'center',
-                color: isDarkMode ? 'white' : 'black',
-                paddingBottom: 10,
-                fontWeight: 'bold',
-              }}
-            >
-              Please enable notifications from your settings to continue.
+              Open Blood sends you alerts when every second counts.{'\n\n'}Turn on
+              notifications in settings so we can reach you when it matters
+              most.
             </Text>
           </View>
-          <Button
-            onPress={() => router.navigate('mailto:openblood@pidgon.com')}
+          <View
+            style={{
+              justifyContent: 'center',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 20,
+            }}
           >
-            <Text style={{ color: 'white', fontSize: 20 }}>
-              Contact support
-            </Text>
-          </Button>
+            <Button
+              onPress={() => {
+                Linking.openSettings()
+              }}
+            >
+              <Text style={{ color: 'white', fontSize: 20 }}>
+                Open App Settings
+              </Text>
+            </Button>
+            <Pressable onPress={() => setShowModal(false)}>
+              <Text
+                style={{
+                  color: '#7469B6',
+                  fontSize: 20,
+                  textAlign: 'center',
+                }}
+              >
+                Not now
+              </Text>
+            </Pressable>
+          </View>
         </View>
       </Modal>
       <Tab.Navigator
@@ -257,8 +279,8 @@ export default function Index() {
             paddingTop: 5,
             textTransform: 'uppercase',
             fontWeight: 'bold',
-          }
-        }} 
+          },
+        }}
         initialRouteName="Home"
       >
         <Tab.Screen
@@ -296,6 +318,7 @@ export default function Index() {
 async function registerForPushNotificationsAsync() {
   let token
   if (Platform.OS === 'android') {
+    //console.log('android')
     await Notifications.setNotificationChannelAsync('default', {
       name: 'default',
       importance: Notifications.AndroidImportance.MAX,
@@ -345,7 +368,7 @@ async function registerForPushNotificationsAsync() {
         })
       ).data
     } catch (e) {
-      console.log(e)
+      //console.log(e)
     }
   } else {
     throw new Error('physical device required for notifications')

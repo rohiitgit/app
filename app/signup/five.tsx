@@ -3,13 +3,9 @@ import { Octicons } from '@expo/vector-icons'
 import { Picker } from '@react-native-picker/picker'
 import { router } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
-import { useState } from 'react'
-import {
-  Pressable,
-  Text,
-  useColorScheme,
-  View
-} from 'react-native'
+import { useEffect, useState } from 'react'
+import * as Device from 'expo-device'
+import { Alert, Pressable, Text, useColorScheme, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import * as Progress from 'react-native-progress'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -20,16 +16,22 @@ export default function Five({
   navigation: any
   route: any
 }) {
-  console.log(route.params)
+  //console.log(route.params)
   let [birthdayHero, setBirthdayHero] = useState<boolean>(
     route.params?.birthdayHero || false
   )
   let [loadingProcess, setLoadingProcess] = useState<boolean>(false)
   delete route.params?.birthdayHero
-  console.log(route.params)
+  //console.log(route.params)
 
   function signup() {
     setLoadingProcess(true)
+    let os =
+      Device.osName === 'Android'
+        ? 'a'
+        : Device.osName === 'iOS' || Device.osName === 'iPadOS'
+        ? 'i'
+        : ''
     /**
      * @params {phoneNumber} string [EXISTS]
      * @params {affiliated} string (convert to boolean)
@@ -45,7 +47,7 @@ export default function Five({
      * @params {distance} number
      * @params {birthdayHero} boolean
      */
-    console.log(route.params.location.latitude, route.params.location.longitude)
+    //console.log(route.params.location.latitude, route.params.location.longitude)
     var payload = {
       phonenumber: route.params.phoneNumber,
       name: route.params.name,
@@ -59,14 +61,19 @@ export default function Five({
       distance: route.params.distance,
       birthdayhero: birthdayHero,
       scope: route.params.baseBank.uuid,
+      os: os,
       coords: route.params.location
-        ? route.params.location.hasOwnProperty('latitude') ?
-        `${route.params.location.latitude},${route.params.location.longitude}`
-        : route.params.location.address
+        ? route.params.location.hasOwnProperty('latitude')
+          ? `${route.params.location.latitude},${route.params.location.longitude}`
+          : route.params.location.address
         : '',
-      lookupid: route.params.location ? route.params.location.hasOwnProperty('lookup') ? route.params.location.lookup : '' : ''
+      lookupid: route.params.location
+        ? route.params.location.hasOwnProperty('lookup')
+          ? route.params.location.lookup
+          : ''
+        : '',
     }
-    fetch(`http://localhost:3000/donor/signup`, {
+    fetch(`https://api.pdgn.xyz/donor/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -93,7 +100,6 @@ export default function Five({
       })
   }
   let responsiveDark = useColorScheme() === 'dark' ? 'white' : 'black'
-
   return (
     <KeyboardAwareScrollView
       contentContainerStyle={{
@@ -121,17 +127,38 @@ export default function Five({
               gap: 20,
             }}
           >
-            <Pressable onPress={() => router.push('/')}>
+            <Pressable
+              onPress={() => {
+                Alert.alert(
+                  'Are you sure?',
+                  'Going back will reset your progress.',
+                  [
+                    {
+                      text: 'Cancel',
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'Yes',
+                      style: 'destructive',
+                      onPress: () => {
+                        router.replace('/')
+                      },
+                    },
+                  ]
+                )
+              }}
+            >
               <Octicons name="arrow-left" size={24} color={responsiveDark} />
             </Pressable>
             <Text
               style={{
                 fontSize: 24,
                 textAlign: 'center',
-                color: responsiveDark,
+                color: '#7469B6',
+                fontFamily: 'PlayfairDisplay_600SemiBold',
               }}
             >
-              <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
+              Open Blood
             </Text>
           </View>
           <Progress.Bar
@@ -145,13 +172,13 @@ export default function Five({
         <Text
           style={{
             fontSize: 28,
-            textAlign: 'center',
-            margin: 'auto',
+            textAlign: 'left',
             marginBottom: 20,
-            color: responsiveDark,
+            fontFamily: 'PlayfairDisplay_600SemiBold',
+            color: '#7469B6',
           }}
         >
-          Sign up | <Text style={{ color: '#7469B6' }}>Extras</Text>
+          Extras
         </Text>
         <View
           style={{
@@ -163,11 +190,10 @@ export default function Five({
               fontSize: 18,
               marginBottom: 20,
               color: responsiveDark,
+              fontWeight: 'bold',
             }}
           >
-            As you celebrate yet another year of life, give someone else the
-            chance too. Be a real hero in your life by participating in
-            "Birthday Heroes" initiative.
+            Birthday coming up?
           </Text>
           <Text
             style={{
@@ -176,8 +202,7 @@ export default function Five({
               color: responsiveDark,
             }}
           >
-            Kindly give your consent for the Birthday Heroes project and be a
-            hero!
+            We can remind you so you can celebrate by donating and save a life.
           </Text>
           <View>
             <Picker

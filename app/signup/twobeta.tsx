@@ -72,7 +72,7 @@ export default function TwoBeta({
                 color: responsiveDark,
               }}
             >
-              <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
+              <Text style={{ color: '#7469B6' }}>Open Blood</Text>
             </Text>
           </View>
           <Progress.Bar

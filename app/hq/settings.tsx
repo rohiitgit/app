@@ -23,7 +23,7 @@ export default function Settings() {
   }
 
   useEffect(() => {
-    console.log('loading')
+    //console.log('loading')
     load(false)
   }, [])
   function reportBug() {
@@ -113,6 +113,9 @@ export default function Settings() {
         >
           <Octicons name="sign-out" size={20} /> Log out
         </Button>
+        <Button onPress={reportBug}>
+          <Octicons name="bug" size={20} /> Report a Bug
+        </Button>
         <View style={{ alignItems: 'center' }}>
           <Text
             style={{
@@ -121,7 +124,7 @@ export default function Settings() {
               fontSize: 16,
             }}
           >
-            Open Blood HQ Internal Dist. {Application.nativeApplicationVersion}{' '}
+            Open Blood HQ {Application.nativeApplicationVersion}{' '}
             [{Application.nativeBuildVersion}]
           </Text>
         </View>

@@ -36,8 +36,8 @@ export default function Card(props: {
         }}
       >
         {/^\d+$/.test(props.title)
-          ? (props.title || "").replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-          : props.title || ""}
+          ? (props.title || '').replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+          : props.title || ''}
       </Text>
       <Text
         style={{

@@ -1,4 +1,4 @@
-# Untitled Blood Center Companion App
+# Open Blood
 Open source blood donation app built for large-scale blood banks to facilitate donor logging, donor certificates, emergency blood donation and the works.
 
 ![outline](https://i.imgur.com/DPutcQh.png)

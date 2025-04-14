@@ -3,10 +3,12 @@ import { router } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
 import { useEffect, useState } from 'react'
 import {
+  Keyboard,
   Pressable,
   ScrollView,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   useColorScheme,
   View
 } from 'react-native'
@@ -19,14 +21,14 @@ export default function Onboarding() {
   useEffect(() => {
     SecureStore.getItemAsync('token').then((token) => {
       if (token) {
-        console.log(token)
+        //console.log(token)
         router.push('/hq')
       }
     })
   })
   function login() {
     setLoginProcess(true)
-    fetch(`http://localhost:3000/hq/login`, {
+    fetch(`https://api.pdgn.xyz/hq/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,7 +41,7 @@ export default function Onboarding() {
       .then((response) => response.json())
       .then(async (response) => {
         setLoginProcess(false)
-        console.log('RES: ', response)
+        //console.log('RES: ', response)
         if (response.error == true) {
           alert(response.message)
         } else {
@@ -55,6 +57,7 @@ export default function Onboarding() {
   }
   let isDarkMode = useColorScheme() === 'dark'
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <ScrollView
       contentContainerStyle={{
         flex: 1,
@@ -62,6 +65,7 @@ export default function Onboarding() {
         alignItems: 'center',
         backgroundColor: isDarkMode ? '#030303' : '#efeef7',
       }}
+      keyboardShouldPersistTaps='handled'
     >
       <SafeAreaView>
         <Text
@@ -71,7 +75,7 @@ export default function Onboarding() {
             color: isDarkMode ? 'white' : 'black',
           }}
         >
-          <Text style={{ color: '#7469B6' }}>Open Blood HQ</Text> Internal
+          <Text style={{ color: '#7469B6' }}>Open Blood HQ</Text>
         </Text>
         <View style={{ marginTop: 20 }}>
           <Text
@@ -137,5 +141,6 @@ export default function Onboarding() {
         </Pressable>
       </SafeAreaView>
     </ScrollView>
+    </TouchableWithoutFeedback>
   )
 }

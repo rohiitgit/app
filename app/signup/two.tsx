@@ -13,7 +13,7 @@ import {
   Text,
   TextInput,
   useColorScheme,
-  View
+  View,
 } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import * as Progress from 'react-native-progress'
@@ -77,25 +77,38 @@ export default function Two({
               gap: 20,
             }}
           >
-            <Pressable onPress={() => router.push('/')}>
+            <Pressable
+              onPress={() => {
+                Alert.alert(
+                  'Are you sure?',
+                  'Going back will reset your progress.',
+                  [
+                    {
+                      text: 'Cancel',
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'Yes',
+                      style: 'destructive',
+                      onPress: () => {
+                        router.replace('/')
+                      },
+                    },
+                  ]
+                )
+              }}
+            >
               <Octicons name="arrow-left" size={24} />
             </Pressable>
             <Text
               style={{
                 fontSize: 24,
                 textAlign: 'center',
-                color: responsiveDark,
+                color: '#7469B6',
+                fontFamily: 'PlayfairDisplay_600SemiBold',
               }}
             >
-              <Text
-                style={{
-                  color: '#7469B6',
-                  fontFamily: 'PlayfairDisplay_600SemiBold',
-                }}
-              >
-                Open Blood
-              </Text>{' '}
-              Sign Up
+              Open Blood
             </Text>
           </View>
           <Progress.Bar
@@ -111,10 +124,11 @@ export default function Two({
             fontSize: 28,
             textAlign: 'left',
             marginBottom: 20,
-            color: responsiveDark,
+            fontFamily: 'PlayfairDisplay_600SemiBold',
+            color: '#7469B6',
           }}
         >
-          <Text style={{ color: '#7469B6' }}>Biodata</Text>
+          Donor Profile
         </Text>
         <Text
           style={{

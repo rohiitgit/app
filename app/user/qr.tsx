@@ -1,7 +1,10 @@
 import Button from '@/components/Button'
+import FreeButton from '@/components/FreeButton'
+import { BlurView } from 'expo-blur'
 import * as SecureStore from 'expo-secure-store'
 import { useEffect, useState } from 'react'
 import {
+  Alert,
   RefreshControl,
   ScrollView,
   Text,
@@ -9,6 +12,7 @@ import {
   View,
 } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
+import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
 export default function QR() {
   let [uuid, setUUID] = useState<string | null>('notfound')
@@ -24,6 +28,37 @@ export default function QR() {
     setRefreshing(false)
   }
 
+  async function regenerateUUID() {
+    fetch(`https://api.pdgn.xyz/donor/regenerate-id`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        uuid: uuid,
+      }),
+    })
+      .then((response) => response.json())
+      .then(async (response) => {
+        if (response.error) {
+          alert(response.message)
+        } else {
+          SecureStore.setItemAsync('token', response.uuid)
+          Alert.alert('ID Regenerated!', 'Please restart your app.', [
+            {
+              text: 'OK',
+              onPress: () => {
+                load()
+              },
+            },
+          ])
+        }
+      })
+      .catch((error) => {
+        //console.log(error)
+        alert(error)
+      })
+  }
   useEffect(() => {
     load(false)
   }, [])
@@ -40,34 +75,33 @@ export default function QR() {
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
-          width: '80%',
-          marginBottom: 20,
+          width: '85%',
+          marginBottom: 10,
           marginTop: 10,
         }}
       >
-        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <Image
+            source={require('../../assets/images/home.png')}
+            style={{
+              width: 40,
+              height: 40,
+              marginRight: 10,
+            }}
+          />
           <Text
             style={{
               fontSize: 26,
-              textAlign: 'center',
-              color: isDarkMode ? 'white' : 'black',
+              color: '#7469B6',
+              fontFamily: 'PlayfairDisplay_600SemiBold',
             }}
           >
-            <Text
-              style={{
-                color: '#7469B6',
-                fontFamily: 'PlayfairDisplay_600SemiBold',
-              }}
-            >
-              {bbName ? bbName : 'Open Blood'}
-            </Text>
-          </Text>
-          <Text
-            style={{
-              color: isDarkMode ? 'white' : 'black',
-            }}
-          >
-            {bbName ? 'Open Blood' : ''}
+            {bbName}
           </Text>
         </View>
       </View>
@@ -91,25 +125,27 @@ export default function QR() {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
+            marginTop: 20,
           }}
         >
-          <View
+          <QRCode
+            value={
+              'bloodbank-' +
+              (uuid === null ? 'notfound' : showQR ? uuid : 'hidden')
+            }
+            backgroundColor="transparent"
+            color={isDarkMode ? 'white' : 'black'}
+            size={325}
+          />
+          <BlurView
+            intensity={showQR || uuid === null || refreshing == true ? 0 : 10}
+            tint="systemMaterial"
             style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
             }}
-          >
-            <QRCode
-              value={
-                'bloodbank-' +
-                (uuid === null ? 'notfound' : showQR ? uuid : 'hidden')
-              }
-              backgroundColor="transparent"
-              color={isDarkMode ? 'white' : 'black'}
-              size={325}
-            />
-          </View>
+          />
           <Button onPress={() => setShowQR(!showQR)}>
             {showQR ? 'Hide QR' : 'Show QR'}
           </Button>

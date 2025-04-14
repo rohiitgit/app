@@ -57,7 +57,7 @@ export default function Modal() {
     setToken()
   })
   async function updateLocation() {
-    console.log('updating locations')
+    //console.log('updating locations')
     let nowDate = new Date()
     //check if user is 18
     let dobDate = new Date(dob)
@@ -77,8 +77,8 @@ export default function Modal() {
       return
     } else {
       setDisable(true)
-      console.log('updating location: conditions met')
-      fetch('http://localhost:3000/donor/update-location', {
+     ////console.log('updating location: conditions met')
+      fetch('https://api.pdgn.xyz/donor/update-location', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ export default function Modal() {
   }
 
   async function getLocation() {
-    console.log('getting location')
+    //console.log('getting location')
     setErrorMsg('')
     let { status } = await Location.requestForegroundPermissionsAsync()
     if (status !== 'granted') {
@@ -150,9 +150,9 @@ export default function Modal() {
         longitude: location.coords.longitude,
       })
 
-      console.log(location)
+      //console.log(location)
     } catch (e) {
-      console.log(e)
+      //console.log(e)
       setErrorMsg('An error occurred. Please try again.')
       setDistance(null)
       setUserDefinedLocation(null)
@@ -189,7 +189,7 @@ export default function Modal() {
 
   async function geocodeAddress() {
     setIsLocatingCustomAddress(true)
-    fetch(`http://localhost:3000/donor/geocode-location`, {
+    fetch(`https://api.pdgn.xyz/donor/geocode-location`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -222,13 +222,13 @@ export default function Modal() {
           setIsLocatingCustomAddress(false)
           setDistance(res.data.distance)
           setFormattedAddress(res.data.formattedAddress)
-          console.log(distance)
+          //console.log(distance)
           setGeocodeLookupId(res.data.uuid)
           await SecureStore.setItemAsync('lookup', res.data.uuid)
         }
       })
       .catch((e) => {
-        console.log(e)
+        //console.log(e)
         setIsLocatingCustomAddress(false)
         setErrorMsg('An error occurred. Please try again.')
         setDistance(null)

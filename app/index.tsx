@@ -6,12 +6,14 @@ import * as SecureStore from 'expo-secure-store'
 import { fetch } from 'expo/fetch'
 import React, { useEffect, useState } from 'react'
 import {
+  Keyboard,
   Pressable,
   ScrollView,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   useColorScheme,
-  View
+  View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 export default function Index() {
@@ -38,7 +40,7 @@ export default function Index() {
     }
     console.log(otp)
     setLoginProcess(true)
-    fetch(`http://localhost:3000/donor/send-otp`, {
+    fetch(`https://api.pdgn.xyz/donor/send-otp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -79,135 +81,144 @@ export default function Index() {
         alert(error)
       })
   }
-
   useEffect(() => {
-    try {
-      SecureStore.getItemAsync('token').then((token) => {
+    async function init() {
+      try {
+        const token = await SecureStore.getItemAsync('token')
+
         if (token) {
           if (token.startsWith('hq-')) {
-            console.log('hq', token)
             router.replace('/hq')
           } else {
-            console.log('user', token)
             router.replace('/user')
           }
+        } else {
+          const hasOnboarded = await SecureStore.getItemAsync('hasOnboarded')
+          if (hasOnboarded !== 'true') {
+            router.push('/welcome')
+          }
         }
-      })
-    } catch (e) {
-      console.warn(e)
+      } catch (e) {
+        console.warn(e)
+      }
     }
+
+    init()
   }, [])
   let isDarkMode = useColorScheme() === 'dark'
   return (
-    <ScrollView
-      contentContainerStyle={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: isDarkMode ? '#030303' : '#fff',
-      }}
-      keyboardDismissMode="on-drag"
-    >
-      <SafeAreaView>
-        <Text
-          style={{
-            fontSize: 32,
-            textAlign: 'center',
-            color: '#7469B6',
-            fontFamily: 'PlayfairDisplay_600SemiBold'//'PlayfairDisplay_600SemiBold',
-          }}
-        >
-          Open Blood
-        </Text>
-        <View style={{ marginTop: 20 }}>
-          <TextInput
-            placeholder="phone number"
-            autoComplete="tel"
-            keyboardType="phone-pad"
-            value={phoneNumber}
-            onSubmitEditing={login}
-            onChangeText={setPhoneNumber}
-            placeholderTextColor={'grey'}
-            style={{
-              ...styles.input,
-              color: newUser || allowOTP ? 'grey' : 'black',
-            }}
-            editable={!loginProcess && (!newUser || !allowOTP)}
-          />
-          {allowOTP ? (
-            <>
-              <Pressable
-                onPress={() => {
-                  //let the user input a new phone number
-                  setAllowOTP(false)
-                  setNewUser(false)
-                }}
-              >
-                <Text
-                  style={{
-                    textAlign: 'left',
-                    fontSize: 16,
-                    color: '#7469B6',
-                  }}
-                >
-                  Try a different number
-                </Text>
-              </Pressable>
-              <TextInput
-                placeholderTextColor={'grey'}
-                placeholder="enter OTP"
-                autoComplete="off"
-                keyboardType="number-pad"
-                secureTextEntry={false}
-                value={otp}
-                onChangeText={setOtp}
-                style={styles.input}
-              />
-            </>
-          ) : null}
-        </View>
-        <Button onPress={login} disabled={loginProcess}>
-          {loginProcess
-            ? newUser
-              ? 'Verifying...'
-              : 'Loading...'
-            : newUser
-            ? 'Sign up!'
-            : 'Continue'}
-        </Button>
-        <Pressable
-          onPress={() => {
-            router.push('/hqonboarding')
-          }}
-          style={{ marginTop: 20 }}
-        >
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ScrollView
+        contentContainerStyle={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: isDarkMode ? '#030303' : '#fff',
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <SafeAreaView>
           <Text
             style={{
+              fontSize: 32,
               textAlign: 'center',
-              fontSize: 16,
               color: '#7469B6',
+              fontFamily: 'PlayfairDisplay_600SemiBold', //'PlayfairDisplay_600SemiBold',
             }}
           >
-            Blood Center
+            Open Blood
           </Text>
-        </Pressable>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginTop: 50,
-          }}>
+          <View style={{ marginTop: 20 }}>
+            <TextInput
+              placeholder="phone number"
+              autoComplete="tel"
+              keyboardType="phone-pad"
+              value={phoneNumber}
+              onSubmitEditing={login}
+              onChangeText={setPhoneNumber}
+              placeholderTextColor={'grey'}
+              style={{
+                ...styles.input,
+                color: newUser || allowOTP ? 'grey' : 'black',
+              }}
+              editable={!loginProcess && (!newUser || !allowOTP)}
+            />
+            {allowOTP ? (
+              <>
+                <Pressable
+                  onPress={() => {
+                    //let the user input a new phone number
+                    setAllowOTP(false)
+                    setNewUser(false)
+                  }}
+                >
+                  <Text
+                    style={{
+                      textAlign: 'left',
+                      fontSize: 16,
+                      color: '#7469B6',
+                    }}
+                  >
+                    Try a different number
+                  </Text>
+                </Pressable>
+                <TextInput
+                  placeholderTextColor={'grey'}
+                  placeholder="enter OTP"
+                  autoComplete="off"
+                  keyboardType="number-pad"
+                  secureTextEntry={false}
+                  value={otp}
+                  onChangeText={setOtp}
+                  style={styles.input}
+                />
+              </>
+            ) : null}
+          </View>
+          <Button onPress={login} disabled={loginProcess}>
+            {loginProcess
+              ? newUser
+                ? 'Verifying...'
+                : 'Loading...'
+              : newUser
+              ? 'Sign up!'
+              : 'Continue'}
+          </Button>
+          <Pressable
+            onPress={() => {
+              router.push('/hqonboarding')
+            }}
+            style={{ marginTop: 20 }}
+          >
+            <Text
+              style={{
+                textAlign: 'center',
+                fontSize: 16,
+                color: '#7469B6',
+              }}
+            >
+              Blood Center
+            </Text>
+          </Pressable>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              marginTop: 50,
+            }}
+          >
             <Text
               style={{
                 fontSize: 16,
-                color: 'grey'
+                color: 'grey',
               }}
             >
-              Open Blood Internal Distribution {Application.nativeApplicationVersion} [
-                          {Application.nativeBuildVersion}]
+              Open Blood {Application.nativeApplicationVersion} [
+              {Application.nativeBuildVersion}]
             </Text>
           </View>
-      </SafeAreaView>
-    </ScrollView>
+        </SafeAreaView>
+      </ScrollView>
+    </TouchableWithoutFeedback>
   )
 }

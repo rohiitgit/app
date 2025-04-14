@@ -58,9 +58,11 @@ export default function Modal() {
       <View
         style={{
           justifyContent: 'center',
-          width: '80%',
-          margin: 'auto',
           gap: 20,
+          marginTop: 20,
+          width: '100%',
+          alignItems: 'center',
+          marginBottom: 20,
         }}
       >
         <Pressable
@@ -104,6 +106,7 @@ export default function Modal() {
             padding: 20,
             backgroundColor: '#fefefe',
             borderRadius: 16,
+            width: 300,
           }}
         >
           <Picker.Item label="A+" value="A+" />
@@ -170,6 +173,16 @@ export default function Modal() {
         <Button onPress={requestBlood}>
           {loading ? 'Initiating...' : 'Send Alert'}
         </Button>
+        <Text
+          style={{
+            fontSize: 18,
+            color: responsiveColor,
+            textAlign: 'center',
+          }}
+        >
+          This will send a notification to all eligible donors in your blood
+          bank.
+        </Text>
         <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
       </View>
     </KeyboardAwareScrollView>

@@ -13,7 +13,7 @@ import {
   Text,
   TextInput,
   useColorScheme,
-  View
+  View,
 } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
@@ -47,7 +47,7 @@ export default function Four({
   useEffect(() => {
     SecureStore.getItemAsync('lookup').then((res) => {
       if (res) {
-        console.log('Found lookup')
+        //console.log('Found lookup')
         setCustomAddressLookupID(res)
       }
     })
@@ -78,7 +78,7 @@ export default function Four({
       longitude: location.coords.longitude,
     })
 
-    console.log(location)
+    //console.log(location)
   }
 
   function calcCrow(region: { latitude: number; longitude: number }) {
@@ -109,7 +109,7 @@ export default function Four({
 
   async function geocodeAddress() {
     setIsLocatingCustomAddress(true)
-    fetch(`http://localhost:3000/donor/geocode-location`, {
+    fetch(`https://api.pdgn.xyz/donor/geocode-location`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -142,13 +142,13 @@ export default function Four({
           setIsLocatingCustomAddress(false)
           setDistance(res.data.distance)
           setCustomLocationFormattedAddress(res.data.formattedAddress)
-          console.log(distance)
+          //console.log(distance)
           setCustomAddressLookupID(res.data.uuid)
           await SecureStore.setItemAsync('lookup', res.data.uuid)
         }
       })
       .catch((e) => {
-        console.log(e)
+        //console.log(e)
         setIsLocatingCustomAddress(false)
         setErrorMsg('An error occurred. Please try again.')
         setDistance(null)
@@ -183,17 +183,38 @@ export default function Four({
               gap: 20,
             }}
           >
-            <Pressable onPress={() => router.push('/')}>
+            <Pressable
+              onPress={() => {
+                Alert.alert(
+                  'Are you sure?',
+                  'Going back will reset your progress.',
+                  [
+                    {
+                      text: 'Cancel',
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'Yes',
+                      style: 'destructive',
+                      onPress: () => {
+                        router.replace('/')
+                      },
+                    },
+                  ]
+                )
+              }}
+            >
               <Octicons name="arrow-left" size={24} color={responsiveDark} />
             </Pressable>
             <Text
               style={{
                 fontSize: 24,
                 textAlign: 'center',
-                color: responsiveDark,
+                color: '#7469B6',
+                fontFamily: 'PlayfairDisplay_600SemiBold',
               }}
             >
-              <Text style={{ color: '#7469B6' }}>Open Blood</Text> Internal
+              Open Blood
             </Text>
           </View>
           <Progress.Bar
@@ -207,13 +228,13 @@ export default function Four({
         <Text
           style={{
             fontSize: 28,
-            textAlign: 'center',
-            margin: 'auto',
+            textAlign: 'left',
             marginBottom: 20,
-            color: responsiveDark,
+            fontFamily: 'PlayfairDisplay_600SemiBold',
+            color: '#7469B6',
           }}
         >
-          Sign up | <Text style={{ color: '#7469B6' }}>Location</Text>
+          Location
         </Text>
         <View
           style={{
@@ -348,8 +369,12 @@ export default function Four({
                   />
                   <Marker
                     coordinate={{
-                      latitude: parseFloat(route.params.baseBank.coords.split(',')[0] || 0),
-                      longitude: parseFloat(route.params.baseBank.coords.split(',')[1] || 0),
+                      latitude: parseFloat(
+                        route.params.baseBank.coords.split(',')[0] || 0
+                      ),
+                      longitude: parseFloat(
+                        route.params.baseBank.coords.split(',')[1] || 0
+                      ),
                     }}
                     title="Blood Bank"
                     pinColor="blue"
@@ -374,7 +399,7 @@ export default function Four({
                   textAlign: 'center',
                   marginTop: 10,
                   marginBottom: 10,
-                  color: responsiveDark
+                  color: responsiveDark,
                 }}
               >
                 Please ensure you are at your permanent location. If not, enter
