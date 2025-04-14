@@ -34,7 +34,7 @@ export default function Modal() {
   let [progress, setProgress] = useState<number>(0)
   useEffect(() => {
     //console.log('connecting to server')
-    const ws = new WebSocket('ws://api.pdgn.xyz/request')
+    const ws = new WebSocket('ws://localhost:3000/request')
     // catch connection errors
     ws.onerror = (error) => {
       //console.log('error', error)

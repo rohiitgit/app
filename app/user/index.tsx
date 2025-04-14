@@ -61,7 +61,7 @@ export default function Index() {
             ? 'i'
             : ''
         setExpoPushToken(token)
-        fetch('https://api.pdgn.xyz/donor/update-notifications', {
+        fetch('http://localhost:3000/donor/update-notifications', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

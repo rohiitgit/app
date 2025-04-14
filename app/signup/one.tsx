@@ -51,7 +51,7 @@ export default function One({
   let responsiveDark = useColorScheme() === 'dark' ? 'white' : 'black'
 
   function retrieveBanks() {
-    fetch('https://api.pdgn.xyz/donor/banks', {
+    fetch('http://localhost:3000/donor/banks', {
       method: 'GET',
     })
       .then((response) => response.json())

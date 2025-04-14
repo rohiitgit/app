@@ -44,7 +44,7 @@ export default function Settings() {
 
   async function regenerateUUID() {
     setRegenerating(true)
-    fetch(`https://api.pdgn.xyz/donor/regenerate-id`, {
+    fetch(`http://localhost:3000/donor/regenerate-id`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ export default function Settings() {
   }
 
   async function delBank(bankcode: string) {
-    fetch(`https://api.pdgn.xyz/donor/remove-bank`, {
+    fetch(`http://localhost:3000/donor/remove-bank`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ export default function Settings() {
   }
   async function addBank(bankcode: string) {
     ////console.log(bankcode)
-    fetch(`https://api.pdgn.xyz/donor/add-bank`, {
+    fetch(`http://localhost:3000/donor/add-bank`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ export default function Settings() {
   }
 
   async function getAllBanks() {
-    fetch('https://api.pdgn.xyz/donor/banks', {
+    fetch('http://localhost:3000/donor/banks', {
       method: 'GET',
     })
       .then((response) => response.json())
@@ -174,7 +174,7 @@ export default function Settings() {
 
     let token = await SecureStore.getItemAsync('token')
     setUUID(token)
-    fetch(`https://api.pdgn.xyz/donor/get-banks`, {
+    fetch(`http://localhost:3000/donor/get-banks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

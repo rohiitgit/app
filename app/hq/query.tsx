@@ -84,7 +84,7 @@ export default function Query() {
     setLoading(true)
     let bankCode = await SecureStore.getItemAsync('id')
     let token = await SecureStore.getItemAsync('token')
-    fetch(`https://api.pdgn.xyz/hq/query-donor`, {
+    fetch(`http://localhost:3000/hq/query-donor`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

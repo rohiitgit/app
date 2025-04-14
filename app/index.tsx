@@ -40,7 +40,7 @@ export default function Index() {
     }
     console.log(otp)
     setLoginProcess(true)
-    fetch(`https://api.pdgn.xyz/donor/send-otp`, {
+    fetch(`http://localhost:3000/donor/send-otp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -28,7 +28,7 @@ export default function Onboarding() {
   })
   function login() {
     setLoginProcess(true)
-    fetch(`https://api.pdgn.xyz/hq/login`, {
+    fetch(`http://localhost:3000/hq/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

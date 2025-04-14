@@ -120,7 +120,7 @@ export default function Home() {
     if (refresh) setRefreshing(true)
     let token = await SecureStore.getItemAsync('token')
     let bbId = await SecureStore.getItemAsync('bbId')
-    fetch(`https://api.pdgn.xyz/donor/user-stats`, {
+    fetch(`http://localhost:3000/donor/user-stats`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -213,7 +213,7 @@ export default function Home() {
     setShowModal(true)
     setSwitchModalLoading(true)
     let token = await SecureStore.getItemAsync('token')
-    fetch(`https://api.pdgn.xyz/donor/get-banks`, {
+    fetch(`http://localhost:3000/donor/get-banks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

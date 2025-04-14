@@ -109,7 +109,7 @@ export default function Four({
 
   async function geocodeAddress() {
     setIsLocatingCustomAddress(true)
-    fetch(`https://api.pdgn.xyz/donor/geocode-location`, {
+    fetch(`http://localhost:3000/donor/geocode-location`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

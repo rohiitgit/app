@@ -8,7 +8,6 @@ import { useColorScheme } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
 import One from './one'
 import Two from './two'
-import TwoBeta from './twobeta'
 import Three from './three'
 import Four from './four'
 import Five from './five'
@@ -35,7 +34,6 @@ export default function Signup() {
             initialParams={{ phoneNumber: local.phoneNumber }}
           />
           <Stack.Screen name="two" component={Two} />
-          <Stack.Screen name="twobeta" component={TwoBeta} />
           <Stack.Screen name="three" component={Three} />
           <Stack.Screen name="four" component={Four} />
           <Stack.Screen name="five" component={Five} />

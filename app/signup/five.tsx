@@ -73,7 +73,7 @@ export default function Five({
           : ''
         : '',
     }
-    fetch(`https://api.pdgn.xyz/donor/signup`, {
+    fetch(`http://localhost:3000/donor/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

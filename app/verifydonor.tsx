@@ -69,7 +69,7 @@ export default function Modal() {
   let responsiveColor = isDarkMode ? 'white' : 'black'
 
   useEffect(() => {
-    fetch(`https://api.pdgn.xyz/hq/request-user-data`, {
+    fetch(`http://localhost:3000/hq/request-user-data`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ export default function Modal() {
   function verifyDonor() {
     //console.log(token)
     setVerifying(true)
-    fetch(`https://api.pdgn.xyz/hq/verify-donor`, {
+    fetch(`http://localhost:3000/hq/verify-donor`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ export default function Modal() {
 
   function rejectDonor() {
     setRejecting(true)
-    fetch(`https://api.pdgn.xyz/hq/reject-donor`, {
+    fetch(`http://localhost:3000/hq/reject-donor`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

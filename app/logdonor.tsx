@@ -37,7 +37,7 @@ export default function Modal() {
   let [loading, setLoading] = useState<boolean>(true)
   let [oos, setOos] = useState<boolean>(false)
   useEffect(() => {
-    fetch(`https://api.pdgn.xyz/hq/get-donor`, {
+    fetch(`http://localhost:3000/hq/get-donor`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ export default function Modal() {
 
   function markAsDonated() {
     setMarking(true)
-    fetch(`https://api.pdgn.xyz/hq/mark-donated`, {
+    fetch(`http://localhost:3000/hq/mark-donated`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export default function Modal() {
 
   function extendDonorScope() {
     setExtending(true)
-    fetch(`https://api.pdgn.xyz/hq/extend-donor-scope`, {
+    fetch(`http://localhost:3000/hq/extend-donor-scope`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

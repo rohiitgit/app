@@ -78,7 +78,7 @@ export default function Modal() {
     } else {
       setDisable(true)
      ////console.log('updating location: conditions met')
-      fetch('https://api.pdgn.xyz/donor/update-location', {
+      fetch('http://localhost:3000/donor/update-location', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,7 +189,7 @@ export default function Modal() {
 
   async function geocodeAddress() {
     setIsLocatingCustomAddress(true)
-    fetch(`https://api.pdgn.xyz/donor/geocode-location`, {
+    fetch(`http://localhost:3000/donor/geocode-location`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

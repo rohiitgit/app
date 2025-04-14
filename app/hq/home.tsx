@@ -42,7 +42,7 @@ export default function HQHome() {
 
     let token = await SecureStore.getItemAsync('token')
     let id = await SecureStore.getItemAsync('id')
-    fetch(`https://api.pdgn.xyz/hq/get-stats`, {
+    fetch(`http://localhost:3000/hq/get-stats`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

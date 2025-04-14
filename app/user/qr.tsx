@@ -29,7 +29,7 @@ export default function QR() {
   }
 
   async function regenerateUUID() {
-    fetch(`https://api.pdgn.xyz/donor/regenerate-id`, {
+    fetch(`http://localhost:3000/donor/regenerate-id`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
