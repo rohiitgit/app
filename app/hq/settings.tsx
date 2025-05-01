@@ -11,7 +11,9 @@ import {
   useColorScheme,
   View,
 } from 'react-native'
+import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { logoutUser } from '@/components/CheckSecret'
 export default function Settings() {
   let [uuid, setUUID] = useState<string | null>('notfound')
   let [refreshing, setRefreshing] = useState<boolean>(false)
@@ -23,11 +25,12 @@ export default function Settings() {
   }
 
   useEffect(() => {
-    //console.log('loading')
     load(false)
   }, [])
   function reportBug() {
-    router.push('mailto:openblood@pidgon.com?subject=Open%20Blood%20Bug%20Report')
+    router.push(
+      'mailto:openblood@pidgon.com?subject=Open%20Blood%20Bug%20Report'
+    )
   }
   let isDarkMode = useColorScheme() === 'dark'
   let responsiveColor = useColorScheme() === 'dark' ? '#fff' : '#000'
@@ -43,33 +46,34 @@ export default function Settings() {
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
-          width: '80%',
+          width: '85%',
           marginBottom: 40,
           marginTop: 20,
         }}
       >
-        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <Image
+            source={require('../../assets/images/home.png')}
+            style={{
+              width: 40,
+              height: 40,
+              marginRight: 10,
+            }}
+          />
           <Text
             style={{
               fontSize: 26,
-              textAlign: 'center',
-              color: isDarkMode ? 'white' : 'black',
+              color: '#7469B6',
+              fontFamily: 'PlayfairDisplay_600SemiBold',
             }}
           >
-            <Text
-              style={{
-                color: '#7469B6',
-                fontFamily: 'PlayfairDisplay_600SemiBold',
-              }}
-            >
-              Open Blood HQ
-            </Text>
+            Open Blood HQ
           </Text>
-          <Text
-            style={{
-              color: isDarkMode ? 'white' : 'black',
-            }}
-          ></Text>
         </View>
       </View>
       <ScrollView
@@ -101,8 +105,7 @@ export default function Settings() {
         </Button>
         <Button
           onPress={() => {
-            SecureStore.deleteItemAsync('token')
-            SecureStore.deleteItemAsync('id')
+            logoutUser(true)
             router.replace('/')
           }}
           style={{
@@ -113,9 +116,6 @@ export default function Settings() {
         >
           <Octicons name="sign-out" size={20} /> Log out
         </Button>
-        <Button onPress={reportBug}>
-          <Octicons name="bug" size={20} /> Report a Bug
-        </Button>
         <View style={{ alignItems: 'center' }}>
           <Text
             style={{
@@ -124,8 +124,8 @@ export default function Settings() {
               fontSize: 16,
             }}
           >
-            Open Blood HQ {Application.nativeApplicationVersion}{' '}
-            [{Application.nativeBuildVersion}]
+            Open Blood HQ {Application.nativeApplicationVersion} [
+            {Application.nativeBuildVersion}]
           </Text>
         </View>
       </ScrollView>

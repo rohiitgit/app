@@ -1,10 +1,12 @@
 import styles from '@/assets/styles/styles'
 import Button from '@/components/Button'
+import checkSecret from '@/components/CheckSecret'
 import * as Application from 'expo-application'
 import { router } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
 import { fetch } from 'expo/fetch'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
+import * as SplashScreen from 'expo-splash-screen'
 import {
   Keyboard,
   Pressable,
@@ -15,97 +17,173 @@ import {
   useColorScheme,
   View,
 } from 'react-native'
+import {
+  DMSerifText_400Regular,
+  useFonts,
+} from '@expo-google-fonts/dm-serif-text'
+import { PlayfairDisplay_600SemiBold } from '@expo-google-fonts/playfair-display'
+
 import { SafeAreaView } from 'react-native-safe-area-context'
 export default function Index() {
+  SplashScreen.preventAutoHideAsync()
   let [phoneNumber, setPhoneNumber] = useState<string>('')
   let [password, setPassword] = useState<string>('')
   let [loginProcess, setLoginProcess] = useState<boolean>(false)
+  let [appIsReady, setAppIsReady] = useState<boolean>(false)
+  let [fontsLoaded] = useFonts({
+    PlayfairDisplay_600SemiBold,
+    DMSerifText_400Regular,
+  })
   let [otp, setOtp] = useState<string>('')
-  let [newUserOTP, setNewUserOTP] = useState<string>('')
   let [allowOTP, setAllowOTP] = useState<boolean>(false)
   let [newUser, setNewUser] = useState<boolean>(false)
+  let [lookupAccessToken, setLookupAccessToken] = useState<string>('')
   async function login() {
     if (newUser) {
-      console.log(otp)
-      console.log(newUserOTP)
-      if (parseInt(otp) === parseInt(newUserOTP)) {
-        router.push({
-          pathname: '/signup',
-          params: { phoneNumber: phoneNumber },
+      setLoginProcess(true)
+      fetch(
+        `${
+          __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
+        }/donor/check-otp`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${lookupAccessToken}`,
+          },
+          body: JSON.stringify({
+            phone: phoneNumber,
+            otp: otp,
+          }),
+        }
+      )
+        .then((response) => response.json())
+        .then(async (response) => {
+          setLoginProcess(false)
+          if (response.error) {
+            alert(response.message)
+          } else {
+            router.replace({
+              pathname: '/signup',
+              params: {
+                phoneNumber: phoneNumber,
+                lookuptoken: lookupAccessToken,
+              },
+            })
+          }
         })
-      } else {
-        alert('Invalid OTP')
-      }
+        .catch((error) => {
+          alert(error)
+        })
       return
     }
     console.log(otp)
     setLoginProcess(true)
-    fetch(`http://localhost:3000/donor/send-otp`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        phone: phoneNumber,
-        allowSignup: true,
-        intentVerifyOTPlogin: allowOTP,
-        userEnteredOTP: allowOTP ? otp : null,
-      }),
-    })
+    fetch(
+      `${
+        __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
+      }/donor/send-otp`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone: phoneNumber,
+          allowSignup: true,
+          intentVerifyOTPlogin: allowOTP,
+          userEnteredOTP: allowOTP ? otp : null,
+        }),
+      }
+    )
       .then((response) => response.json())
       .then(async (response) => {
+        if (response.statusCode === 429) {
+          alert('Too many requests. Please try again later.')
+          setLoginProcess(false)
+          return
+        }
         setLoginProcess(false)
         if (response.error) {
           alert(response.message)
         } else {
           //alert(response.message)
-          if (response.otpSent) {
+          if (response.hasOwnProperty('otpSent')) {
             setAllowOTP(true)
-          } else if (response.otp) {
+          } else if (response.hasOwnProperty('access')) {
+            console.log(response.access.token, response.bank.id)
+            await SecureStore.setItemAsync('token', response.access.token)
+            await SecureStore.setItemAsync('refresh', response.refresh.token)
+            await SecureStore.setItemAsync(
+              'tokenexp',
+              response.access.exp.toString()
+            )
+            await SecureStore.setItemAsync(
+              'refreshexp',
+              response.refresh.exp.toString()
+            )
+            await SecureStore.setItemAsync('bbId', response.bank.id)
+            router.replace('/user')
+          } else {
             setAllowOTP(true)
             setNewUser(true)
-            setNewUserOTP(response.otp)
+            setLookupAccessToken(response.lookuptoken)
             console.log(response.otp)
             console.log('new user')
-          } else if (response.uuid) {
-            console.log(response.uuid, response.bank.id)
-            await SecureStore.setItemAsync('token', response.uuid)
-            await SecureStore.setItemAsync('bbId', response.bank.id)
-            router.push('/user')
           }
         }
       })
       .catch((error) => {
+        console.log('error', error)
         setLoginProcess(false)
         console.log(error)
         alert(error)
       })
   }
-  useEffect(() => {
-    async function init() {
-      try {
-        const token = await SecureStore.getItemAsync('token')
 
-        if (token) {
-          if (token.startsWith('hq-')) {
-            router.replace('/hq')
-          } else {
-            router.replace('/user')
-          }
-        } else {
+  useEffect(() => {
+    async function prepare() {
+      try {
+        // Call checkSecret to validate tokens
+        const token = await checkSecret()
+
+        if (!token) {
+          console.log('Token is invalid or does not exist')
           const hasOnboarded = await SecureStore.getItemAsync('hasOnboarded')
-          if (hasOnboarded !== 'true') {
+          if (!hasOnboarded) {
             router.push('/welcome')
           }
+          setAppIsReady(true)
+          return
+        } else {
+          const id = await SecureStore.getItemAsync('id')
+          const redirectPath = id ? '/hq' : '/user'
+          console.log(`Redirecting to ${redirectPath}`)
+          setAppIsReady(true)
+          router.replace(redirectPath)
         }
       } catch (e) {
         console.warn(e)
       }
     }
 
-    init()
+    prepare()
   }, [])
   let isDarkMode = useColorScheme() === 'dark'
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady && fontsLoaded) {
+      await SplashScreen.hideAsync()
+    }
+  }, [appIsReady, fontsLoaded])
+
+  useEffect(() => {
+    onLayoutRootView()
+  }, [appIsReady, fontsLoaded])
+
+  if (!appIsReady || !fontsLoaded) {
+    return null
+  }
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView
@@ -142,6 +220,7 @@ export default function Index() {
                 color: newUser || allowOTP ? 'grey' : 'black',
               }}
               editable={!loginProcess && (!newUser || !allowOTP)}
+              readOnly={loginProcess || newUser || allowOTP}
             />
             {allowOTP ? (
               <>
@@ -175,14 +254,22 @@ export default function Index() {
               </>
             ) : null}
           </View>
-          <Button onPress={login} disabled={loginProcess}>
+          <Button
+            onPress={login}
+            disabled={
+              allowOTP
+                ? !otp.match(/^\d{4}$/)
+                : loginProcess ||
+                  !phoneNumber.match(/^(\+91[\-\s]?|0)?[1-9]\d{4}[\-\s]?\d{5}$/)
+            }
+          >
             {loginProcess
               ? newUser
                 ? 'Verifying...'
-                : 'Loading...'
+                : 'Logging in...'
               : newUser
-              ? 'Sign up!'
-              : 'Continue'}
+              ? 'Continue'
+              : 'Log in'}
           </Button>
           <Pressable
             onPress={() => {
@@ -197,7 +284,7 @@ export default function Index() {
                 color: '#7469B6',
               }}
             >
-              Blood Center
+              Blood Banks
             </Text>
           </Pressable>
           <View

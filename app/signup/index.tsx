@@ -31,11 +31,16 @@ export default function Signup() {
           <Stack.Screen
             name="one"
             component={One}
-            initialParams={{ phoneNumber: local.phoneNumber }}
+            initialParams={{ phoneNumber: local.phoneNumber,
+              lookuptoken: local.lookuptoken,
+
+            }}
           />
           <Stack.Screen name="two" component={Two} />
           <Stack.Screen name="three" component={Three} />
-          <Stack.Screen name="four" component={Four} />
+          <Stack.Screen name="four" component={Four} initialParams={{
+            lookuptoken: local.lookuptoken
+          }}/>
           <Stack.Screen name="five" component={Five} />
 
           <Stack.Screen

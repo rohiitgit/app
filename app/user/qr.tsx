@@ -1,9 +1,7 @@
-import Button from '@/components/Button'
-import FreeButton from '@/components/FreeButton'
-import { BlurView } from 'expo-blur'
 import * as SecureStore from 'expo-secure-store'
 import { useEffect, useState } from 'react'
 import {
+  ActivityIndicator,
   Alert,
   RefreshControl,
   ScrollView,
@@ -14,54 +12,72 @@ import {
 import QRCode from 'react-native-qrcode-svg'
 import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import fx from '@/components/Fetch'
+import { router } from 'expo-router'
+import { useFocusEffect } from '@react-navigation/native'
+import React from 'react'
+import Button from '@/components/Button'
 export default function QR() {
   let [uuid, setUUID] = useState<string | null>('notfound')
   let [refreshing, setRefreshing] = useState<boolean>(false)
+  let [loadingQR, setLoadingQR] = useState<boolean>(false)
   let [showQR, setShowQR] = useState<boolean>(false)
   const [bbName, setBbName] = useState<string>('')
+
   async function load(refresh = false) {
+    ping()
     if (refresh) setRefreshing(true)
-    let token = await SecureStore.getItemAsync('token')
     const name = await SecureStore.getItemAsync('bbName')
     setBbName(name || '')
-    setUUID(token)
     setRefreshing(false)
   }
 
-  async function regenerateUUID() {
-    fetch(`http://localhost:3000/donor/regenerate-id`, {
+  useEffect(() => {
+    load(false) // Initial load
+  }, [])
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Start the interval when the screen is focused
+      const interval = setInterval(() => {
+        setRefreshing(true)
+        ping()
+        setRefreshing(false)
+      }, 50000) // 50 seconds
+
+      return () => {
+        // Clear the interval when the screen loses focus
+        clearInterval(interval)
+      }
+    }, [])
+  )
+
+  function ping() {
+    fx(`/donor/qr`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+      body: {
+        qr: true,
       },
-      body: JSON.stringify({
-        uuid: uuid,
-      }),
     })
-      .then((response) => response.json())
       .then(async (response) => {
         if (response.error) {
-          alert(response.message)
-        } else {
-          SecureStore.setItemAsync('token', response.uuid)
-          Alert.alert('ID Regenerated!', 'Please restart your app.', [
+          Alert.alert('Error', 'Unauthorized Access', [
             {
-              text: 'OK',
+              text: 'Go back',
               onPress: () => {
-                load()
+                SecureStore.deleteItemAsync('token')
+                router.navigate('/')
               },
             },
           ])
+        } else {
+          setUUID(response.access.token)
         }
       })
       .catch((error) => {
-        //console.log(error)
-        alert(error)
+        console.error(error)
       })
   }
-  useEffect(() => {
-    load(false)
-  }, [])
   let isDarkMode = useColorScheme() === 'dark'
   return (
     <SafeAreaView
@@ -128,28 +144,25 @@ export default function QR() {
             marginTop: 20,
           }}
         >
-          <QRCode
-            value={
-              'bloodbank-' +
-              (uuid === null ? 'notfound' : showQR ? uuid : 'hidden')
-            }
-            backgroundColor="transparent"
-            color={isDarkMode ? 'white' : 'black'}
-            size={325}
-          />
-          <BlurView
-            intensity={showQR || uuid === null || refreshing == true ? 0 : 10}
-            tint="systemMaterial"
-            style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-            }}
-          />
-          <Button onPress={() => setShowQR(!showQR)}>
-            {showQR ? 'Hide QR' : 'Show QR'}
-          </Button>
+          {loadingQR ? (
+            <ActivityIndicator
+              size="small"
+              color={isDarkMode ? 'white' : 'black'}
+            />
+          ) : (
+            <>
+              <QRCode
+                value={`ob-${uuid}` || 'ob-notfound'}
+                backgroundColor="transparent"
+                color={isDarkMode ? 'white' : 'black'}
+                size={325}
+              />
+            </>
+          )}
         </View>
+        <Button onPress={ping} style={{ marginTop: 20 }}>
+          Refresh QR Code
+        </Button>
         <Text
           style={{
             fontSize: 16,

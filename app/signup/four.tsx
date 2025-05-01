@@ -38,6 +38,9 @@ export default function Four({
   const [errorMsg, setErrorMsg] = useState<string>('')
   let [addressText, setAddressText] = useState<string>('')
   let [useCustomLocation, setUseCustomLocation] = useState<boolean>(false)
+  let [lookupToken, setLookupToken] = useState<string>(
+    route.params?.lookuptoken || ''
+  )
   let [customAddressLookupID, setCustomAddressLookupID] = useState<string>('')
   let [isLocatingCustomAddress, setIsLocatingCustomAddress] =
     useState<boolean>(false)
@@ -45,6 +48,7 @@ export default function Four({
     useState<string>('')
   let text = ''
   useEffect(() => {
+    console.log(lookupToken)
     SecureStore.getItemAsync('lookup').then((res) => {
       if (res) {
         //console.log('Found lookup')
@@ -109,18 +113,30 @@ export default function Four({
 
   async function geocodeAddress() {
     setIsLocatingCustomAddress(true)
-    fetch(`http://localhost:3000/donor/geocode-location`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        address: addressText,
-        uuid: customAddressLookupID,
-      }),
-    })
+    fetch(
+      `${
+        __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
+      }/donor/geocode-location`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${lookupToken}`,
+        },
+        body: JSON.stringify({
+          address: addressText,
+          //uuid: customAddressLookupID,
+        }),
+      }
+    )
       .then((res) => res.json())
       .then(async (res) => {
+        console.log(res)
+        if (res.statusCode === 429) {
+          alert('Too many requests. Please try again later.')
+          setIsLocatingCustomAddress(false)
+          return
+        }
         if (res.error) {
           if (res.message == 'ratelimit') {
             Alert.alert(
@@ -135,20 +151,30 @@ export default function Four({
           }
           setIsLocatingCustomAddress(false)
         } else {
-          Alert.alert(
+          setUserDefinedLocation({
+            latitude: res.data.coords.latitude,
+            longitude: res.data.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          })
+          calcCrow({
+            latitude: res.data.coords.latitude,
+            longitude: res.data.coords.longitude,
+          })
+          /*Alert.alert(
             'Address located!',
             'For security reasons, your exact address cannot be displayed. Please ensure that the distance is roughly accurate. If not, enter a more specific address and try again.'
-          )
+          )*/
           setIsLocatingCustomAddress(false)
           setDistance(res.data.distance)
-          setCustomLocationFormattedAddress(res.data.formattedAddress)
+          //setCustomLocationFormattedAddress(res.data.formattedAddress)
           //console.log(distance)
-          setCustomAddressLookupID(res.data.uuid)
+          //setCustomAddressLookupID(res.data.uuid)
           await SecureStore.setItemAsync('lookup', res.data.uuid)
         }
       })
       .catch((e) => {
-        //console.log(e)
+        console.log(e)
         setIsLocatingCustomAddress(false)
         setErrorMsg('An error occurred. Please try again.')
         setDistance(null)
@@ -241,7 +267,7 @@ export default function Four({
             width: '80%',
           }}
         >
-          {distance && !useCustomLocation ? (
+          {distance ? (
             <Text
               style={{
                 fontSize: 16,
@@ -285,7 +311,7 @@ export default function Four({
                   Try Again
                 </Button>
               </>
-            ) : userDefinedLocation && !useCustomLocation ? (
+            ) : userDefinedLocation ? (
               <View
                 style={{
                   width: '100%',
@@ -438,9 +464,7 @@ export default function Four({
                   value={useCustomLocation}
                 />
               </View>
-              {distance &&
-              customLocationFormattedAddress !== '' &&
-              useCustomLocation ? (
+              {distance && customLocationFormattedAddress !== '' ? (
                 <>
                   <Text
                     style={{

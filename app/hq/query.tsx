@@ -7,22 +7,26 @@ import { router } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
 import { useEffect, useRef, useState } from 'react'
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
+  Keyboard,
   Modal,
   Pressable,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   useColorScheme,
   View,
 } from 'react-native'
+import { Image } from 'expo-image'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import fx from '@/components/Fetch'
 
 export default function Query() {
-  let nameInputTemp = ''
   let [expandCriteria, setExpandCriteria] = useState<boolean>(false)
   let [expandSearchBox, setExpandSearchBox] = useState<boolean>(true)
   let [activeHotswap, setActiveHotswap] = useState<boolean>(true)
@@ -37,8 +41,6 @@ export default function Query() {
   let [showBloodTypeModal, setShowBloodTypeModal] = useState<boolean>(false)
   let [openUnverified, setOpenUnverified] = useState<boolean>(false)
   let [requireUsersVerified, setRequireUsersVerified] = useState<boolean>(true)
-  let [requireUsersAffiliated, setRequireUsersAffiliated] =
-    useState<boolean>(false)
   let [radius, setRadius] = useState<string>('')
   let [token, setToken] = useState<string | null>('')
   let [bankCode, setBankCode] = useState<string | null>('')
@@ -49,9 +51,7 @@ export default function Query() {
     bloodtype !== '' ||
     radius !== '' ||
     minimumMonths !== '' ||
-    name !== '' ||
-    requireUsersVerified ||
-    requireUsersAffiliated
+    requireUsersVerified
 
   function convertTimestampToShortString(timestamp: string) {
     if (
@@ -64,6 +64,19 @@ export default function Query() {
     let month = date.toLocaleString('default', { month: 'short' })
     let year = date.getFullYear().toString().substring(2)
     return `${month} '${year}`
+  }
+
+  function formatDistance(distance: number): string {
+    const actual = distance < 1 ? distance * 1000 : distance
+    const unit = distance < 1 ? 'm' : 'km'
+
+    if (actual >= 1_000_000) {
+      return `${(actual / 1_000_000).toFixed(1)}M ${unit} away`
+    } else if (actual >= 1_000) {
+      return `${(actual / 1_000).toFixed(1)}K ${unit} away`
+    } else {
+      return `${Math.round(actual).toLocaleString()} ${unit} away`
+    }
   }
 
   useEffect(() => {
@@ -84,33 +97,26 @@ export default function Query() {
     setLoading(true)
     let bankCode = await SecureStore.getItemAsync('id')
     let token = await SecureStore.getItemAsync('token')
-    fetch(`http://localhost:3000/hq/query-donor`, {
+    fx(`/hq/query-donor`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(
-        unverified
-          ? {
-              bankCode: bankCode,
-              token: token,
-              unverified: true,
-            }
-          : {
-              bankCode: bankCode,
-              token: token,
-              months: minimumMonths == '' ? null : minimumMonths,
-              verified: requireUsersVerified,
-              affiliated: requireUsersAffiliated,
-              distance: radius == '' ? null : radius,
-              bloodtype: bloodtype,
-              name: name,
-              unverified: false,
-            }
-      ),
+      body: unverified
+        ? {
+            bankCode: bankCode,
+            token: token,
+            unverified: true,
+          }
+        : {
+            bankCode: bankCode,
+            token: token,
+            months: minimumMonths == '' ? null : minimumMonths,
+            verified: requireUsersVerified,
+            distance: radius == '' ? null : radius,
+            bloodtype: bloodtype,
+            name: name,
+            unverified: false,
+          },
     })
-      .then((response) => response.json())
-      .then((response) => {
+      .then(async (response) => {
         if (refresh) setLoading(false)
         if (!unverified) setExpandSearchBox(false)
         if (response.error) {
@@ -323,18 +329,8 @@ export default function Query() {
           </KeyboardAwareScrollView>
         </View>
       </Modal>
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'column',
-          gap: 10,
-          marginTop: 100,
-          marginBottom: 100,
-          height: '100%',
-          width: '100%',
-        }}
-      >
+
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <FlatList
           style={{
             width: '100%',
@@ -353,55 +349,55 @@ export default function Query() {
                 No donors found{'\n'} matching that criteria.
               </Text>
             ) : loading ? (
-              <Text
+              <View
                 style={{
-                  fontSize: 18,
-                  textAlign: 'center',
                   marginTop: 20,
-                  color: isDarkMode ? 'white' : 'black',
+                  alignSelf: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                Querying...
-              </Text>
+                <ActivityIndicator
+                  size="small"
+                  color={isDarkMode ? 'white' : 'black'}
+                />
+              </View>
             ) : null
           }
-          ListFooterComponent={() => <View style={{ height: 200 }}></View>}
-          ListHeaderComponent={() => (
+          ListFooterComponent={<View style={{ height: 100 }}></View>}
+          ListHeaderComponent={
             <View>
               <View
                 style={{
                   flexDirection: 'row',
-                  width: '80%',
+                  width: '85%',
                   justifyContent: 'space-between',
                   alignSelf: 'center',
                   marginTop: 20,
+                  marginBottom: 20,
                 }}
               >
                 <View
-                  style={{ flexDirection: 'column', justifyContent: 'center' }}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}
                 >
+                  <Image
+                    source={require('../../assets/images/home.png')}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      marginRight: 10,
+                    }}
+                  />
                   <Text
                     style={{
                       fontSize: 26,
-                      textAlign: 'center',
-                      color: isDarkMode ? 'white' : 'black',
+                      color: '#7469B6',
+                      fontFamily: 'PlayfairDisplay_600SemiBold',
                     }}
                   >
-                    <Text
-                      style={{
-                        color: '#7469B6',
-                        fontFamily: 'PlayfairDisplay_600SemiBold',
-                      }}
-                    >
-                      {bbName ? bbName : 'Open Blood HQ'}
-                    </Text>
-                  </Text>
-                  <Text
-                    style={{
-                      color: isDarkMode ? 'white' : 'black',
-                    }}
-                  >
-                    {bbName ? 'Open Blood HQ' : ''}
+                    DonorBase
                   </Text>
                 </View>
               </View>
@@ -413,27 +409,6 @@ export default function Query() {
                   alignItems: 'center',
                 }}
               >
-                <View
-                  style={{
-                    alignContent: 'flex-start',
-                    width: '80%',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 28,
-                      textAlign: 'left',
-                      color: '#7469B6',
-                      fontWeight: 'bold',
-                      fontFamily: 'PlayfairDisplay_600SemiBold',
-                      marginTop: 20,
-                      marginBottom: 10,
-                    }}
-                  >
-                    Donors
-                  </Text>
-                </View>
                 <View
                   style={{
                     flexDirection: 'row',
@@ -462,7 +437,7 @@ export default function Query() {
                         textAlign: 'center',
                       }}
                     >
-                      Custom Search
+                      All
                     </Text>
                   </Pressable>
                   <Pressable
@@ -495,7 +470,7 @@ export default function Query() {
                     style={{
                       flexDirection: 'row',
                       justifyContent: 'space-between',
-                      width: '80%',
+                      width: '85%',
                       marginTop: 20,
                       alignSelf: 'center',
                     }}
@@ -570,15 +545,14 @@ export default function Query() {
                           gap: 10,
                           padding: 9,
                           borderRadius: 16,
-                          width: '100%',
                         }}
                         style={{
                           width: '90%',
                           backgroundColor: isDarkMode ? '#3A3B3C' : '#fff',
-                          borderRadius: 25,
+                          borderRadius: 16,
                           marginTop: 5,
                         }}
-                        showsHorizontalScrollIndicator={true}
+                        showsHorizontalScrollIndicator={false}
                       >
                         {expandCriteria ||
                         (!expandCriteria && bloodtype !== '') ||
@@ -591,9 +565,9 @@ export default function Query() {
                               backgroundColor:
                                 bloodtype == '' ? '#DDE1E4' : '#AD88C6',
                               padding: 10,
-                              borderRadius: 16,
-                              borderBottomLeftRadius: expandCriteria ? 7 : 16,
-                              borderBottomRightRadius: expandCriteria ? 7 : 16,
+                              borderRadius: 7,
+                              borderBottomLeftRadius: expandCriteria ? 3 : 7,
+                              borderBottomRightRadius: expandCriteria ? 3 : 7,
                             }}
                           >
                             <Text
@@ -622,7 +596,7 @@ export default function Query() {
                               backgroundColor:
                                 radius == '' ? '#DDE1E4' : '#AD88C6',
                               padding: 10,
-                              borderRadius: expandCriteria ? 7 : 16,
+                              borderRadius: expandCriteria ? 3 : 7,
                             }}
                           >
                             <Text
@@ -651,7 +625,7 @@ export default function Query() {
                               backgroundColor:
                                 minimumMonths == '' ? '#DDE1E4' : '#AD88C6',
                               padding: 10,
-                              borderRadius: expandCriteria ? 7 : 16,
+                              borderRadius: expandCriteria ? 3 : 7,
                             }}
                           >
                             <Text
@@ -680,7 +654,7 @@ export default function Query() {
                                   ? '#AD88C6'
                                   : '#DDE1E4',
                               padding: 10,
-                              borderRadius: expandCriteria ? 7 : 16,
+                              borderRadius: expandCriteria ? 3 : 7,
                             }}
                           >
                             <Text
@@ -700,41 +674,6 @@ export default function Query() {
                             </Text>
                           </Pressable>
                         ) : null}
-                        {expandCriteria ||
-                        (!expandCriteria && requireUsersAffiliated === true) ||
-                        !isAtLeastOneCriteriaActive ? (
-                          <Pressable
-                            onPress={() => {
-                              setRequireUsersAffiliated(!requireUsersAffiliated)
-                            }}
-                            style={{
-                              backgroundColor:
-                                requireUsersAffiliated == true
-                                  ? '#AD88C6'
-                                  : '#DDE1E4',
-                              padding: 10,
-                              borderRadius: 16,
-                              borderTopLeftRadius: expandCriteria ? 7 : 16,
-                              borderTopRightRadius: expandCriteria ? 7 : 16,
-                            }}
-                          >
-                            <Text
-                              style={{
-                                fontSize: 16,
-                                textAlign: 'left',
-                                color:
-                                  requireUsersAffiliated == true
-                                    ? 'white'
-                                    : 'black',
-                              }}
-                            >
-                              Affiliation{' '}
-                              {requireUsersAffiliated
-                                ? 'required'
-                                : 'not required'}
-                            </Text>
-                          </Pressable>
-                        ) : null}
                       </ScrollView>
                     ) : null}
                     {activeHotswap ? (
@@ -749,7 +688,7 @@ export default function Query() {
                           style={{
                             flexDirection: 'row',
                             justifyContent: 'space-between',
-                            width: '90%',
+                            width: '100%',
                             alignSelf: 'center',
                             marginTop: 20,
                           }}
@@ -786,9 +725,11 @@ export default function Query() {
                           }}
                           placeholderTextColor={'grey'}
                           placeholder="Type here"
-                          onChangeText={(val) => (nameInputTemp = val)}
+                          /*onChangeText={(val) => (nameInputTemp = val)}
                           onEndEditing={() => setName(nameInputTemp)}
-                          defaultValue={name}
+                          defaultValue={name}*/
+                          value={name}
+                          onChangeText={setName}
                           autoComplete="off"
                           autoCorrect={false}
                         />
@@ -828,7 +769,7 @@ export default function Query() {
                 ) : null}
               </View>
             </View>
-          )}
+          }
           renderItem={({ item }: { item: any }) => (
             <View
               style={{
@@ -882,13 +823,7 @@ export default function Query() {
                         : '#FF3B31',
                   }}
                 >
-                  {parseFloat(
-                    item.distance < 1 ? item.distance * 1000 : item.distance
-                  )
-                    .toPrecision(item.distance < 1 ? 3 : 2)
-                    .toString()
-                    .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}{' '}
-                  {item.distance < 1 ? 'm' : 'km'} away
+                  {formatDistance(item.distance)}
                 </Text>
               </View>
               <View
@@ -1001,7 +936,7 @@ export default function Query() {
           )}
           keyExtractor={(item) => item.uuid}
         />
-      </View>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   )
 }

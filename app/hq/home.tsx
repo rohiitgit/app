@@ -14,12 +14,15 @@ import {
   useColorScheme,
   View,
 } from 'react-native'
+import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import fx from '@/components/Fetch'
 
 export default function HQHome() {
   let [refreshing, setRefreshing] = useState<boolean>(false)
   let [totalDonators, setTotalDonators] = useState<number>(0)
   let [verifiedDonors, setVerifiedDonors] = useState<number>(0)
+  //let [installed, setInstalled] = useState<string>("0")
   let [unverifiedDonors, setUnverifiedDonors] = useState<number>(0)
   let [totalDonations, setTotalDonations] = useState<number | null>(null)
   let [token, setToken] = useState<string | null>('')
@@ -29,7 +32,7 @@ export default function HQHome() {
   useEffect(() => {
     async function getToken() {
       let t = await SecureStore.getItemAsync('token')
-      //console.log(t)
+      console.log(t)
       setToken(t)
       let id = await SecureStore.getItemAsync('id')
       setBankCode(id)
@@ -39,20 +42,14 @@ export default function HQHome() {
   }, [])
   async function load(refresh = false) {
     if (refresh) setRefreshing(true)
-
-    let token = await SecureStore.getItemAsync('token')
     let id = await SecureStore.getItemAsync('id')
-    fetch(`http://localhost:3000/hq/get-stats`, {
+  console.log('getting stats')
+    fx(`/hq/get-stats`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+      body: {
         bankCode: id,
-        loginCode: token,
-      }),
+      },
     })
-      .then((response) => response.json())
       .then(async (response) => {
         if (refresh) setRefreshing(false)
         if (response.error) {
@@ -75,6 +72,7 @@ export default function HQHome() {
             parseInt(response.data.totalDonors) -
               parseInt(response.data.verified)
           )
+          //setInstalled(((response.data.installed*100)/response.data.totalDonors).toPrecision(2))
         }
       })
       .catch((error) => {
@@ -111,34 +109,33 @@ export default function HQHome() {
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
-          width: '80%',
+          width: '85%',
           marginBottom: 40,
           marginTop: 20,
         }}
       >
-        <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <Image
+            source={require('../../assets/images/home.png')}
+            style={{
+              width: 40,
+              height: 40,
+              marginRight: 10,
+            }}
+          />
           <Text
             style={{
               fontSize: 26,
-              textAlign: 'center',
-              color: responsiveColor,
+              color: '#7469B6',
+              fontFamily: 'PlayfairDisplay_600SemiBold',
             }}
           >
-            <Text
-              style={{
-                color: '#7469B6',
-                fontFamily: 'PlayfairDisplay_600SemiBold',
-              }}
-            >
-              {bbName ? bbName : 'Open Blood HQ'}
-            </Text>
-          </Text>
-          <Text
-            style={{
-              color: responsiveColor,
-            }}
-          >
-            {bbName ? 'Open Blood HQ' : ''}
+            {bbName ? bbName : 'Open Blood HQ'}
           </Text>
         </View>
         <Pressable
@@ -148,7 +145,7 @@ export default function HQHome() {
             alignItems: 'center',
           }}
         >
-          <Octicons name="sync" size={32} color="#7469B6" />
+          <Octicons name="sync" size={24} color="#7469B6" />
         </Pressable>
       </View>
       <ScrollView
@@ -240,6 +237,16 @@ export default function HQHome() {
               subtitle="units donated"
             />
           </View>
+          <View
+            style={{
+              width: '100%',
+              gap: 10,
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: 20,
+            }}
+          ></View>
           <Button
             onPress={() =>
               router.push({
@@ -251,7 +258,8 @@ export default function HQHome() {
               })
             }
           >
-            🚨 Send Blood Alert
+            <Octicons name="megaphone" size={20} color="white" />
+            {'  '}Send Blood Alert
           </Button>
         </View>
       </ScrollView>

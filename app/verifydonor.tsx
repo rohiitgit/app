@@ -1,4 +1,6 @@
+import Button from '@/components/Button'
 import Card from '@/components/Card'
+import fx from '@/components/Fetch'
 import FreeButton from '@/components/FreeButton'
 import Octicons from '@expo/vector-icons/Octicons'
 import { Picker } from '@react-native-picker/picker'
@@ -6,6 +8,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
 import {
+  ActivityIndicator,
   Alert,
   Linking,
   Platform,
@@ -44,7 +47,7 @@ export default function Modal() {
   let [bloodtype, setBloodtype] = useState<string>('')
   let [conditions, setConditions] = useState<string>('')
   let [medications, setMedications] = useState<string>('')
-
+  let [marking, setMarking] = useState<boolean>(false)
   let [name, setName] = useState<string>('')
   let [phone, setPhone] = useState<string>('')
   let [dob, setDob] = useState<string>('')
@@ -69,19 +72,15 @@ export default function Modal() {
   let responsiveColor = isDarkMode ? 'white' : 'black'
 
   useEffect(() => {
-    fetch(`http://localhost:3000/hq/request-user-data`, {
+    fx(`/hq/request-user-data`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+      body: {
         bankCode: bankCode,
         token: token,
         uuid: uuid,
-      }),
+      },
     })
-      .then((response) => response.json())
-      .then((response) => {
+      .then(async (response) => {
         if (response.error) {
           alert(response.message)
           router.dismiss()
@@ -97,6 +96,8 @@ export default function Modal() {
           setHeight(response.data.height)
           setWeight(response.data.weight)
           setDistance(response.data.distance)
+          setMedications(response.data.medications)
+          setConditions(response.data.conditions)
           setSex(response.data.sex)
           setVerified(response.data.verified)
           setLastDonated(response.data.lastdonated)
@@ -113,22 +114,18 @@ export default function Modal() {
   function verifyDonor() {
     //console.log(token)
     setVerifying(true)
-    fetch(`http://localhost:3000/hq/verify-donor`, {
+    fx(`/hq/verify-donor`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+      body: {
         bankCode: bankCode,
         token: token,
         uuid: uuid,
         bloodtype: bloodtype,
         conditions: conditions,
         medications: medications,
-      }),
+      },
     })
-      .then((response) => response.json())
-      .then((response) => {
+      .then(async (response) => {
         if (response.error) {
           setVerifying(false)
           alert(response.message)
@@ -143,22 +140,43 @@ export default function Modal() {
         alert(error)
       })
   }
-
-  function rejectDonor() {
-    setRejecting(true)
-    fetch(`http://localhost:3000/hq/reject-donor`, {
+  function markAsDonated() {
+    setMarking(true)
+    fx(`/hq/mark-donated`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+      body: {
         bankCode: bankCode,
         token: token,
         uuid: uuid,
-      }),
+      },
     })
-      .then((response) => response.json())
-      .then((response) => {
+      .then(async (response) => {
+        if (response.error) {
+          setMarking(false)
+          alert(response.message)
+        } else {
+          setMarking(false)
+          alert(response.message)
+          router.dismiss()
+        }
+      })
+      .catch((error) => {
+        setMarking(false)
+        alert('An error occurred while marking the donor as donated')
+      })
+  }
+
+  function rejectDonor() {
+    setRejecting(true)
+    fx(`/hq/reject-donor`, {
+      method: 'POST',
+      body: {
+        bankCode: bankCode,
+        token: token,
+        uuid: uuid,
+      },
+    })
+      .then(async (response) => {
         if (!response.error) {
           setRejecting(false)
           Alert.alert('Done!', response.message, [
@@ -200,7 +218,20 @@ export default function Modal() {
         alert(error)
       })
   }
-
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: isDarkMode ? '#121212' : '#fff',
+        }}
+      >
+        <ActivityIndicator size="large" color={responsiveColor} />
+      </View>
+    )
+  }
   return (
     <KeyboardAwareScrollView
       style={{
@@ -210,365 +241,370 @@ export default function Modal() {
         justifyContent: 'center',
       }}
     >
-      {loading ? (
-        <View
+      <View
+        style={{
+          flexDirection: 'column',
+          gap: 20,
+        }}
+      >
+        <Pressable
+          onPress={() => router.dismiss()}
           style={{
-            flex: 1,
+            width: '90%',
+            alignSelf: 'center',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginTop: 20,
           }}
         >
           <Text
             style={{
               fontSize: 36,
               fontWeight: 'bold',
-              textAlign: 'center',
+              textAlign: 'left',
               color: responsiveColor,
               fontFamily: 'PlayfairDisplay_600SemiBold',
             }}
           >
-            Loading donor...
+            {name}
           </Text>
-        </View>
-      ) : (
+          <Octicons name="x" size={36} color={responsiveColor} />
+        </Pressable>
+        <Text
+          style={{
+            fontSize: 24,
+            color: 'grey',
+            textAlign: 'center',
+          }}
+        >
+          +91 {phone}
+        </Text>
         <View
           style={{
             flexDirection: 'column',
-            gap: 20,
+            gap: 10,
           }}
         >
-          <Pressable
-            onPress={() => router.dismiss()}
-            style={{
-              width: '90%',
-              alignSelf: 'center',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginTop: 20,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 36,
-                fontWeight: 'bold',
-                textAlign: 'left',
-                color: responsiveColor,
-                fontFamily: 'PlayfairDisplay_600SemiBold',
-              }}
-            >
-              {name}
-            </Text>
-            <Octicons name="x" size={36} color={responsiveColor} />
-          </Pressable>
-          <Text
-            style={{
-              fontSize: 24,
-              color: 'grey',
-              textAlign: 'center',
-            }}
-          >
-            +91 {phone}
-          </Text>
           <View
             style={{
-              flexDirection: 'column',
+              width: '81%',
+              height: 120,
+              backgroundColor: isDarkMode ? '#242526' : '#f3f3f3',
+              borderRadius: 10,
+              justifyContent: 'center',
+              alignItems: 'center',
+              alignSelf: 'center',
+              padding: 5,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 20,
+              }}
+            >
+              {!/^-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?$/.test(address) ? (
+                <Text
+                  style={{
+                    fontSize: 18,
+                    textAlign: 'left',
+                    color: isDarkMode ? '#fff' : '#000',
+                  }}
+                >
+                  {address.slice(0, 50)}
+                  {address.length > 50 ? '...' : ''}
+                </Text>
+              ) : null}
+            </View>
+            <FreeButton
+              onPress={() => {
+                Linking.openURL(
+                  `https://www.google.com/maps/search/?api=1&query=${address}`
+                )
+              }}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              Open in Maps
+            </FreeButton>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
               gap: 10,
             }}
           >
-            <View
-              style={{
-                width: '81%',
-                height: 120,
-                backgroundColor: isDarkMode ? '#242526' : '#f3f3f3',
-                borderRadius: 10,
-                justifyContent: 'center',
-                alignItems: 'center',
-                alignSelf: 'center',
-                padding: 5,
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 20,
-                }}
-              >
-                {!/^-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?$/.test(address) ? (
-                  <Text
-                    style={{
-                      fontSize: 18,
-                      textAlign: 'left',
-                      color: isDarkMode ? '#fff' : '#000',
-                    }}
-                  >
-                    {address.slice(0, 50)}
-                    {address.length > 50 ? '...' : ''}
-                  </Text>
-                ) : null}
-              </View>
-              <FreeButton
-                onPress={() => {
-                  Linking.openURL(
-                    `https://www.google.com/maps/search/?api=1&query=${address}`
-                  )
-                }}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}
-              >
-                Open in Maps
-              </FreeButton>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                gap: 10,
-              }}
-            >
-              <Card
-                title={bloodtype}
-                icon={'heart'}
-                iconColor={'#F34573'}
-                subtitle={`Blood Group`}
-                border={true}
-              />
-              <Card
-                title={verified ? 'Verified' : 'Not\nVerified'}
-                icon={verified ? 'verified' : 'unverified'}
-                iconColor={verified ? '#35C759' : '#F34573'}
-                border={true}
-                subtitle=""
-              />
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                gap: 10,
-              }}
-            >
-              <Card
-                title={`${
-                  //calculate age accurately. use months
-                  Math.floor(
-                    (new Date().getTime() - new Date(dob).getTime()) /
-                      (1000 * 60 * 60 * 24 * 30 * 12)
-                  )
-                }`}
-                icon="person"
-                iconColor={responsiveColor}
-                subtitle={'years old'}
-                border={true}
-              />
-              <Card
-                title={`${parseFloat(distance).toFixed(2)} km`}
-                icon="location"
-                iconColor={responsiveColor}
-                subtitle={'away'}
-                border={true}
-              />
-              {/*<Card
+            <Card
+              title={bloodtype}
+              icon={'heart'}
+              iconColor={'#F34573'}
+              subtitle={`Blood Group`}
+              border={true}
+            />
+            <Card
+              title={verified ? 'Verified' : 'Not\nVerified'}
+              icon={verified ? 'verified' : 'unverified'}
+              iconColor={verified ? '#35C759' : '#F34573'}
+              border={true}
+              subtitle=""
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 10,
+            }}
+          >
+            <Card
+              title={`${
+                //calculate age accurately. use months
+                Math.floor(
+                  (new Date().getTime() - new Date(dob).getTime()) /
+                    (1000 * 60 * 60 * 24 * 30 * 12)
+                )
+              }`}
+              icon="person"
+              iconColor={responsiveColor}
+              subtitle={'years old'}
+              border={true}
+            />
+            <Card
+              title={`${parseFloat(distance).toFixed(2)} km`}
+              icon="location"
+              iconColor={responsiveColor}
+              subtitle={'away'}
+              border={true}
+            />
+            {/*<Card
                 title={affiliated ? 'Affiliated' : 'Unaffiliated'}
                 icon={affiliated ? 'pulse' : 'x'}
                 iconColor={affiliated ? '#35C759' : '#F34573'}
                 subtitle={`with JIPMER`}
                 border={true}
               />*/}
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                gap: 10,
-              }}
-            >
-              <Card
-                title={`${height} cm`}
-                icon="diff"
-                iconColor={responsiveColor}
-                subtitle={'height'}
-                border={true}
-              />
-              <Card
-                title={`${weight} kg`}
-                icon="diff"
-                iconColor={responsiveColor}
-                subtitle={'weight'}
-                border={true}
-              />
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                gap: 10,
-              }}
-            >
-              <Card
-                title={convertTimestampToShortString(lastDonated)}
-                icon="graph"
-                iconColor={responsiveColor}
-                subtitle={'Last Donated'}
-                border={true}
-              />
-              <Card
-                title={totalDonations.toString()}
-                icon="sort-asc"
-                iconColor={responsiveColor}
-                subtitle={'total donations'}
-                border={true}
-              />
-            </View>
           </View>
           <View
             style={{
-              borderColor: '#FF3B2F',
-              borderWidth: 2,
-              backgroundColor: isDarkMode ? '#242526' : '#FAF9F6',
-              padding: 10,
-              borderRadius: 10,
-              width: '90%',
-              margin: 'auto',
-              marginBottom: 50,
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 10,
             }}
           >
-            <Text
-              style={{
-                fontSize: 24,
-                color: '#FF3B2F',
-                fontWeight: 'bold',
-              }}
-            >
-              {verified ? 'Danger Zone' : 'This donor is not verified.'}
-            </Text>
-            {verified ? (
-              <Text style={{ fontSize: 18, color: responsiveColor }}>
-                Modify blood type
-              </Text>
-            ) : (
-              <Text style={{ fontSize: 18, color: responsiveColor }}>
-                Please verify their blood group before allowing them to donate.
-              </Text>
-            )}
-            <Picker
-              selectedValue={bloodtype}
-              onValueChange={(itemValue, itemIndex) => setBloodtype(itemValue)}
-              style={{
-                margin: 10,
-                borderRadius: 9,
-                backgroundColor: isDarkMode ? '#242526' : '#F3F3F3',
-              }}
-            >
-              <Picker.Item label="A+" value="A+" color={responsiveColor} />
-              <Picker.Item label="A-" value="A-" color={responsiveColor} />
-              <Picker.Item label="B+" value="B+" color={responsiveColor} />
-              <Picker.Item label="B-" value="B-" color={responsiveColor} />
-              <Picker.Item label="AB+" value="AB+" color={responsiveColor} />
-              <Picker.Item label="AB-" value="AB-" color={responsiveColor} />
-              <Picker.Item label="O+" value="O+" color={responsiveColor} />
-              <Picker.Item label="O-" value="O-" color={responsiveColor} />
-              <Picker.Item
-                label="Bombay blood group"
-                value="Bombay blood group"
-                color={responsiveColor}
-              />
-            </Picker>
-            <Text
-              style={{
-                fontSize: 18,
-                margin: 10,
-                color: responsiveColor,
-              }}
-            >
-              {conditions.trim() == '' && medications.trim() == ''
-                ? 'No'
-                : null}{' '}
-              Conditions and Medications
-            </Text>
-            <Text
-              style={{
-                fontSize: 18,
-                margin: 10,
-                color: responsiveColor,
-              }}
-            >
-              If the donor has any conditions or medications, please enter them
-              here. Leave blank if none.
-            </Text>
-            <TextInput
-              placeholder="Conditions"
-              placeholderTextColor={'grey'}
-              value={conditions}
-              onChangeText={setConditions}
-              multiline={true}
-              style={{
-                margin: 10,
-                borderRadius: 9,
-                backgroundColor: '#F3F3F3',
-                height: 100,
-              }}
+            <Card
+              title={`${height} cm`}
+              icon="diff"
+              iconColor={responsiveColor}
+              subtitle={'height'}
+              border={true}
             />
-            <TextInput
-              placeholder="Medications"
-              placeholderTextColor={'grey'}
-              value={medications}
-              onChangeText={setMedications}
-              multiline={true}
-              style={{
-                margin: 10,
-                borderRadius: 9,
-                backgroundColor: '#F3F3F3',
-                height: 100,
-              }}
+            <Card
+              title={`${weight} kg`}
+              icon="diff"
+              iconColor={responsiveColor}
+              subtitle={'weight'}
+              border={true}
             />
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                gap: 10,
-              }}
-            >
-              <FreeButton
-                onPress={() => {
-                  Alert.alert(
-                    'Are you sure you want to reject this donor?',
-                    'If they are not part of any other bank, their profile will be deleted.',
-                    [
-                      {
-                        text: 'Cancel',
-                        onPress: () => {},
-                      },
-                      {
-                        text: 'Reject',
-                        onPress: () => {
-                          rejectDonor()
-                        },
-                        style: 'destructive',
-                      },
-                    ]
-                  )
-                }}
-                disabled={rejecting}
-                style={{ width: '40%', backgroundColor: 'red' }}
-              >
-                <Text>Reject{rejecting ? 'ing...' : ''}</Text>
-              </FreeButton>
-              <FreeButton
-                onPress={verifyDonor}
-                disabled={verifying}
-                style={{ width: '40%' }}
-              >
-                <Text>
-                  {verified ? 'Confirm' : 'Verify'}
-                  {verifying ? 'ing' : ''}
-                </Text>
-              </FreeButton>
-            </View>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 10,
+            }}
+          >
+            <Card
+              title={convertTimestampToShortString(lastDonated)}
+              icon="graph"
+              iconColor={responsiveColor}
+              subtitle={'Last Donated'}
+              border={true}
+            />
+            <Card
+              title={totalDonations.toString()}
+              icon="sort-asc"
+              iconColor={responsiveColor}
+              subtitle={'total donations'}
+              border={true}
+            />
           </View>
         </View>
-      )}
+        <FreeButton
+          onPress={markAsDonated}
+          disabled={!verified || marking}
+          style={{
+            margin: 'auto',
+            width: '83%'
+          }}
+        >
+          <Text style={{ fontSize: 24, color: 'white' }}>
+            Mark{marking ? 'ing' : ''} as donated
+            {marking ? '...' : ''}
+          </Text>
+        </FreeButton>
+        {!verified ? (
+          <Text
+            style={{
+              fontSize: 16,
+              color: responsiveColor,
+              textAlign: 'center',
+              margin: 'auto',
+              width: '80%'
+            }}
+          >
+            Please verify this donor before
+            marking them as donated.
+          </Text>
+        ) : null}
+        <View
+          style={{
+            borderColor: '#FF3B2F',
+            borderWidth: 2,
+            backgroundColor: isDarkMode ? '#242526' : '#FAF9F6',
+            padding: 10,
+            borderRadius: 10,
+            width: '90%',
+            margin: 'auto',
+            marginBottom: 50,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 24,
+              color: '#FF3B2F',
+              fontWeight: 'bold',
+            }}
+          >
+            {verified ? 'Danger Zone' : 'This donor is not verified.'}
+          </Text>
+          {verified ? (
+            <Text style={{ fontSize: 18, color: responsiveColor }}>
+              Modify blood type
+            </Text>
+          ) : (
+            <Text style={{ fontSize: 18, color: responsiveColor }}>
+              Please verify their blood group before allowing them to donate.
+            </Text>
+          )}
+          <Picker
+            selectedValue={bloodtype}
+            onValueChange={(itemValue, itemIndex) => setBloodtype(itemValue)}
+            style={{
+              margin: 10,
+              borderRadius: 9,
+              backgroundColor: isDarkMode ? '#242526' : '#F3F3F3',
+            }}
+          >
+            <Picker.Item label="A+" value="A+" color={responsiveColor} />
+            <Picker.Item label="A-" value="A-" color={responsiveColor} />
+            <Picker.Item label="B+" value="B+" color={responsiveColor} />
+            <Picker.Item label="B-" value="B-" color={responsiveColor} />
+            <Picker.Item label="AB+" value="AB+" color={responsiveColor} />
+            <Picker.Item label="AB-" value="AB-" color={responsiveColor} />
+            <Picker.Item label="O+" value="O+" color={responsiveColor} />
+            <Picker.Item label="O-" value="O-" color={responsiveColor} />
+            <Picker.Item
+              label="Bombay blood group"
+              value="Bombay blood group"
+              color={responsiveColor}
+            />
+          </Picker>
+          <Text
+            style={{
+              fontSize: 18,
+              margin: 10,
+              color: responsiveColor,
+            }}
+          >
+            {conditions.trim() == '' && medications.trim() == '' ? 'No' : null}{' '}
+            Conditions and Medications
+          </Text>
+          <Text
+            style={{
+              fontSize: 18,
+              margin: 10,
+              color: responsiveColor,
+            }}
+          >
+            If the donor has any conditions or medications, please enter them
+            here. Leave blank if none.
+          </Text>
+          <TextInput
+            placeholder="Conditions"
+            placeholderTextColor={'grey'}
+            value={conditions}
+            onChangeText={setConditions}
+            multiline={true}
+            style={{
+              margin: 10,
+              borderRadius: 9,
+              backgroundColor: '#F3F3F3',
+              height: 100,
+            }}
+          />
+          <TextInput
+            placeholder="Medications"
+            placeholderTextColor={'grey'}
+            value={medications}
+            onChangeText={setMedications}
+            multiline={true}
+            style={{
+              margin: 10,
+              borderRadius: 9,
+              backgroundColor: '#F3F3F3',
+              height: 100,
+            }}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 10,
+            }}
+          >
+            <FreeButton
+              onPress={() => {
+                Alert.alert(
+                  'Are you sure you want to reject this donor?',
+                  'If they are not part of any other bank, their profile will be deleted.',
+                  [
+                    {
+                      text: 'Cancel',
+                      onPress: () => {},
+                    },
+                    {
+                      text: 'Reject',
+                      onPress: () => {
+                        rejectDonor()
+                      },
+                      style: 'destructive',
+                    },
+                  ]
+                )
+              }}
+              disabled={rejecting}
+              style={{ width: '40%', backgroundColor: 'red' }}
+            >
+              <Text>Reject{rejecting ? 'ing...' : ''}</Text>
+            </FreeButton>
+            <FreeButton
+              onPress={verifyDonor}
+              disabled={verifying}
+              style={{ width: '40%' }}
+            >
+              <Text>
+                {verified ? 'Confirm' : 'Verify'}
+                {verifying ? 'ing' : ''}
+              </Text>
+            </FreeButton>
+          </View>
+        </View>
+      </View>
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
     </KeyboardAwareScrollView>
   )

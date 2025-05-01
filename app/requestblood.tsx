@@ -1,5 +1,6 @@
 import styles from '@/assets/styles/styles'
 import Button from '@/components/Button'
+import FreeButton from '@/components/FreeButton'
 import TwoRowInput from '@/components/TwoRowInput'
 import Octicons from '@expo/vector-icons/Octicons'
 import { Picker } from '@react-native-picker/picker'
@@ -59,9 +60,8 @@ export default function Modal() {
         style={{
           justifyContent: 'center',
           gap: 20,
-          marginTop: 20,
-          width: '100%',
-          alignItems: 'center',
+          width: '90%',
+          alignSelf: 'center',
           marginBottom: 20,
         }}
       >
@@ -107,6 +107,7 @@ export default function Modal() {
             backgroundColor: '#fefefe',
             borderRadius: 16,
             width: 300,
+            margin: 'auto',
           }}
         >
           <Picker.Item label="A+" value="A+" />
@@ -122,57 +123,76 @@ export default function Modal() {
         <Text
           style={{
             fontSize: 18,
-            textAlign: 'center',
             color: responsiveColor,
+            textAlign: 'center',
           }}
         >
           How many units do you need?
         </Text>
-        <TwoRowInput
-          placeholder="2"
-          value={unitsRequired}
-          setValue={setUnitsRequired}
-          keyboardType="numpad"
+        <View
+          style={{
+            margin: 'auto',
+          }}
         >
-          units
-        </TwoRowInput>
+          <TwoRowInput
+            placeholder="2"
+            value={unitsRequired}
+            setValue={setUnitsRequired}
+            keyboardType="numpad"
+            style={{
+              width: '90%',
+              margin: 'auto',
+            }}
+          >
+            units
+          </TwoRowInput>
+        </View>
         <Text
           style={{
             fontSize: 18,
-            textAlign: 'center',
             color: responsiveColor,
+            textAlign: 'center',
           }}
         >
           What is the minimum month gap required from the last donation?
         </Text>
-        <TwoRowInput
-          placeholder="4"
-          value={minimumMonths}
-          setValue={setMinimumMonths}
-          keyboardType="numpad"
+
+        <View
+          style={{
+            margin: 'auto',
+          }}
         >
-          months
-        </TwoRowInput>
+          <TwoRowInput
+            placeholder="4"
+            value={minimumMonths}
+            setValue={setMinimumMonths}
+            keyboardType="numpad"
+            style={{
+              width: '90%',
+              margin: 'auto',
+            }}
+          >
+            months
+          </TwoRowInput>
+        </View>
         <Text
           style={{
             fontSize: 18,
-            textAlign: 'center',
             color: responsiveColor,
+            textAlign: 'center',
           }}
         >
           What phone number should the donors contact?
         </Text>
         <TextInput
-          style={styles.input}
+          style={{ ...styles.input, width: '90%', margin: 'auto' }}
           placeholderTextColor={'grey'}
           placeholder="9123456789"
           keyboardType="phone-pad"
           value={phoneNumber}
           onChangeText={setPhoneNumber}
         />
-        <Button onPress={requestBlood}>
-          {loading ? 'Initiating...' : 'Send Alert'}
-        </Button>
+
         <Text
           style={{
             fontSize: 18,
@@ -180,9 +200,13 @@ export default function Modal() {
             textAlign: 'center',
           }}
         >
-          This will send a notification to all eligible donors in your blood
-          bank.
+          This will send a notification to{' '}
+          <Text style={{ fontWeight: 'bold' }}>all</Text> eligible donors in
+          your blood bank.
         </Text>
+        <FreeButton onPress={requestBlood}>
+          {loading ? 'Initiating...' : 'Send Alert'}
+        </FreeButton>
         <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
       </View>
     </KeyboardAwareScrollView>

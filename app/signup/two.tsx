@@ -132,7 +132,7 @@ export default function Two({
         </Text>
         <Text
           style={{
-            fontSize: 18,
+            fontSize: 20,
             marginBottom: 20,
             color: responsiveDark,
           }}
@@ -149,7 +149,8 @@ export default function Two({
         />
         <Text
           style={{
-            fontSize: 18,
+            fontSize: 20,
+            marginTop: 20,
             marginBottom: 20,
             color: responsiveDark,
           }}
@@ -172,7 +173,8 @@ export default function Two({
         </Picker>
         <Text
           style={{
-            fontSize: 18,
+            fontSize: 20,
+            marginTop: 20,
             marginBottom: 20,
             color: responsiveDark,
           }}
@@ -206,7 +208,7 @@ export default function Two({
         </View>
         <Text
           style={{
-            fontSize: 18,
+            fontSize: 20,
             marginBottom: 20,
             color: responsiveDark,
           }}
@@ -252,7 +254,7 @@ export default function Two({
 
         <Text
           style={{
-            fontSize: 18,
+            fontSize: 20,
             marginBottom: 20,
             marginTop: 20,
             color: responsiveDark,
@@ -286,7 +288,7 @@ export default function Two({
           <FreeButton
             onPress={() => {
               navigation.navigate(
-                route.params?.affiliated == 'yes' ? `twobeta` : `one`,
+                `one`,
                 {
                   ...route.params,
                   name,

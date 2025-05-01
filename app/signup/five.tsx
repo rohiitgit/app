@@ -67,34 +67,50 @@ export default function Five({
           ? `${route.params.location.latitude},${route.params.location.longitude}`
           : route.params.location.address
         : '',
-      lookupid: route.params.location
-        ? route.params.location.hasOwnProperty('lookup')
-          ? route.params.location.lookup
-          : ''
-        : '',
     }
-    fetch(`http://localhost:3000/donor/signup`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    })
+    console.log(payload)
+    fetch(
+      `${
+        __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
+      }/donor/signup`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      }
+    )
       .then((response) => response.json())
       .then(async (response) => {
+        console.log(response)
         if (response.error) {
           setLoadingProcess(false)
           alert(response.message)
         } else {
-          await SecureStore.setItemAsync('token', response.data.uuid)
+          await SecureStore.setItemAsync('token', response.access.token)
+          await SecureStore.setItemAsync('refresh', response.refresh.token)
+          await SecureStore.setItemAsync(
+            'tokenexp',
+            response.access.exp.toString()
+          )
+          await SecureStore.setItemAsync(
+            'refreshexp',
+            response.refresh.exp.toString()
+          )
           await SecureStore.deleteItemAsync('lookup')
           router.push({
             pathname: '/signupcomplete',
-            params: response.data,
+            params: {
+              phone: response.data.phone,
+              name: response.data.name,
+              bankName: response.data.bankname,
+            },
           })
         }
       })
       .catch((error) => {
+        console.log('fetcherror', error)
         setLoadingProcess(false)
         alert(error)
       })

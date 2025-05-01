@@ -24,6 +24,9 @@ export default function One({
   let [phoneNumber, setPhoneNumber] = useState<string>(
     route.params?.phoneNumber || ''
   )
+  let [lookuptoken, setLookupToken] = useState<string>(
+    route.params?.lookuptoken || ''
+  )
   let [baseBank, setBaseBank] = useState<{
     name: string
     uuid: string
@@ -51,9 +54,21 @@ export default function One({
   let responsiveDark = useColorScheme() === 'dark' ? 'white' : 'black'
 
   function retrieveBanks() {
-    fetch('http://localhost:3000/donor/banks', {
-      method: 'GET',
-    })
+    fetch(
+      `${
+        __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
+      }/donor/banks`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${lookuptoken}`,
+        },
+        body: JSON.stringify({
+          'getBanks': true,
+        })
+      }
+    )
       .then((response) => response.json())
       .then(async (response) => setBanks(response.banks))
       .catch((error) => {

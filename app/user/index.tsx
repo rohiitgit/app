@@ -22,6 +22,8 @@ import Home from './home'
 import QR from './qr'
 import Settings from './settings'
 import * as Linking from 'expo-linking'
+import fx from '@/components/Fetch'
+import checkSecret, { logoutUser } from '@/components/CheckSecret'
 const Tab = createBottomTabNavigator()
 const ModalStack = createStackNavigator()
 Notifications.setNotificationHandler({
@@ -46,7 +48,6 @@ export default function Index() {
 
   let local: any = useLocalSearchParams()
   async function checkNotifs() {
-    let uuid = await SecureStore.getItemAsync('token')
     const perms = await Notifications.getPermissionsAsync()
     let existingStatus = perms.status
     console.log(`Existing status: ${existingStatus}`)
@@ -61,27 +62,23 @@ export default function Index() {
             ? 'i'
             : ''
         setExpoPushToken(token)
-        fetch('http://localhost:3000/donor/update-notifications', {
+
+        fx('donor/update-notifications', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            uuid: uuid,
+          body: {
             notificationToken: token,
             os: os,
-          }),
+          },
         })
-          .then((response) => response.json())
           .then((response) => {
             if (response.error) {
               Alert.alert('Error', response.error)
             } else {
-              //console.log('Notification token updated')
+              console.log('Notification token updated successfully')
             }
           })
           .catch((error) => {
-            //console.log("Couldn't update notification token", error)
+            console.log("Couldn't update notification token", error)
           })
       } else {
         Alert.alert('Error', 'Failed to get notification token')
@@ -114,9 +111,9 @@ export default function Index() {
   }
   useEffect(() => {
     async function askUser() {
-      let uuid = await SecureStore.getItemAsync('token')
+      let uuid = await checkSecret()
 
-      if (!uuid) {
+      if (uuid === false) {
         Alert.alert('Error', 'Please login to continue', [
           {
             text: 'Login',
@@ -146,7 +143,7 @@ export default function Index() {
                 {
                   text: 'Log out',
                   onPress: () => {
-                    SecureStore.deleteItemAsync('token')
+                    logoutUser()
                     router.navigate('/')
                   },
                   style: 'destructive',
@@ -214,8 +211,8 @@ export default function Index() {
                 paddingTop: 10,
               }}
             >
-              Open Blood sends you alerts when every second counts.{'\n\n'}Turn on
-              notifications in settings so we can reach you when it matters
+              Open Blood sends you alerts when every second counts.{'\n\n'}Turn
+              on notifications in settings so we can reach you when it matters
               most.
             </Text>
           </View>
@@ -336,7 +333,7 @@ async function registerForPushNotificationsAsync() {
           allowAlert: true,
           allowBadge: true,
           allowSound: true,
-          allowCriticalAlerts: true,
+          //allowCriticalAlerts: true,
         },
         android: {
           allowAlert: true,

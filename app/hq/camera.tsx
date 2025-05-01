@@ -1,5 +1,6 @@
 import Button from '@/components/Button'
 import Octicons from '@expo/vector-icons/Octicons'
+import { useIsFocused } from '@react-navigation/native'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { router } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
@@ -15,6 +16,7 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 export default function Camera() {
+  const isFocused = useIsFocused()
   const [permission, requestPermission] = useCameraPermissions()
   const [flash, setFlash] = useState(false)
   const [side, setSide] = useState<'front' | 'back'>('back')
@@ -70,124 +72,43 @@ export default function Camera() {
   }
   return (
     <SafeAreaView style={styles.container}>
-      <View
-        style={{
-          gap: 0,
-          borderBottomLeftRadius: 64,
-          borderBottomRightRadius: 64,
-          padding: 20,
-          width: '100%',
-          flexDirection: 'column',
-          //backgroundColor: '#efeef7',
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 26,
-            textAlign: 'left',
-            color: isDarkMode ? 'white' : 'black',
+      {isFocused && (
+        <CameraView
+          style={styles.camera}
+          facing={side}
+          onCameraReady={() => {
+            console.log('Camera is ready')
           }}
-        >
-          <Text
-            style={{
-              color: '#7469B6',
-              fontFamily: 'PlayfairDisplay_600SemiBold',
-            }}
-          >
-            {bbName ? bbName : 'Open Blood HQ'}
-          </Text>
-        </Text>
-        <Text
-          style={{
-            color: isDarkMode ? 'white' : 'black',
+          onMountError={(error) => {
+            console.log('Camera error: ', error)
+            Alert.alert('Error', 'Camera not available. Please try again later.')
           }}
-        >
-          {bbName ? 'Open Blood HQ' : ''}
-        </Text>
-      </View>
-      <CameraView
-        style={styles.camera}
-        facing={side}
-        barcodeScannerSettings={{
-          barcodeTypes: ['qr'],
-        }}
-        onBarcodeScanned={(result) => {
-          if (result.data == 'bloodbank-notfound') {
-            Alert.alert(
-              'Error',
-              "The donor's identity could not be confirmed. Please reload the donor app or check the donor's internet connection and try again."
-            )
-          } else if (result.data == 'bloodbank-hidden') {
-            Alert.alert(
-              'Error',
-              "The donor's QR code is hidden. Please ask the donor to click 'Show QR' in the app."
-            )
-          } else if (result.data.startsWith('bloodbank-') !== true) {
-            setCurrentData('')
-          } else {
-            setCurrentData(result.data)
-          }
-        }}
-        enableTorch={flash}
-      ></CameraView>
-      {/* <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          gap: 30,
-          alignItems: 'center',
-          width: '100%',
-          position: 'absolute',
-          top: '5%',
-          borderRadius: 64,
-          padding: 20,
-          paddingTop: 10,
-          paddingBottom: 10,
-          elevation: 10,
-          backdropFilter: 'blur(20px)',
-          backgroundColor: "#efeef7"
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'column',
-            justifyContent: 'center',
+          barcodeScannerSettings={{
+            barcodeTypes: ['qr'],
           }}
-        >
-          <Text
-            style={{
-              fontSize: 26,
-              textAlign: 'center',
-              color: isDarkMode ? 'white' : 'black',
-            }}
-          >
-            <Text
-              style={{
-                color: '#7469B6',
-                fontFamily: 'PlayfairDisplay_600SemiBold',
-              }}
-            >
-              {bbName ? bbName : 'Open Blood HQ'}
-            </Text>
-          </Text>
-          <Text
-            style={{
-              color: isDarkMode ? 'white' : 'black',
-            }}
-          >
-            {bbName ? 'Open Blood HQ' : ''}
-          </Text>
-        </View>
-      </View> */}
+          onBarcodeScanned={(result) => {
+            if (result.data == 'ob-notfound') {
+              Alert.alert(
+                'Error',
+                "The donor's identity could not be confirmed. Please reload the donor app or check the donor's internet connection and try again."
+              )
+            } else if (result.data.startsWith('ob-') !== true) {
+              setCurrentData('')
+            } else {
+              setCurrentData(result.data)
+            }
+          }}
+          enableTorch={flash}
+        />
+      )}
       <View
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
-          gap: 30,
-          alignItems: 'center',
-          width: '100%',
+          alignSelf: 'center',
+          width: '80%',
           position: 'absolute',
-          bottom: '12%',
+          bottom: '15%',
           borderRadius: 64,
           padding: 10,
           elevation: 10,

@@ -1,5 +1,7 @@
 import styles from '@/assets/styles/styles'
 import Button from '@/components/Button'
+import { logoutUser } from '@/components/CheckSecret'
+import fx from '@/components/Fetch'
 import FreeButton from '@/components/FreeButton'
 import { Octicons } from '@expo/vector-icons'
 import * as Application from 'expo-application'
@@ -7,6 +9,7 @@ import { router } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
 import { useEffect, useState } from 'react'
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Modal,
@@ -20,7 +23,6 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 export default function Settings() {
-  let [uuid, setUUID] = useState<string | null>('notfound')
   let [refreshing, setRefreshing] = useState<boolean>(false)
   let [showModal, setShowModal] = useState<boolean>(false)
   let [isRegenerating, setRegenerating] = useState<boolean>(false)
@@ -44,16 +46,12 @@ export default function Settings() {
 
   async function regenerateUUID() {
     setRegenerating(true)
-    fetch(`http://localhost:3000/donor/regenerate-id`, {
+    fx(`/donor/regenerate-id`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+      body: {
+        regenerate: true,
       },
-      body: JSON.stringify({
-        uuid: uuid,
-      }),
     })
-      .then((response) => response.json())
       .then(async (response) => {
         if (response.error) {
           alert(response.message)
@@ -78,17 +76,12 @@ export default function Settings() {
   }
 
   async function delBank(bankcode: string) {
-    fetch(`http://localhost:3000/donor/remove-bank`, {
+    fx(`/donor/remove-bank`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        uuid: uuid,
+      body: {
         bankcode: bankcode,
-      }),
+      },
     })
-      .then((response) => response.json())
       .then(async (response) => {
         if (response.error) {
           alert(response.message)
@@ -110,17 +103,12 @@ export default function Settings() {
   }
   async function addBank(bankcode: string) {
     ////console.log(bankcode)
-    fetch(`http://localhost:3000/donor/add-bank`, {
+    fx(`/donor/add-bank`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        uuid: uuid,
+      body: {
         bankcode: bankcode,
-      }),
+      },
     })
-      .then((response) => response.json())
       .then(async (response) => {
         if (response.error) {
           alert(response.message)
@@ -151,10 +139,12 @@ export default function Settings() {
   }
 
   async function getAllBanks() {
-    fetch('http://localhost:3000/donor/banks', {
-      method: 'GET',
+    fx('/donor/banks', {
+      method: 'POST',
+      body: {
+        'getBanks': true,
+      },
     })
-      .then((response) => response.json())
       .then(async (response) => {
         setAllBanks(
           response.banks.filter((x: any) => {
@@ -171,19 +161,12 @@ export default function Settings() {
   }
   async function load(refresh = false) {
     if (refresh) setRefreshing(true)
-
-    let token = await SecureStore.getItemAsync('token')
-    setUUID(token)
-    fetch(`http://localhost:3000/donor/get-banks`, {
+    fx(`/donor/get-banks`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+      body: {
+        'get-banks': true,
       },
-      body: JSON.stringify({
-        uuid: token,
-      }),
     })
-      .then((response) => response.json())
       .then(async (response) => {
         if (response.error) {
           alert(response.message)
@@ -445,7 +428,11 @@ export default function Settings() {
           {'\n'}
           Your Banks
         </Text>
-        <View style={{}}>
+        <View
+          style={{
+            margin: 10,
+          }}
+        >
           {scopes.map((item, index) => (
             <View
               key={item.uuid}
@@ -504,55 +491,20 @@ export default function Settings() {
                 >
                   <Octicons name="device-mobile" size={24} color="#7469B6" />
                 </Pressable>
-                {/*scopes.length == 1 && index == 0 ? null : (
-                  <Pressable
-                    onPress={() => {
-                      Alert.alert(
-                        `Delete ${item.name}?`,
-                        'This bank will no longer be able to view your data, and you will no longer receive alerts from them.',
-                        [
-                          {
-                            text: 'Cancel',
-                            style: 'cancel',
-                          },
-                          {
-                            text: 'Delete',
-                            style: 'destructive',
-                            onPress: () => {
-                              delBank(item.uuid)
-                            },
-                          },
-                        ]
-                      )
-                    }}
-                    style={{
-                      backgroundColor: '#FF463A',
-                      width: 45,
-                      height: 45,
-                      borderRadius: 22.5,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      display: 'none',
-                    }}
-                  >
-                    <Octicons name="trash" size={24} color="#7469B6" />
-                  </Pressable>
-                )*/}
               </View>
             </View>
           ))}
           {scopes.length === 0 ? (
-            <Text
+            <View
               style={{
-                fontSize: 18,
-                paddingTop: 10,
-                paddingBottom: 10,
-                textAlign: 'center',
-                color: isDarkMode ? 'white' : 'black',
+                marginBottom: 20,
               }}
             >
-              Loading...
-            </Text>
+              <ActivityIndicator
+                size="small"
+                color={isDarkMode ? 'white' : 'black'}
+              />
+            </View>
           ) : null}
           <Pressable
             onPress={getAllBanks}
@@ -600,6 +552,11 @@ export default function Settings() {
           <FreeButton onPress={reportBug}>
             <Octicons name="bug" size={20} /> Report a Bug
           </FreeButton>
+          <FreeButton onPress={()=>{
+            router.push('https://github.com/openbloodfdn/app')
+          }}>
+            <Octicons name="mark-github" size={20} /> Star us on GitHub!
+          </FreeButton>
         </View>
         <View
           style={{
@@ -618,7 +575,7 @@ export default function Settings() {
             {'\n'}
             Security
           </Text>
-          <FreeButton
+          {/*<FreeButton
             onPress={() => {
               Alert.alert(
                 'Warning',
@@ -641,12 +598,12 @@ export default function Settings() {
           >
             Regenerat{isRegenerating ? 'ing' : 'e'} ID
             {isRegenerating ? '...' : ''}
-          </FreeButton>
+          </FreeButton>*/}
         </View>
 
         <FreeButton
           onPress={() => {
-            SecureStore.deleteItemAsync('token')
+            logoutUser()
             router.replace('/')
           }}
         >

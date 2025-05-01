@@ -4,16 +4,19 @@ import * as SecureStore from 'expo-secure-store'
 import * as SplashScreen from 'expo-splash-screen'
 import { useCallback, useEffect, useState } from 'react'
 
-//import {useFonts, PlayfairDisplay_400Regular} from '@expo-google-fonts/playfair-display'
+// Import fonts
 import {
   DMSerifText_400Regular,
   useFonts,
 } from '@expo-google-fonts/dm-serif-text'
 import { PlayfairDisplay_600SemiBold } from '@expo-google-fonts/playfair-display'
-export default function RootLayout() {
-  const [initialRoute, setInitialRoute] = useState<string | null>(null)
 
-  let [fontsLoaded] = useFonts({
+// Import checkSecret
+import checkSecret from '@/components/CheckSecret'
+
+export default function RootLayout() {
+  const [appIsReady, setAppIsReady] = useState(false)
+  const [fontsLoaded] = useFonts({
     PlayfairDisplay_600SemiBold,
     DMSerifText_400Regular,
   })
@@ -51,43 +54,8 @@ export default function RootLayout() {
 
   SplashScreen.preventAutoHideAsync()
 
-  const [appIsReady, setAppIsReady] = useState(false)
-  useEffect(() => {
-    async function prepare() {
-      try {
-        SecureStore.getItemAsync('token').then((token) => {
-          setAppIsReady(true)
-          /*if (token) {
-            if (token.startsWith('hq-')) {
-              console.log('hq', token)
-              router.replace('/hq')
-            } else {
-              console.log('user', token)
-              router.replace('/user')
-            }
-          }*/
-        })
-      } catch (e) {
-        console.warn(e)
-      }
-    }
 
-    prepare()
-  }, [])
 
-  const onLayoutRootView = useCallback(async () => {
-    if (appIsReady && !fontsLoaded) {
-      await SplashScreen.hideAsync()
-    }
-  }, [appIsReady])
-
-  useEffect(() => {
-    onLayoutRootView()
-  }, [appIsReady])
-
-  if (!appIsReady || !fontsLoaded) {
-    return null
-  }
 
   return (
     <Stack
@@ -145,6 +113,8 @@ export default function RootLayout() {
         name="signupcomplete"
         options={{
           presentation: 'modal',
+          gestureEnabled: false,
+          headerLeft: () => null,
         }}
       />
     </Stack>

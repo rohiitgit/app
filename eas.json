@@ -6,12 +6,11 @@
   "build": {
     "development": {
       "developmentClient": true,
-        "distribution": "internal",
-        "ios": {
-          "simulator": true
-        },
-        "node": "22.13.1"
-        
+      "distribution": "internal",
+      "ios": {
+        "simulator": false
+      },
+      "node": "22.13.1"
     },
     "preview": {
       "distribution": "internal",
@@ -20,6 +19,14 @@
     "production": {
       "autoIncrement": true,
       "node": "22.13.1"
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "environment": "development"
     }
   },
   "submit": {

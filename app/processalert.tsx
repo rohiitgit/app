@@ -1,5 +1,6 @@
 import Button from '@/components/Button'
 import Card from '@/components/Card'
+import checkSecret from '@/components/CheckSecret'
 import { router, useLocalSearchParams } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
@@ -8,7 +9,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import * as Progress from 'react-native-progress'
 export default function Modal() {
   const local = useLocalSearchParams()
-  const token = local.token
+  //const token = local.token
   const bankCode = local.bankCode
   const bloodtype = local.bloodtype
   const units = local.units
@@ -33,60 +34,76 @@ export default function Modal() {
   }>({ x: 0, y: 0, e: 0 })
   let [progress, setProgress] = useState<number>(0)
   useEffect(() => {
-    //console.log('connecting to server')
-    const ws = new WebSocket('ws://localhost:3000/request')
-    // catch connection errors
-    ws.onerror = (error) => {
-      //console.log('error', error)
-      Alert.alert('Error', 'Could not connect to Blood Alert server')
-    }
-    ws.onopen = () => {
-      //console.log('connected')
-      ws.send(
-        JSON.stringify({
-          bankCode: bankCode,
-          token: token,
-          type: bloodtype,
-          units: units,
-          months: months,
-          contact: contact,
-        })
-      )
 
-      ws.onmessage = (message) => {
-        //format of message: %ckpt%event%data%
-        //event: 0: auth, 1 (pull eligible donors), 2 (calc distances), 3 (send notifications)
-        //data: 0: true/false, 1: {x: 10, y: 100} (10/100 donors are eligible), 2: {x: 1} | {x: 0} (distances calculated), 3: {x: 10, y: 9, e: 5} (10 notifications, 9 whatsapp/sms messages, 5 errors)
-        let msg = message.data.split('%')
-        let event = parseInt(msg[1])
-        let data = JSON.parse(msg[2])
-        if (msg[0] === 'err') {
-          Alert.alert('Error', msg[2])
-          router.dismiss()
-        }
-        if (event === 0) {
-          if (data) {
-            //console.log('authenticated')
-            setProgress(0.25)
-          } else {
-            //console.log('unauthenticated')
-            Alert.alert('Error', 'Authentication failed')
+    async function load() {
+      let token = await checkSecret()
+      const ws = new WebSocket(`ws://${
+        __DEV__ ? 'localhost:3000' : 'api.pdgn.xyz'
+      }/bx`)
+      // catch connection errors
+      ws.onerror = (error) => {
+        console.log('error', error)
+        Alert.alert('Error', 'Could not connect to Blood Alert server')
+      }
+      ws.onopen = () => {
+        console.log('connected')
+        ws.send(
+          JSON.stringify({
+            bankCode: bankCode,
+            token: token,
+            type: bloodtype,
+            units: units,
+            months: months,
+            contact: contact,
+          })
+        )
+
+        ws.onmessage = (message) => {
+
+          //message format: %ckpt%event%data%
+          //event: 0: auth, 1 (pull eligible donors), 2 (calc distances), 3 (send notifications)
+          //data: 0: true/false, 1: {x: 10, y: 100} (10/100 donors are eligible), 2: {x: 1} | {x: 0} (distances calculated), 3: {x: 10, y: 9, e: 5} (10 notifications, 9 whatsapp/sms messages, 5 errors)
+
+          let msg = message.data.split('%')
+
+          console.log(msg)
+          if (msg[1] === 'err') {
+            Alert.alert('Error', msg[2])
             router.dismiss()
           }
-        } else if (event === 1) {
-          //console.log('eligible donors pulled')
-          setProgress(0.5)
-          //console.log(`${data.x} donors are eligible`)
-        } else if (event === 2) {
-          //console.log(`distances ${data.x == 1 ? '' : 'not'} calculated`)
-          setProgress(0.75)
-        } else if (event === 3) {
-          setProgress(1)
-          //console.log( `${data.x} notifications sent, ${data.y} messages sent, ${data.e} errors`)
-          setNotificationsSent(data)
+
+          let event = parseInt(msg[2])
+
+          let data = JSON.parse(msg[3])
+          console.log(event, data)
+          if (event === 0) {
+            if (data.a == 1) {
+              console.log('authenticated')
+              setProgress(0.25)
+            } else {
+              console.log('unauthenticated')
+              Alert.alert('Error', 'Authentication failed')
+              router.dismiss()
+            }
+          } else if (event === 1) {
+            console.log('eligible donors pulled')
+            setProgress(0.5)
+
+            console.log(`${data.x} donors are eligible`)
+          } else if (event === 2) {
+            console.log(`distances ${data.x == 1 ? '' : 'not'} calculated`)
+            setProgress(0.75)
+          } else if (event === 3) {
+            setProgress(1)
+            console.log(
+              `${data.x} notifications sent, ${data.y} messages sent, ${data.e} errors`
+            )
+            setNotificationsSent(data)
+          }
         }
       }
     }
+    load()
   }, [])
   let doneIcon = ''
   return (

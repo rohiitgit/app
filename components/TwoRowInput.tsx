@@ -5,6 +5,7 @@ export default function TwoRowInput(props: {
   value: string
   setValue: (value: string) => void
   keyboardType: any
+  style?: any
   children: any
 }) {
   return (
@@ -13,6 +14,7 @@ export default function TwoRowInput(props: {
         flexDirection: 'row',
         width: 300,
         justifyContent: 'space-between',
+        ...props.style,
       }}
     >
       <TextInput
@@ -21,14 +23,14 @@ export default function TwoRowInput(props: {
         value={props.value}
         placeholderTextColor={'grey'}
         onChangeText={props.setValue}
-        style={{ ...styles.input, width: '75%' }}
+        style={{ ...styles.input, width: '72%' }}
       />
       <View
         style={{
           borderRadius: 9,
           padding: 5,
           backgroundColor: '#F3F3F3',
-          width: '20%',
+          width: '25%',
           height: 50,
           margin: 10,
           marginLeft: 0,

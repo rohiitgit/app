@@ -8,18 +8,12 @@ export default function Modal() {
   let {
     name,
     phone,
-    uuid,
+    bankName,
   }: {
     name: string
     phone: string
-    uuid: string
+    bankName: string
   } = useLocalSearchParams()
-  useEffect(() => {
-    async function setToken() {
-      let e = await SecureStore.setItemAsync('token', uuid)
-    }
-    setToken()
-  })
   let isDarkMode = useColorScheme() === 'dark'
   let responsiveColor = isDarkMode ? 'white' : 'black'
   return (
@@ -162,9 +156,9 @@ export default function Modal() {
                 }}
               >
                 Even if you haven't been verified, you can still donate at the{' '}
-                <Text style={{ color: '#7469B6' }}>Blood Center</Text>. Make
-                sure to show an employee your QR code before you donate so they
-                can verify your profile.
+                <Text style={{ color: '#7469B6' }}>{bankName}</Text>. Make sure
+                to show an employee your QR code before you donate so they can
+                verify your profile.
               </Text>
             </View>
           </View>

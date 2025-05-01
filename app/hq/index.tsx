@@ -30,7 +30,7 @@ export default function HQIndex() {
             shadowRadius: 20,
             backgroundColor: isDarkMode ? '#3a3b3c' : '#fff',
             borderTopWidth: 0,
-            
+
           },
           sceneStyle: {
             backgroundColor: isDarkMode ? '#030303' : '#efeef7',
@@ -53,9 +53,10 @@ export default function HQIndex() {
           component={Camera}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Octicons name="database" color={color} size={size} />
+              <Octicons name="device-camera" color={color} size={size} />
             ),
           }}
+          
         />
         <Tab.Screen
           name="Home"
@@ -67,21 +68,22 @@ export default function HQIndex() {
           }}
         />
         <Tab.Screen
-          name="Query"
+          name="Donors"
           component={Query}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Octicons name="person" color={color} size={size} />
+              <Octicons name="database" color={color} size={size} />
             ),
           }}
         />
         <Tab.Screen
-          name="Settings"
+          name="More"
           component={Settings}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Octicons name="gear" color={color} size={size} />
+              <Octicons name="kebab-horizontal" color={color} size={size} />
             ),
+            
           }}
         />
       </Tab.Navigator>

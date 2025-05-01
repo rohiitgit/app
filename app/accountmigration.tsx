@@ -1,5 +1,6 @@
 import styles from '@/assets/styles/styles'
 import Button from '@/components/Button'
+import fx from '@/components/Fetch'
 import FreeButton from '@/components/FreeButton'
 import DateTimePicker, {
   DateTimePickerAndroid,
@@ -16,7 +17,7 @@ import {
   Text,
   TextInput,
   useColorScheme,
-  View
+  View,
 } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import MapView, { Marker } from 'react-native-maps'
@@ -28,17 +29,8 @@ export default function Modal() {
   let [addressText, setAddressText] = useState<string>('')
   let [useCustomLocation, setUseCustomLocation] = useState<boolean>(false)
   let [formattedAddress, setFormattedAddress] = useState<string>('')
-  let [geocodeLookupId, setGeocodeLookupId] = useState<string>('')
   let [isLocatingCustomAddress, setIsLocatingCustomAddress] =
     useState<boolean>(false)
-
-  useEffect(() => {
-    SecureStore.getItemAsync('lookup').then((res) => {
-      if (res) {
-        setGeocodeLookupId(res)
-      }
-    })
-  }, [])
 
   let [userDefinedLocation, setUserDefinedLocation] = useState<{
     latitude: number
@@ -48,14 +40,6 @@ export default function Modal() {
   } | null>(coords.hasOwnProperty('latitude') ? coords : null)
   let [errorMsg, setErrorMsg] = useState<string>('')
   let [disable, setDisable] = useState<boolean>(false)
-  let [uuid, setUUID] = useState<string | null>(null)
-  useEffect(() => {
-    async function setToken() {
-      let e = await SecureStore.getItemAsync('token')
-      setUUID(e)
-    }
-    setToken()
-  })
   async function updateLocation() {
     //console.log('updating locations')
     let nowDate = new Date()
@@ -77,25 +61,17 @@ export default function Modal() {
       return
     } else {
       setDisable(true)
-     ////console.log('updating location: conditions met')
-      fetch('http://localhost:3000/donor/update-location', {
+      ////console.log('updating location: conditions met')
+      fx('/donor/update-location', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          uuid: uuid,
+        body: {
           distance: distance,
           dob: dob,
-          coords: useCustomLocation
-            ? formattedAddress
-            : userDefinedLocation
+          coords: userDefinedLocation
             ? `${userDefinedLocation.latitude},${userDefinedLocation.longitude}`
             : '',
-          lookupid: geocodeLookupId,
-        }),
+        },
       })
-        .then((res) => res.json())
         .then(async (res) => {
           setDisable(false)
           if (res.error) {
@@ -152,7 +128,7 @@ export default function Modal() {
 
       //console.log(location)
     } catch (e) {
-      //console.log(e)
+      console.log(e)
       setErrorMsg('An error occurred. Please try again.')
       setDistance(null)
       setUserDefinedLocation(null)
@@ -165,7 +141,7 @@ export default function Modal() {
     let bbLat = 11.953852
     let bbLon = 79.797765
     /**
-     * Why are these values hardcoded? 
+     * Why are these values hardcoded?
      * This page is only for certain donors of that blood bank and this page will be removed in the future.
      */
     var R = 6371 // km
@@ -189,18 +165,18 @@ export default function Modal() {
 
   async function geocodeAddress() {
     setIsLocatingCustomAddress(true)
-    fetch(`http://localhost:3000/donor/geocode-location`, {
+    fx(`/donor/geocode-location`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+      body: {
         address: addressText,
-        uuid: geocodeLookupId,
-      }),
+      },
     })
-      .then((res) => res.json())
       .then(async (res) => {
+        if (res.statusCode === 429) {
+          alert('Too many requests. Please try again later.')
+          setIsLocatingCustomAddress(false)
+          return
+        }
         if (res.error) {
           if (res.message == 'ratelimit') {
             Alert.alert(
@@ -215,20 +191,24 @@ export default function Modal() {
           }
           setIsLocatingCustomAddress(false)
         } else {
-          Alert.alert(
-            'Address located!',
-            'For security reasons, your exact address cannot be displayed. Please ensure that the distance is roughly accurate. If not, enter a more specific address and try again.'
-          )
+          setErrorMsg('')
           setIsLocatingCustomAddress(false)
           setDistance(res.data.distance)
+          setUserDefinedLocation({
+            latitude: res.data.coords.latitude,
+            longitude: res.data.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          })
           setFormattedAddress(res.data.formattedAddress)
+          //setFormattedAddress(res.data.formattedAddress)
           //console.log(distance)
-          setGeocodeLookupId(res.data.uuid)
-          await SecureStore.setItemAsync('lookup', res.data.uuid)
+          // setGeocodeLookupId(res.data.uuid)
+          //await SecureStore.setItemAsync('lookup', res.data.uuid)
         }
       })
       .catch((e) => {
-        //console.log(e)
+        console.log(e)
         setIsLocatingCustomAddress(false)
         setErrorMsg('An error occurred. Please try again.')
         setDistance(null)
@@ -240,14 +220,15 @@ export default function Modal() {
   return (
     <KeyboardAwareScrollView
       style={{
-        marginBottom: 30,
-        marginTop: 30,
+        backgroundColor: isDarkMode ? '#030303' : '#fff',
       }}
       contentContainerStyle={{
         justifyContent: 'center',
         width: '80%',
         alignSelf: 'center',
         gap: 20,
+        marginTop: 20,
+        paddingBottom: 50,
       }}
     >
       <Text
@@ -255,6 +236,7 @@ export default function Modal() {
           fontSize: 28,
           fontWeight: 'bold',
           textAlign: 'center',
+          color: isDarkMode ? 'white' : 'black',
         }}
       >
         Thanks for installing,{'\n'}{' '}
@@ -312,6 +294,7 @@ export default function Modal() {
             <Text
               style={{
                 fontSize: 16,
+                color: isDarkMode ? 'white' : 'black',
               }}
             >
               The next time you donate blood, open the app and show an employee
@@ -339,6 +322,7 @@ export default function Modal() {
             <Text
               style={{
                 fontSize: 16,
+                color: isDarkMode ? 'white' : 'black',
               }}
             >
               Since you're a pre-existing donor, you do not require further
@@ -366,6 +350,7 @@ export default function Modal() {
             <Text
               style={{
                 fontSize: 16,
+                color: isDarkMode ? 'white' : 'black',
               }}
             >
               You will receive alerts on your phone when the blood bank is in
@@ -373,7 +358,14 @@ export default function Modal() {
             </Text>
           </View>
         </View>
-        <Text style={{ fontSize: 16, marginTop: 20, marginBottom: 20 }}>
+        <Text
+          style={{
+            fontSize: 16,
+            marginTop: 20,
+            marginBottom: 20,
+            color: isDarkMode ? 'white' : 'black',
+          }}
+        >
           As a final step, please confirm your information.
         </Text>
         <Text
@@ -480,7 +472,8 @@ export default function Modal() {
                   Try Again
                 </Button>
               </>
-            ) : userDefinedLocation && !useCustomLocation ? (
+            ) : null}
+            {userDefinedLocation ? (
               <View
                 style={{
                   width: '100%',
@@ -590,6 +583,7 @@ export default function Modal() {
                   textAlign: 'center',
                   marginTop: 10,
                   marginBottom: 10,
+                  color: isDarkMode ? 'white' : 'black',
                 }}
               >
                 Please ensure you are at your permanent location. If not, enter
@@ -611,6 +605,7 @@ export default function Modal() {
                     textAlign: 'center',
                     marginBottom: 10,
                     alignSelf: 'center',
+                    color: isDarkMode ? 'white' : 'black',
                   }}
                 >
                   Use custom address (limited)
@@ -637,6 +632,7 @@ export default function Modal() {
                       borderWidth: 1,
                       padding: 10,
                       width: 320,
+                      color: isDarkMode ? 'white' : 'black',
                     }}
                   >
                     {formattedAddress}
@@ -691,15 +687,16 @@ export default function Modal() {
                 </View>
               ) : null}
 
-              <Button
+              <FreeButton
                 onPress={updateLocation}
                 disabled={useCustomLocation ? !distance : !userDefinedLocation}
                 style={{
-                  width: '50%',
+                  width: '100%',
+                  backgroundColor: '#7469B6',
                 }}
               >
                 Confirm
-              </Button>
+              </FreeButton>
             </>
           </View>
         </View>
