@@ -77,7 +77,7 @@ export default async function checkSecret() {
       console.error('CheckSecret: Error refreshing token:', error)
       Alert.alert(
         'Error',
-        'Failed to rotate login tokens. Please log in again.',
+        'An error occurred. Please log in again.',
         [
           {
             text: 'OK',

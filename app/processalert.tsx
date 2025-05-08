@@ -34,12 +34,11 @@ export default function Modal() {
   }>({ x: 0, y: 0, e: 0 })
   let [progress, setProgress] = useState<number>(0)
   useEffect(() => {
-
     async function load() {
       let token = await checkSecret()
-      const ws = new WebSocket(`ws://${
-        __DEV__ ? 'localhost:3000' : 'api.pdgn.xyz'
-      }/bx`)
+      const ws = new WebSocket(
+        `${__DEV__ ? 'ws://localhost:3000' : 'wss://api.pdgn.xyz'}/bx`
+      )
       // catch connection errors
       ws.onerror = (error) => {
         console.log('error', error)
@@ -59,7 +58,6 @@ export default function Modal() {
         )
 
         ws.onmessage = (message) => {
-
           //message format: %ckpt%event%data%
           //event: 0: auth, 1 (pull eligible donors), 2 (calc distances), 3 (send notifications)
           //data: 0: true/false, 1: {x: 10, y: 100} (10/100 donors are eligible), 2: {x: 1} | {x: 0} (distances calculated), 3: {x: 10, y: 9, e: 5} (10 notifications, 9 whatsapp/sms messages, 5 errors)
