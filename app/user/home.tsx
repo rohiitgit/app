@@ -594,9 +594,9 @@ export default function Home() {
               <Text
                 style={{ fontSize: 16, color: isDarkMode ? 'white' : 'black' }}
               >
-                Your Profile has not been verified yet. Please allow a few days
-                for verification. Alternatively, you can visit the blood center
-                to get verified.
+                Your profile is awaiting verification. This may take a few days.
+                For faster processing, you can also visit the blood center
+                directly.
               </Text>
             </View>
           ) : null}

@@ -4,10 +4,10 @@ import checkSecret from '@/components/CheckSecret'
 import * as Application from 'expo-application'
 import { router } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
-import { fetch } from 'expo/fetch'
 import React, { useCallback, useEffect, useState } from 'react'
 import * as SplashScreen from 'expo-splash-screen'
 import {
+  Alert,
   Keyboard,
   Pressable,
   ScrollView,
@@ -22,12 +22,12 @@ import {
   useFonts,
 } from '@expo-google-fonts/dm-serif-text'
 import { PlayfairDisplay_600SemiBold } from '@expo-google-fonts/playfair-display'
-
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { StatusBar } from 'expo-status-bar'
+
 export default function Index() {
   SplashScreen.preventAutoHideAsync()
   let [phoneNumber, setPhoneNumber] = useState<string>('')
-  let [password, setPassword] = useState<string>('')
   let [loginProcess, setLoginProcess] = useState<boolean>(false)
   let [appIsReady, setAppIsReady] = useState<boolean>(false)
   let [fontsLoaded] = useFonts({
@@ -35,120 +35,113 @@ export default function Index() {
     DMSerifText_400Regular,
   })
   let [otp, setOtp] = useState<string>('')
-  let [allowOTP, setAllowOTP] = useState<boolean>(false)
-  let [newUser, setNewUser] = useState<boolean>(false)
+  let [awaitingOTP, setAwaitingOTP] = useState<boolean>(false)
   let [lookupAccessToken, setLookupAccessToken] = useState<string>('')
-  async function login() {
-    if (newUser) {
-      setLoginProcess(true)
-      fetch(
+
+  async function sendOTP() {
+    setLoginProcess(true)
+    try {
+      const response = await fetch(
+        `${
+          __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
+        }/donor/send-otp`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: phoneNumber }),
+        }
+      )
+      const data = await response.json()
+      setLoginProcess(false)
+      if (data.error) {
+        alert(data.message)
+        return
+      }
+      setAwaitingOTP(true)
+      setLookupAccessToken(data.lookuptoken || '') // Save lookup token if present
+    } catch (error) {
+      setLoginProcess(false)
+      Alert.alert(
+        'An error occurred while sending your code.',
+        error ? String(error) : 'Please try again later.'
+      )
+    }
+  }
+
+  async function checkOTP() {
+    setLoginProcess(true)
+    try {
+      const response = await fetch(
         `${
           __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
         }/donor/check-otp`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${lookupAccessToken}`,
-          },
+          headers: lookupAccessToken
+            ? {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${lookupAccessToken}`,
+              }
+            : {
+                'Content-Type': 'application/json',
+              },
           body: JSON.stringify({
             phone: phoneNumber,
             otp: otp,
           }),
         }
       )
-        .then((response) => response.json())
-        .then(async (response) => {
-          setLoginProcess(false)
-          if (response.error) {
-            alert(response.message)
-          } else {
-            router.replace({
-              pathname: '/signup',
-              params: {
-                phoneNumber: phoneNumber,
-                lookuptoken: lookupAccessToken,
-              },
-            })
-          }
-        })
-        .catch((error) => {
-          alert(error)
-        })
-      return
-    }
-    console.log(otp)
-    setLoginProcess(true)
-    fetch(
-      `${
-        __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
-      }/donor/send-otp`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phone: phoneNumber,
-          allowSignup: true,
-          intentVerifyOTPlogin: allowOTP,
-          userEnteredOTP: allowOTP ? otp : null,
-        }),
+      const data = await response.json()
+      console.log('OTP verification response:', data)
+      setLoginProcess(false)
+      if (data.error) {
+        Alert.alert(
+          'An error occurred while verifying your code.',
+          data.error ? String(data.error) : 'Please try again later.'
+        )
+        return
       }
-    )
-      .then((response) => response.json())
-      .then(async (response) => {
-        if (response.statusCode === 429) {
-          alert('Too many requests. Please try again later.')
-          setLoginProcess(false)
-          return
-        }
-        setLoginProcess(false)
-        if (response.error) {
-          alert(response.message)
-        } else {
-          //alert(response.message)
-          if (response.hasOwnProperty('otpSent')) {
-            setAllowOTP(true)
-          } else if (response.hasOwnProperty('access')) {
-            console.log(response.access.token, response.bank.id)
-            await SecureStore.setItemAsync('token', response.access.token)
-            await SecureStore.setItemAsync('refresh', response.refresh.token)
-            await SecureStore.setItemAsync(
-              'tokenexp',
-              response.access.exp.toString()
-            )
-            await SecureStore.setItemAsync(
-              'refreshexp',
-              response.refresh.exp.toString()
-            )
-            await SecureStore.setItemAsync('bbId', response.bank.id)
-            router.replace('/user')
-          } else {
-            setAllowOTP(true)
-            setNewUser(true)
-            setLookupAccessToken(response.lookuptoken)
-            console.log(response.otp)
-            console.log('new user')
-          }
-        }
-      })
-      .catch((error) => {
-        console.log('error', error)
-        setLoginProcess(false)
-        console.log(error)
-        alert(error)
-      })
+      if (data.existing === false) {
+        console.log('New user detected, redirecting to signup')
+        router.replace({
+          pathname: '/signup',
+          params: {
+            phoneNumber: phoneNumber,
+            lookuptoken: lookupAccessToken,
+          },
+        })
+      } else {
+        await SecureStore.setItemAsync('token', data.access.token)
+        await SecureStore.setItemAsync('refresh', data.refresh.token)
+        await SecureStore.setItemAsync('tokenexp', data.access.exp.toString())
+        await SecureStore.setItemAsync(
+          'refreshexp',
+          data.refresh.exp.toString()
+        )
+        await SecureStore.setItemAsync('bbId', data.bank.id)
+        router.replace('/user')
+      }
+    } catch (error) {
+      setLoginProcess(false)
+      Alert.alert(
+        'An error occurred while verifying your code.',
+        error ? String(error) : 'Please try again later.'
+      )
+    }
   }
 
+  function handleLogin() {
+    if (awaitingOTP) {
+      checkOTP()
+    } else {
+      sendOTP()
+    }
+  }
   useEffect(() => {
     async function prepare() {
       try {
-        // Call checkSecret to validate tokens
         const token = await checkSecret()
-
         if (!token) {
-          console.log('Token is invalid or does not exist')
           const hasOnboarded = await SecureStore.getItemAsync('hasOnboarded')
           if (!hasOnboarded) {
             router.push('/welcome')
@@ -158,7 +151,6 @@ export default function Index() {
         } else {
           const id = await SecureStore.getItemAsync('id')
           const redirectPath = id ? '/hq' : '/user'
-          console.log(`Redirecting to ${redirectPath}`)
           setAppIsReady(true)
           router.replace(redirectPath)
         }
@@ -166,7 +158,6 @@ export default function Index() {
         console.warn(e)
       }
     }
-
     prepare()
   }, [])
   let isDarkMode = useColorScheme() === 'dark'
@@ -201,7 +192,7 @@ export default function Index() {
               fontSize: 32,
               textAlign: 'center',
               color: '#7469B6',
-              fontFamily: 'PlayfairDisplay_600SemiBold', //'PlayfairDisplay_600SemiBold',
+              fontFamily: 'PlayfairDisplay_600SemiBold',
             }}
           >
             Open Blood
@@ -212,23 +203,22 @@ export default function Index() {
               autoComplete="tel"
               keyboardType="phone-pad"
               value={phoneNumber}
-              onSubmitEditing={login}
+              onSubmitEditing={handleLogin}
               onChangeText={setPhoneNumber}
               placeholderTextColor={'grey'}
               style={{
                 ...styles.input,
-                color: newUser || allowOTP ? 'grey' : 'black',
+                color: awaitingOTP ? 'grey' : 'black',
               }}
-              editable={!loginProcess && (!newUser || !allowOTP)}
-              readOnly={loginProcess || newUser || allowOTP}
+              editable={!loginProcess && !awaitingOTP}
+              readOnly={loginProcess || awaitingOTP}
             />
-            {allowOTP ? (
+            {awaitingOTP ? (
               <>
                 <Pressable
                   onPress={() => {
-                    //let the user input a new phone number
-                    setAllowOTP(false)
-                    setNewUser(false)
+                    setAwaitingOTP(false)
+                    setOtp('')
                   }}
                 >
                   <Text
@@ -255,19 +245,19 @@ export default function Index() {
             ) : null}
           </View>
           <Button
-            onPress={login}
+            onPress={handleLogin}
             disabled={
-              allowOTP
+              awaitingOTP
                 ? !otp.match(/^\d{4}$/)
                 : loginProcess ||
                   !phoneNumber.match(/^(\+91[\-\s]?|0)?[1-9]\d{4}[\-\s]?\d{5}$/)
             }
           >
             {loginProcess
-              ? newUser
+              ? awaitingOTP
                 ? 'Verifying...'
-                : 'Logging in...'
-              : newUser
+                : 'Sending OTP...'
+              : awaitingOTP
               ? 'Continue'
               : 'Log in'}
           </Button>

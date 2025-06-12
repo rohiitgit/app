@@ -257,7 +257,7 @@ export default function Index() {
             height: 100,
             justifyContent: 'center',
             alignSelf: 'center',
-            elevation: 10,
+            elevation: 0,
             shadowColor: '#7469B6',
             shadowOpacity: 0.3,
             shadowRadius: 20,
