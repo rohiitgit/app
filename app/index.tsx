@@ -182,75 +182,168 @@ export default function Index() {
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: isDarkMode ? '#030303' : '#fff',
+          backgroundColor: isDarkMode ? '#030303' : '#f8f8fc',
+          paddingHorizontal: 24,
         }}
         keyboardShouldPersistTaps="handled"
       >
         <SafeAreaView>
+          {/* App Title */}
           <Text
             style={{
-              fontSize: 32,
+              fontSize: 36,
               textAlign: 'center',
               color: '#7469B6',
               fontFamily: 'PlayfairDisplay_600SemiBold',
+              marginBottom: 8,
+              letterSpacing: 1,
+              paddingBottom: 12,
             }}
           >
             Open Blood
           </Text>
-          <View style={{ marginTop: 20 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: '#e5e5e5',
+              borderRadius: 12,
+              backgroundColor: isDarkMode ? '#18181b' : '#fff',
+              marginBottom: 18,
+              paddingHorizontal: 12,
+              height: 54,
+              shadowColor: '#000',
+              shadowOpacity: 0.04,
+              shadowRadius: 6,
+              shadowOffset: { width: 0, height: 2 },
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 22,
+                marginRight: 8,
+                color: '#222',
+              }}
+            >
+              🇮🇳 +91
+            </Text>
             <TextInput
-              placeholder="phone number"
+              placeholder="10-digit phone number"
               autoComplete="tel"
               keyboardType="phone-pad"
               value={phoneNumber}
               onSubmitEditing={handleLogin}
-              onChangeText={setPhoneNumber}
-              placeholderTextColor={'grey'}
+              onChangeText={text => {
+                let cleaned = text.replace(/[^0-9]/g, '').slice(0, 10)
+                if (cleaned.startsWith('0')) cleaned = cleaned.slice(1)
+                setPhoneNumber(cleaned)
+              }}
+              placeholderTextColor={'#bbb'}
               style={{
                 ...styles.input,
-                color: awaitingOTP ? 'grey' : 'black',
+                color: awaitingOTP ? '#bbb' : '#222',
+                borderWidth: 0,
+                flex: 1,
+                fontSize: 18,
+                backgroundColor: 'transparent',
               }}
               editable={!loginProcess && !awaitingOTP}
               readOnly={loginProcess || awaitingOTP}
+              maxLength={10}
             />
-            {awaitingOTP ? (
-              <>
-                <Pressable
-                  onPress={() => {
-                    setAwaitingOTP(false)
-                    setOtp('')
-                  }}
-                >
-                  <Text
+          </View>
+          {awaitingOTP ? (
+            <>
+              <Text
+                style={{
+                  fontSize: 15,
+                  color: '#888',
+                  marginBottom: 12,
+                  marginLeft: 2,
+                }}
+              >
+                Enter the 4-digit code sent to your phone.
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  gap: 10,
+                  marginBottom: 18,
+                }}
+              >
+                {[0, 1, 2, 3].map(i => (
+                  <View
+                    key={i}
                     style={{
-                      textAlign: 'left',
-                      fontSize: 16,
-                      color: '#7469B6',
+                      width: 44,
+                      height: 54,
+                      borderRadius: 10,
+                      borderWidth: 1.5,
+                      borderColor: otp.length === i ? '#7469B6' : '#e5e5e5',
+                      backgroundColor: isDarkMode ? '#18181b' : '#fff',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      shadowColor: '#000',
+                      shadowOpacity: otp.length === i ? 0.08 : 0,
+                      shadowRadius: 6,
+                      shadowOffset: { width: 0, height: 2 },
                     }}
                   >
-                    Try a different number
-                  </Text>
-                </Pressable>
+                    <Text
+                      style={{
+                        fontSize: 24,
+                        color: '#222',
+                        fontFamily: 'DMSerifText_400Regular',
+                        letterSpacing: 2,
+                      }}
+                    >
+                      {otp[i] ? otp[i] : ''}
+                    </Text>
+                  </View>
+                ))}
+                {/* Hidden TextInput for actual input */}
                 <TextInput
-                  placeholderTextColor={'grey'}
-                  placeholder="enter OTP"
-                  autoComplete="off"
-                  keyboardType="number-pad"
-                  secureTextEntry={false}
                   value={otp}
-                  onChangeText={setOtp}
-                  style={styles.input}
+                  onChangeText={text => setOtp(text.replace(/[^0-9]/g, '').slice(0, 4))}
+                  keyboardType="number-pad"
+                  maxLength={4}
+                  autoFocus
+                  style={{
+                    position: 'absolute',
+                    opacity: 0,
+                    width: 1,
+                    height: 1,
+                  }}
                 />
-              </>
-            ) : null}
-          </View>
+              </View>
+              <Pressable
+                onPress={() => {
+                  setAwaitingOTP(false)
+                  setOtp('')
+                }}
+                style={{ marginBottom: 12 }}
+              >
+                <Text
+                  style={{
+                    textAlign: 'left',
+                    fontSize: 15,
+                    color: '#7469B6', 
+                  }}
+                >
+                  Use a different number
+                </Text>
+              </Pressable>
+            </>
+          ) : null}
           <Button
             onPress={handleLogin}
             disabled={
               awaitingOTP
                 ? !otp.match(/^\d{4}$/)
                 : loginProcess ||
-                  !phoneNumber.match(/^(\+91[\-\s]?|0)?[1-9]\d{4}[\-\s]?\d{5}$/)
+                  !phoneNumber.match(/^[1-9]\d{9}$/)
             }
           >
             {loginProcess
@@ -265,7 +358,7 @@ export default function Index() {
             onPress={() => {
               router.push('/hqonboarding')
             }}
-            style={{ marginTop: 20 }}
+            style={{ marginTop: 28 }}
           >
             <Text
               style={{
@@ -281,13 +374,13 @@ export default function Index() {
             style={{
               flexDirection: 'row',
               justifyContent: 'center',
-              marginTop: 50,
+              marginTop: 60,
             }}
           >
             <Text
               style={{
-                fontSize: 16,
-                color: 'grey',
+                fontSize: 14,
+                color: '#bbb',
               }}
             >
               Open Blood {Application.nativeApplicationVersion} [
