@@ -28,7 +28,7 @@ export default function Onboarding() {
   function login() {
     setLoginProcess(true)
     fetch(
-      `${__DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'}/hq/login`,
+      `${__DEV__ ? 'http://localhost:3000' : 'https://core.ob.pidgon.com'}/hq/login`,
       {
         method: 'POST',
         headers: {

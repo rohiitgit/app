@@ -56,7 +56,7 @@ export default function One({
   function retrieveBanks() {
     fetch(
       `${
-        __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
+        __DEV__ ? 'http://localhost:3000' : 'https://core.ob.pidgon.com'
       }/donor/banks`,
       {
         method: 'POST',

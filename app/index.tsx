@@ -43,7 +43,7 @@ export default function Index() {
     try {
       const response = await fetch(
         `${
-          __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
+          __DEV__ ? 'http://localhost:3000' : 'core.ob.pidgon.com'
         }/donor/send-otp`,
         {
           method: 'POST',
@@ -72,9 +72,7 @@ export default function Index() {
     setLoginProcess(true)
     try {
       const response = await fetch(
-        `${
-          __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
-        }/donor/check-otp`,
+        `${__DEV__ ? 'http://localhost:3000' : 'https://core.ob.pidgon.com'}/donor/check-otp`,
         {
           method: 'POST',
           headers: lookupAccessToken
@@ -295,7 +293,7 @@ export default function Index() {
                       style={{
                         fontSize: 24,
                         color: '#222',
-                        fontFamily: 'DMSerifText_400Regular',
+                        fontFamily: 'PlayfairDisplay_600SemiBold',
                         letterSpacing: 2,
                       }}
                     >

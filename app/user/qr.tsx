@@ -198,7 +198,6 @@ export default function QR() {
                   color: '#7469B6',
                   fontSize: 16,
                   marginTop: 8,
-                  fontFamily: 'DMSerifText_400Regular',
                 }}
               >
                 Loading QR...

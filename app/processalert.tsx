@@ -37,7 +37,7 @@ export default function Modal() {
     async function load() {
       let token = await checkSecret()
       const ws = new WebSocket(
-        `${__DEV__ ? 'ws://localhost:3000' : 'wss://api.pdgn.xyz'}/bx`
+        `${__DEV__ ? 'ws://localhost:3000' : 'wss://core.ob.pidgon.com'}/bx`
       )
       // catch connection errors
       ws.onerror = (error) => {

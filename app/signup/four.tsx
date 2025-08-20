@@ -115,7 +115,7 @@ export default function Four({
     setIsLocatingCustomAddress(true)
     fetch(
       `${
-        __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
+        __DEV__ ? 'http://localhost:3000' : 'https://core.ob.pidgon.com'
       }/donor/geocode-location`,
       {
         method: 'POST',
