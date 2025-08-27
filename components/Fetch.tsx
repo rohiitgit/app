@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store'
 import checkSecret from './CheckSecret'
 
-const BASE_URL = __DEV__ ? 'http://localhost:3000' : 'https://api.pdgn.xyz'
+const BASE_URL = __DEV__ ? 'http://localhost:3000' : 'http://core.ob.pidgon.com'
 
 interface FetchOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'

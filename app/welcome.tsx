@@ -1,167 +1,380 @@
 import React, { useState } from 'react'
 import {
+  StyleSheet,
   useColorScheme,
   useWindowDimensions,
   View,
-  Pressable,
   Text,
 } from 'react-native'
-import Animated, { Easing, FadeIn } from 'react-native-reanimated'
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  SlideInUp,
+} from 'react-native-reanimated'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import FreeButton from '@/components/FreeButton'
 import * as SecureStore from 'expo-secure-store'
 import { router } from 'expo-router'
 
-const screens = [
+const SCREENS = [
   {
-    title: "Welcome to Open Blood",
-    content: "The smartest way to donate blood and save lives in your community.",
-    emoji: "🩸"
+    headline: 'Hey there.',
+    message: "We're really glad you're here.",
   },
   {
-    title: "Everything you need",
-    content: "• Quick 2-minute registration\n• Get notified when blood is needed\n• Track your donation history\n• Emergency alerts in your area",
-    emoji: "✨"
+    headline: 'Welcome to Open Blood.',
+    message: "Open Blood is built to make donating easier, safer, and smarter.",
   },
   {
-    title: "Your privacy matters",
-    content: "Your data is encrypted and secure. You control who sees what. No selling, no spam, just helping save lives.",
-    emoji: "🔒"
-  }
+    headline: 'Welcome to Open Blood.',
+    message: "We'll help you:",
+    showFeatures: true,
+    features: [
+      'Register in under 2 minutes',
+      'Know when and where your blood is needed',
+      'Keep track of your donations, eligibility, and history',
+      'Get notified during critical shortages in your area',
+    ],
+  },
 ]
 
+const FINAL_MESSAGE = "We're not here to sell you anything. Your data is encrypted and kept private. Only you decide who gets access to it."
+
+const AppPreview = ({ 
+  colorScheme, 
+  delay = 0 
+}: { 
+  colorScheme: string | null
+  delay?: number 
+}) => (
+  <Animated.View
+    entering={FadeInDown.duration(400).delay(delay)}
+    style={[
+      styles.appPreview,
+      {
+        backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#f8f8f8',
+        borderColor: colorScheme === 'dark' ? '#333' : '#ddd',
+      },
+    ]}
+  >
+    <View style={[
+      styles.previewHeader, 
+      { backgroundColor: colorScheme === 'dark' ? '#2a2a2a' : '#e8e8e8' }
+    ]}>
+      <View style={[styles.dot, { backgroundColor: '#ff5f57' }]} />
+      <View style={[styles.dot, { backgroundColor: '#ffbd2e' }]} />
+      <View style={[styles.dot, { backgroundColor: '#28ca42' }]} />
+    </View>
+    <View style={styles.previewContent}>
+      <View style={[
+        styles.line, 
+        { 
+          backgroundColor: colorScheme === 'dark' ? '#444' : '#ccc',
+          width: '70%' 
+        }
+      ]} />
+      <View style={[
+        styles.line, 
+        { 
+          backgroundColor: colorScheme === 'dark' ? '#444' : '#ccc',
+          width: '50%' 
+        }
+      ]} />
+      <View style={[
+        styles.line, 
+        { 
+          backgroundColor: colorScheme === 'dark' ? '#444' : '#ccc',
+          width: '80%' 
+        }
+      ]} />
+    </View>
+  </Animated.View>
+)
+
+const PaginationDots = ({ 
+  total, 
+  current, 
+  colorScheme 
+}: { 
+  total: number
+  current: number
+  colorScheme: string | null
+}) => (
+  <View style={styles.pagination}>
+    {Array.from({ length: total }, (_, index) => (
+      <View
+        key={index}
+        style={[
+          styles.paginationDot,
+          {
+            backgroundColor: index === current 
+              ? (colorScheme === 'dark' ? '#fff' : '#000')
+              : (colorScheme === 'dark' ? '#444' : '#ccc'),
+            transform: [{ scale: index === current ? 1.2 : 1 }],
+          },
+        ]}
+      />
+    ))}
+  </View>
+)
+
 export default function WelcomeScreen() {
-  const { width } = useWindowDimensions()
+  const { height, width } = useWindowDimensions()
   const insets = useSafeAreaInsets()
   const colorScheme = useColorScheme()
-  const [screenIndex, setScreenIndex] = useState(0)
-  const [transitioning, setTransitioning] = useState(false)
+  const [currentScreen, setCurrentScreen] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
-  const nextScreen = () => {
-    if (transitioning) return
-    setTransitioning(true)
+  const isSmallScreen = height < 700
+  const isTablet = width > 768
+  const currentData = SCREENS[currentScreen]
+  const isLastScreen = currentScreen === SCREENS.length - 1
 
-    if (screenIndex < screens.length - 1) {
+  const handleNext = () => {
+    if (isTransitioning) return
+    setIsTransitioning(true)
+
+    if (currentScreen < SCREENS.length - 1) {
+      // Move to next screen
       setTimeout(() => {
-        setScreenIndex((prev) => prev + 1)
-        setTransitioning(false)
+        setCurrentScreen(prev => prev + 1)
+        setIsTransitioning(false)
       }, 200)
     } else {
+      // Complete onboarding
       SecureStore.setItemAsync('hasOnboarded', 'true').then(() => {
         router.replace('/')
       })
     }
   }
 
-  const skipOnboarding = () => {
-    SecureStore.setItemAsync('hasOnboarded', 'true').then(() => {
-      router.replace('/')
-    })
+  const textColor = {
+    primary: colorScheme === 'dark' ? '#fff' : '#000',
+    secondary: colorScheme === 'dark' ? '#aaa' : '#444',
+    tertiary: colorScheme === 'dark' ? '#888' : '#666',
   }
 
-  const currentScreen = screens[screenIndex]
-
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
+    <SafeAreaView style={[
+      styles.container,
+      {
         backgroundColor: colorScheme === 'dark' ? '#030303' : '#efeef7',
-        paddingHorizontal: Math.max(20, width * 0.05),
-      }}
-    >
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Animated.View
-          entering={FadeIn.duration(500).easing(Easing.inOut(Easing.ease))}
-          style={[
-            {
-              alignItems: 'center',
-              width: '100%',
-              maxWidth: Math.min(400, width - 40),
-              paddingHorizontal: 20,
-              flex: 1,
-              justifyContent: 'center',
-            },
-          ]}
-        >
-          <View style={{ alignItems: 'center', marginBottom: 20 }}>
-            <Animated.Text
-              key={screenIndex + 'emoji'}
-              entering={FadeIn.duration(500)}
-              style={{
-                fontSize: 64,
-                marginBottom: 20,
-              }}
-            >
-              {currentScreen.emoji}
-            </Animated.Text>
-          </View>
-          
-          <View style={{ marginBottom: 20 }}>
-            <Animated.Text
-              key={screenIndex + 'title'}
-              entering={FadeIn.duration(500)}
-              style={{
-                fontSize: Math.max(22, Math.min(32, width * 0.06)),
-                fontWeight: 'bold',
-                color: colorScheme === 'dark' ? '#fff' : '#000',
-                textAlign: 'center',
-                marginBottom: 16,
-              }}
-            >
-              {currentScreen.title}
-            </Animated.Text>
+        paddingHorizontal: isTablet ? 40 : 20,
+        paddingBottom: insets.bottom + 80,
+      }
+    ]}>
+      <View style={styles.content}>
+        {/* Headline */}
+        <View style={styles.headlineSection}>
+          <Animated.Text
+            key={`headline-${currentScreen}`}
+            entering={FadeIn.duration(500)}
+            style={[
+              styles.headline,
+              {
+                fontSize: isSmallScreen ? 24 : isTablet ? 32 : 28,
+                color: textColor.primary,
+              },
+            ]}
+          >
+            {currentData.headline}
+          </Animated.Text>
+        </View>
+
+        {/* Message */}
+        {currentData.message && (
+          <Animated.Text
+            key={`message-${currentScreen}`}
+            entering={FadeIn.duration(600).delay(200)}
+            style={[
+              styles.message,
+              {
+                fontSize: isSmallScreen ? 16 : isTablet ? 20 : 18,
+                color: textColor.secondary,
+                textAlign: currentData.showFeatures ? 'left' : 'center',
+                alignSelf: currentData.showFeatures ? 'flex-start' : 'center',
+                width: '100%',
+                maxWidth: isTablet ? 600 : '95%',
+              },
+            ]}
+          >
+            {currentData.message}
+          </Animated.Text>
+        )}
+
+        {/* Features List */}
+        {currentData.showFeatures && (
+          <View style={styles.featuresSection}>
+            {currentData.features?.map((feature, index) => (
+              <Animated.View
+                key={feature}
+                entering={FadeInDown.duration(500).delay(300 + index * 100)}
+                style={styles.featureItem}
+              >
+                <Text
+                  style={[
+                    styles.featureText,
+                    {
+                      fontSize: isSmallScreen ? 16 : isTablet ? 20 : 18,
+                      color: textColor.secondary,
+                    },
+                  ]}
+                >
+                  • {feature}
+                </Text>
+              </Animated.View>
+            ))}
             
-            <Animated.Text
-              key={screenIndex + 'content'}
-              entering={FadeIn.duration(800)}
-              style={{
-                fontSize: Math.max(16, Math.min(20, width * 0.045)),
-                color: colorScheme === 'dark' ? '#bbb' : '#555',
-                textAlign: screenIndex === 1 ? 'left' : 'center',
-                lineHeight: Math.max(16, Math.min(20, width * 0.045)) * 1.5,
-              }}
+            {/* App Previews */}
+            <Animated.View 
+              entering={FadeIn.duration(600).delay(700)}
+              style={styles.previewsContainer}
             >
-              {currentScreen.content}
+              <AppPreview colorScheme={colorScheme} delay={0} />
+              <AppPreview colorScheme={colorScheme} delay={100} />
+              {!isSmallScreen && <AppPreview colorScheme={colorScheme} delay={200} />}
+            </Animated.View>
+
+            {/* Final Message */}
+            <Animated.Text
+              entering={FadeIn.duration(600).delay(700)}
+              style={[
+                styles.finalMessage,
+                {
+                  fontSize: isSmallScreen ? 14 : isTablet ? 18 : 16,
+                  color: textColor.tertiary,
+                },
+              ]}
+            >
+              {FINAL_MESSAGE}
             </Animated.Text>
           </View>
-        </Animated.View>
+        )}
       </View>
 
-      <View
-        style={{
-          paddingTop: 40,
-          paddingBottom: insets.bottom + 20,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        {/* <Pressable
-          onPress={skipOnboarding}
-          style={{
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-          }}
+      {/* Bottom Navigation */}
+      <View style={[
+        styles.bottomSection,
+        { bottom: insets.bottom + 20 }
+      ]}>
+        <Animated.View
+          entering={SlideInUp.duration(400)}
+          style={styles.navigation}
         >
-          <Text
-            style={{
-              color: colorScheme === 'dark' ? '#888' : '#666',
-              fontSize: 15,
-              textAlign: 'center',
-            }}
-          >
-            Skip
-          </Text>
-        </Pressable> */}
-        
-        <FreeButton
-          onPress={nextScreen}
-          style={{ flex: 1, marginLeft: 20 }}
-        >
-          {screenIndex < screens.length - 1 ? 'Next' : 'Get Started'}
-        </FreeButton>
+          <PaginationDots 
+            total={3} 
+            current={currentScreen} 
+            colorScheme={colorScheme} 
+          />
+          <FreeButton onPress={handleNext}>
+            {isLastScreen ? 'Get Started' : 'Next'}
+          </FreeButton>
+        </Animated.View>
       </View>
     </SafeAreaView>
   )
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  headlineSection: {
+    alignItems: 'center',
+    marginBottom: 20,
+    minHeight: 80,
+    justifyContent: 'center',
+  },
+  headline: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  message: {
+    textAlign: 'center',
+    lineHeight: 26,
+    marginBottom: 30,
+    paddingHorizontal: 10,
+  },
+  featuresSection: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  featureItem: {
+    width: '100%',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  featureText: {
+    lineHeight: 24,
+    textAlign: 'left',
+  },
+  previewsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginTop: 30,
+    marginBottom: 20,
+    gap: 10,
+  },
+  appPreview: {
+    width: 100,
+    height: 120,
+    borderRadius: 8,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  previewHeader: {
+    height: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    gap: 4,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  previewContent: {
+    flex: 1,
+    padding: 8,
+    gap: 6,
+  },
+  line: {
+    height: 8,
+    borderRadius: 2,
+  },
+  finalMessage: {
+    textAlign: 'center',
+    lineHeight: 22,
+    fontStyle: 'italic',
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  bottomSection: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+  },
+  navigation: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  pagination: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+})

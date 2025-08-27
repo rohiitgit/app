@@ -43,7 +43,7 @@ export default function Index() {
     try {
       const response = await fetch(
         `${
-          __DEV__ ? 'http://localhost:3000' : 'core.ob.pidgon.com'
+          __DEV__ ? 'http://localhost:3000' : 'http://core.ob.pidgon.com'
         }/donor/send-otp`,
         {
           method: 'POST',

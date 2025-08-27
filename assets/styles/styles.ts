@@ -60,6 +60,7 @@ export default StyleSheet.create({
         padding: 10,
         margin: 10,
         borderRadius: 9,
+        minWidth: 120,
        /* shadowColor: '#E1AFD1',
         shadowRadius: 20,
         shadowOffset: {
